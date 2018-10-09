@@ -1,5 +1,5 @@
 {
-    "name": "trackhub/laraboot",
+    "name": "zhuitech/laraboot",
     "description": "Add some base packages for a blank laravel project.",
     "type": "library",
     "authors": [
