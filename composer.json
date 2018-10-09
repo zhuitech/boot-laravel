@@ -1,0 +1,25 @@
+{
+    "name": "trackhub/laraboot",
+    "description": "Add some base packages for a blank laravel project.",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Andrew Zhou",
+            "email": "andrew820@foxmail.com"
+        }
+    ],
+    "require": {
+        "barryvdh/laravel-ide-helper": "^2.4",
+        "doctrine/dbal": "^2.5",
+        "bosnadev/repositories": "^0.13.0",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "TrackHub\\Laraboot\\": "src"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    }
+}
