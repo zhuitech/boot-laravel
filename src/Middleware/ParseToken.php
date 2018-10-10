@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Middleware;
+namespace ZhuiTech\LaraBoot\Middleware;
 
 use Closure;
 use Exception;

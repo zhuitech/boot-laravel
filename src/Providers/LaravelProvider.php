@@ -1,16 +1,16 @@
 <?php
 
-namespace TrackHub\Laraboot\Providers;
+namespace ZhuiTech\LaraBoot\Providers;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\Passport;
-use TrackHub\Laraboot\Console\Commands\ProfileInstall;
-use TrackHub\Laraboot\Console\Commands\ProfileList;
-use TrackHub\Laraboot\Exceptions\AdvancedHandler;
-use TrackHub\Laraboot\Profiles\SettingsInstaller;
-use TrackHub\Laraboot\Providers\PackageServiceProvider;
-use TrackHub\Laraboot\Providers\ServiceProvider;
+use ZhuiTech\LaraBoot\Console\Commands\ProfileInstall;
+use ZhuiTech\LaraBoot\Console\Commands\ProfileList;
+use ZhuiTech\LaraBoot\Exceptions\AdvancedHandler;
+use ZhuiTech\LaraBoot\Profiles\SettingsInstaller;
+use ZhuiTech\LaraBoot\Providers\PackageServiceProvider;
+use ZhuiTech\LaraBoot\Providers\ServiceProvider;
 use Illuminate\Support\Facades\View;
 
 class LaravelProvider extends ServiceProvider
@@ -21,7 +21,7 @@ class LaravelProvider extends ServiceProvider
         'Overtrue\LaravelUploader\UploadServiceProvider',
     ];
 
-    protected $namespace = 'TrackHub\Laraboot\Controllers';
+    protected $namespace = 'ZhuiTech\LaraBoot\Controllers';
 
     protected $commands = [
         ProfileInstall::class,

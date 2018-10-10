@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Console\Commands;
+namespace ZhuiTech\LaraBoot\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Application;

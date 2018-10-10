@@ -6,7 +6,7 @@
  * Time: 12:31
  */
 
-namespace TrackHub\Laraboot\Controllers;
+namespace ZhuiTech\LaraBoot\Controllers;
 
 use Bosnadev\Repositories\Eloquent\Repository;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -18,17 +18,17 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use TrackHub\Laraboot\Exceptions\RestCodeException;
-use TrackHub\Laraboot\Models\MemberOwnershipContract;
-use TrackHub\Laraboot\Models\OwnershipContract;
-use TrackHub\Laraboot\Repositories\BaseRepository;
-use TrackHub\Laraboot\Repositories\QueryCriteria;
+use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
+use ZhuiTech\LaraBoot\Models\MemberOwnershipContract;
+use ZhuiTech\LaraBoot\Models\OwnershipContract;
+use ZhuiTech\LaraBoot\Repositories\BaseRepository;
+use ZhuiTech\LaraBoot\Repositories\QueryCriteria;
 
 /**
  * Base class for restfull api.
  *
  * Class RestController
- * @package TrackHub\Laraboot\Controllers
+ * @package ZhuiTech\LaraBoot\Controllers
  */
 abstract class RestController extends Controller
 {
@@ -118,7 +118,6 @@ abstract class RestController extends Controller
      * Save a new object
      * POST	/photos
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store()
@@ -161,7 +160,6 @@ abstract class RestController extends Controller
      * Update an exists object
      * PUT	/photos/{photo}
      *
-     * @param Request $request
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
@@ -220,6 +218,7 @@ abstract class RestController extends Controller
      *
      * @param $field
      * @param $value
+     * @return \Illuminate\Http\JsonResponse
      */
     public function findBy($field, $value)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Providers;
+namespace ZhuiTech\LaraBoot\Providers;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\AliasLoader;
  * 基础服务提供类，封装了所有注册逻辑。
  *
  * Class ServiceProvider
- * @package TrackHub\Laraboot\Providers
+ * @package ZhuiTech\LaraBoot\Providers
  */
 class ServiceProvider extends BaseServiceProvider
 {

@@ -6,14 +6,14 @@
  * Time: 11:03
  */
 
-namespace TrackHub\Laraboot\Exceptions;
+namespace ZhuiTech\LaraBoot\Exceptions;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  *
  * Class RestCodeException
- * @package TrackHub\Laraboot\Exceptions
+ * @package ZhuiTech\LaraBoot\Exceptions
  */
 class RestCodeException extends HttpException
 {

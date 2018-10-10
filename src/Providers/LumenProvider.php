@@ -1,11 +1,11 @@
 <?php
 
-namespace TrackHub\Laraboot\Providers;
+namespace ZhuiTech\LaraBoot\Providers;
 
 use Illuminate\Support\Facades\Schema;
-use TrackHub\Laraboot\Console\Commands\KeyGenerateCommand;
-use TrackHub\Laraboot\Exceptions\LumenHandler;
-use TrackHub\Laraboot\Providers\ServiceProvider;
+use ZhuiTech\LaraBoot\Console\Commands\KeyGenerateCommand;
+use ZhuiTech\LaraBoot\Exceptions\LumenHandler;
+use ZhuiTech\LaraBoot\Providers\ServiceProvider;
 
 class LumenProvider extends ServiceProvider
 {
@@ -46,7 +46,7 @@ class LumenProvider extends ServiceProvider
 
         $this->app->singleton(
             \Illuminate\Contracts\Debug\ExceptionHandler::class,
-            \TrackHub\Laraboot\Exceptions\LumenHandler::class
+            \ZhuiTech\LaraBoot\Exceptions\LumenHandler::class
         );
 
         parent::register();

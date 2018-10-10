@@ -6,7 +6,7 @@
  * Time: 13:15
  */
 
-namespace TrackHub\Laraboot\Repositories;
+namespace ZhuiTech\LaraBoot\Repositories;
 
 use Bosnadev\Repositories\Criteria\Criteria;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +14,7 @@ use Bosnadev\Repositories\Contracts\RepositoryInterface;
 
 /**
  * Class SimpleCriteria
- * @package TrackHub\Laraboot\Repositories
+ * @package ZhuiTech\LaraBoot\Repositories
  */
 class SimpleCriteria extends Criteria
 {

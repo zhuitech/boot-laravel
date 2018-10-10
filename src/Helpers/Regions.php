@@ -6,7 +6,7 @@
  * Time: 23:41
  */
 
-namespace TrackHub\Laraboot\Helpers;
+namespace ZhuiTech\LaraBoot\Helpers;
 
 use Yingou\ChinaRegion\RegionUtils;
 
@@ -14,7 +14,7 @@ use Yingou\ChinaRegion\RegionUtils;
  * 行政区划辅助类
  *
  * Class Regions
- * @package TrackHub\Laraboot\Helpers
+ * @package ZhuiTech\LaraBoot\Helpers
  */
 class Regions
 {

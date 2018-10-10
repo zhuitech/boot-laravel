@@ -6,7 +6,7 @@
  * Time: 下午12:55
  */
 
-namespace TrackHub\Laraboot\Models;
+namespace ZhuiTech\LaraBoot\Models;
 
 use Laravel\Passport\HasApiTokens;
 

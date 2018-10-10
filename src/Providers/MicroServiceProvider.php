@@ -6,12 +6,12 @@
  * Time: 21:59
  */
 
-namespace TrackHub\Laraboot\Providers;
+namespace ZhuiTech\LaraBoot\Providers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
-use TrackHub\Laraboot\Models\User;
+use ZhuiTech\LaraBoot\Models\User;
 
 class MicroServiceProvider extends ServiceProvider
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Providers;
+namespace ZhuiTech\LaraBoot\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\File;
@@ -12,7 +12,7 @@ use ReflectionClass;
  * 基础服务提供类，封装了所有注册逻辑，在进行包开发的时候，只要添加对应文件或复写对应字段即可自动注册。
  *
  * Class ServiceProvider
- * @package TrackHub\Laraboot\Providers
+ * @package ZhuiTech\LaraBoot\Providers
  */
 class PackageProvider extends ServiceProvider
 {

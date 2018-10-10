@@ -36,8 +36,5 @@ php artisan ide-helper:meta
 
 // 更新模型类提示，需要连接数据库
 php artisan ide-helper:models -W -R
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> 34e551813e5956c17c13abe83256dcecefc3a169
+

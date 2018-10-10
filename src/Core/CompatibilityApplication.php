@@ -6,12 +6,12 @@
  * Time: 22:23
  */
 
-namespace TrackHub\Laraboot\Core;
+namespace ZhuiTech\LaraBoot\Core;
 
 /**
  * 兼容5.3版本
  * Class Application
- * @package TrackHub\Laraboot\Compatible
+ * @package ZhuiTech\LaraBoot\Compatible
  */
 class CompatibilityApplication extends \Illuminate\Foundation\Application
 {

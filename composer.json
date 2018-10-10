@@ -5,7 +5,7 @@
     "authors": [
         {
             "name": "Andrew Zhou",
-            "email": "andrew820@foxmail.com"
+            "email": "andrew@zhuitech.com"
         }
     ],
     "require": {
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "TrackHub\\Laraboot\\": "src"
+            "ZhuiTech\\LaraBoot\\": "src"
         },
         "files": [
             "src/helpers.php"

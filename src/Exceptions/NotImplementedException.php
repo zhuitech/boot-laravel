@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Exceptions;
+namespace ZhuiTech\LaraBoot\Exceptions;
 
 /**
  * Class NotImplementedException

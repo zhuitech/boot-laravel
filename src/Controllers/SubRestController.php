@@ -6,19 +6,19 @@
  * Time: 12:11
  */
 
-namespace TrackHub\Laraboot\Controllers;
+namespace ZhuiTech\LaraBoot\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use TrackHub\Laraboot\Exceptions\RestCodeException;
-use TrackHub\Laraboot\Repositories\BaseRepository;
-use TrackHub\Laraboot\Repositories\SimpleCriteria;
+use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
+use ZhuiTech\LaraBoot\Repositories\BaseRepository;
+use ZhuiTech\LaraBoot\Repositories\SimpleCriteria;
 use Illuminate\Support\Str;
 
 /**
  * BaseController for sub-resources
  * Class SubRestController
- * @package TrackHub\Laraboot\Controllers
+ * @package ZhuiTech\LaraBoot\Controllers
  */
 abstract class SubRestController extends RestController
 {

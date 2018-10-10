@@ -6,11 +6,11 @@
  * Time: 16:43
  */
 
-namespace TrackHub\Laraboot\Models;
+namespace ZhuiTech\LaraBoot\Models;
 
 /**
  * Trait MemberOwnership
- * @package TrackHub\Laraboot\Models
+ * @package ZhuiTech\LaraBoot\Models
  */
 trait MemberOwnership
 {

@@ -6,14 +6,14 @@
  * Time: 14:44
  */
 
-namespace TrackHub\Laraboot\Validators;
+namespace ZhuiTech\LaraBoot\Validators;
 
 use Illuminate\Contracts\Validation\Rule;
-use TrackHub\Laraboot\Helpers\RestClient;
+use ZhuiTech\LaraBoot\Helpers\RestClient;
 
 /**
  * Class MobileVerify
- * @package TrackHub\Laraboot\Validators
+ * @package ZhuiTech\LaraBoot\Validators
  */
 class MobileVerify implements Rule
 {
@@ -24,7 +24,6 @@ class MobileVerify implements Rule
     /**
      * MobileVerify constructor.
      * @param $code
-     * @param $token
      */
     public function __construct($code)
     {
@@ -34,9 +33,10 @@ class MobileVerify implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param  string $attribute
+     * @param  mixed $value
      * @return bool
+     * @throws \Exception
      */
     public function passes($attribute, $value)
     {

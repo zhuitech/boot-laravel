@@ -6,11 +6,11 @@
  * Time: 16:31
  */
 
-namespace TrackHub\Laraboot\Models;
+namespace ZhuiTech\LaraBoot\Models;
 
 /**
  * Interface MemberOwnershipContract
- * @package TrackHub\Laraboot\Models
+ * @package ZhuiTech\LaraBoot\Models
  */
 interface OwnershipContract
 {

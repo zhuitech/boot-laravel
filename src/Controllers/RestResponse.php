@@ -6,12 +6,12 @@
  * Time: 15:39
  */
 
-namespace TrackHub\Laraboot\Controllers;
+namespace ZhuiTech\LaraBoot\Controllers;
 
 /**
  *
  * Trait RestResponseTrait
- * @package TrackHub\Laraboot\Controllers
+ * @package ZhuiTech\LaraBoot\Controllers
  */
 trait RestResponse
 {

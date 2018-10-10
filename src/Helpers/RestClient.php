@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Helpers;
+namespace ZhuiTech\LaraBoot\Helpers;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
@@ -9,8 +9,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use TrackHub\Laraboot\Exceptions\RestCodeException;
-use TrackHub\Laraboot\Exceptions\UnableToExecuteRequestException;
+use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
+use ZhuiTech\LaraBoot\Exceptions\UnableToExecuteRequestException;
 use Exception;
 
 /**
@@ -87,7 +87,7 @@ class RestClient
      *
      * @return ResponseInterface
      *
-     * @throws RequestException
+     * @throws Exception
      */
     public function get($url, array $queries = [])
     {
@@ -107,7 +107,7 @@ class RestClient
      * @param array $queries
      * @return ResponseInterface
      *
-     * @throws RequestException
+     * @throws Exception
      */
     public function post($url, $options = [], $queries = [])
     {
@@ -128,7 +128,7 @@ class RestClient
      * @param array $queries
      * @return ResponseInterface
      *
-     * @throws RequestException
+     * @throws Exception
      */
     public function put($url, $options = [], $queries = [])
     {
@@ -149,7 +149,7 @@ class RestClient
      * @param array $queries
      * @return ResponseInterface
      *
-     * @throws RequestException
+     * @throws Exception
      */
     public function delete($url, $options = [], $queries = [])
     {
@@ -171,7 +171,7 @@ class RestClient
      * @param array $queries
      * @return ResponseInterface
      *
-     * @throws RequestException
+     * @throws Exception
      */
     public function upload($url, array $files = [], array $form = [], array $queries = [])
     {
@@ -252,11 +252,11 @@ class RestClient
      *
      * @param string $url
      * @param string $method
-     * @param array  $options
+     * @param array $options
      *
      * @return ResponseInterface
      *
-     * @throws RestCodeException
+     * @throws Exception
      */
     public function request($url, $method = 'GET', $options = [])
     {

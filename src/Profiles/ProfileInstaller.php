@@ -6,12 +6,12 @@
  * Time: 17:34
  */
 
-namespace TrackHub\Laraboot\Profiles;
+namespace ZhuiTech\LaraBoot\Profiles;
 
 /**
  * 配置档案安装器
  * interface ProfileInstaller
- * @package TrackHub\Laraboot\Profiles
+ * @package ZhuiTech\LaraBoot\Profiles
  */
 interface ProfileInstaller
 {

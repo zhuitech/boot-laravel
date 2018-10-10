@@ -1,16 +1,16 @@
 <?php
 
-namespace TrackHub\Laraboot\Models;
+namespace ZhuiTech\LaraBoot\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
-use TrackHub\Laraboot\Helpers\RestClient;
-use TrackHub\Laraboot\Exceptions\RestCodeException;
+use ZhuiTech\LaraBoot\Helpers\RestClient;
+use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
 
 /**
  * Class Member
- * @package TrackHub\Laraboot\Models
+ * @package ZhuiTech\LaraBoot\Models
  * 
  * @property int $id
  * @property string|null $type 类型

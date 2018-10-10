@@ -6,7 +6,7 @@
  * Time: 10:06
  */
 
-namespace TrackHub\Laraboot\Controllers;
+namespace ZhuiTech\LaraBoot\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;

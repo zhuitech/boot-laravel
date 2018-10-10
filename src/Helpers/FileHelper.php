@@ -1,6 +1,6 @@
 <?php
 
-namespace TrackHub\Laraboot\Helpers;
+namespace ZhuiTech\LaraBoot\Helpers;
 
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Facades\Storage;
@@ -46,10 +46,10 @@ class FileHelper
 
     /**
      * 获取新文件路径
-     * @param $filename
      * @param string $category
-     * @param string $disk
+     * @param string $extension
      * @param string $dir
+     * @return string
      */
     public static function hashPath($category = 'images', $extension = '.png', $dir = '{Y}/{m}/{d}')
     {

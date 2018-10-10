@@ -1,5 +1,5 @@
 <?php
-namespace TrackHub\Laraboot\Repositories;
+namespace ZhuiTech\LaraBoot\Repositories;
 
 use Bosnadev\Repositories\Eloquent\Repository;
 use Illuminate\Container\Container as App;
@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
  * 仓库模式基类
  *
  * Class BaseRepository
- * @package TrackHub\Laraboot\Repositories
+ * @package ZhuiTech\LaraBoot\Repositories
  */
 abstract class BaseRepository extends Repository
 {
