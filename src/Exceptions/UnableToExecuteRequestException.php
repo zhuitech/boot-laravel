@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Exceptions;
+namespace ZhuiTech\BootLaravel\Exceptions;
 
 use GuzzleHttp\Psr7\Response;
 

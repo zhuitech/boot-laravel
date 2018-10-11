@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Providers;
+namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\AliasLoader;
  * 基础服务提供类，封装了所有注册逻辑。
  *
  * Class ServiceProvider
- * @package ZhuiTech\LaraBoot\Providers
+ * @package ZhuiTech\BootLaravel\Providers
  */
 class ServiceProvider extends BaseServiceProvider
 {
@@ -183,9 +183,9 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerErrors()
     {
         if (!empty($this->errors)) {
-            $config = config('laraboot');
+            $config = config('boot-laravel');
             $config['errors'] += $this->errors;
-            config(['laraboot' => $config]);
+            config(['boot-laravel' => $config]);
         }
     }
 

@@ -6,7 +6,7 @@
  * Time: 10:06
  */
 
-namespace ZhuiTech\LaraBoot\Controllers;
+namespace ZhuiTech\BootLaravel\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;

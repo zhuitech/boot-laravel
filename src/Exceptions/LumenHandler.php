@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Exceptions;
+namespace ZhuiTech\BootLaravel\Exceptions;
 
 use Exception;
 use Illuminate\Auth\AuthenticationException;
@@ -39,7 +39,7 @@ class LumenHandler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
 
         if ($e instanceof ModelNotFoundException) {
             $e = new NotFoundHttpException($e->getMessage(), $e);

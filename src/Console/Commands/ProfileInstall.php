@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Console\Commands;
+namespace ZhuiTech\BootLaravel\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Application;

@@ -6,7 +6,7 @@
  * Time: 12:31
  */
 
-namespace ZhuiTech\LaraBoot\Controllers;
+namespace ZhuiTech\BootLaravel\Controllers;
 
 use Bosnadev\Repositories\Eloquent\Repository;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -18,17 +18,17 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
-use ZhuiTech\LaraBoot\Models\MemberOwnershipContract;
-use ZhuiTech\LaraBoot\Models\OwnershipContract;
-use ZhuiTech\LaraBoot\Repositories\BaseRepository;
-use ZhuiTech\LaraBoot\Repositories\QueryCriteria;
+use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
+use ZhuiTech\BootLaravel\Models\MemberOwnershipContract;
+use ZhuiTech\BootLaravel\Models\OwnershipContract;
+use ZhuiTech\BootLaravel\Repositories\BaseRepository;
+use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
 
 /**
  * Base class for restfull api.
  *
  * Class RestController
- * @package ZhuiTech\LaraBoot\Controllers
+ * @package ZhuiTech\BootLaravel\Controllers
  */
 abstract class RestController extends Controller
 {

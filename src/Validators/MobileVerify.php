@@ -6,14 +6,14 @@
  * Time: 14:44
  */
 
-namespace ZhuiTech\LaraBoot\Validators;
+namespace ZhuiTech\BootLaravel\Validators;
 
 use Illuminate\Contracts\Validation\Rule;
-use ZhuiTech\LaraBoot\Helpers\RestClient;
+use ZhuiTech\BootLaravel\Helpers\RestClient;
 
 /**
  * Class MobileVerify
- * @package ZhuiTech\LaraBoot\Validators
+ * @package ZhuiTech\BootLaravel\Validators
  */
 class MobileVerify implements Rule
 {

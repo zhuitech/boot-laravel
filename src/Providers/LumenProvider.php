@@ -1,11 +1,11 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Providers;
+namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Support\Facades\Schema;
-use ZhuiTech\LaraBoot\Console\Commands\KeyGenerateCommand;
-use ZhuiTech\LaraBoot\Exceptions\LumenHandler;
-use ZhuiTech\LaraBoot\Providers\ServiceProvider;
+use ZhuiTech\BootLaravel\Console\Commands\KeyGenerateCommand;
+use ZhuiTech\BootLaravel\Exceptions\LumenHandler;
+use ZhuiTech\BootLaravel\Providers\ServiceProvider;
 
 class LumenProvider extends ServiceProvider
 {
@@ -42,11 +42,11 @@ class LumenProvider extends ServiceProvider
     {
         $this->configures[] = $this->basePath('config/micro-services.php');
         $this->configures[] = $this->basePath('config/ide-helper.php');
-        $this->configures[] = $this->basePath('config/laraboot.php');
+        $this->configures[] = $this->basePath('config/boot-laravel.php');
 
         $this->app->singleton(
             \Illuminate\Contracts\Debug\ExceptionHandler::class,
-            \ZhuiTech\LaraBoot\Exceptions\LumenHandler::class
+            \ZhuiTech\BootLaravel\Exceptions\LumenHandler::class
         );
 
         parent::register();

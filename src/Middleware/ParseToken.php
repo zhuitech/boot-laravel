@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Middleware;
+namespace ZhuiTech\BootLaravel\Middleware;
 
 use Closure;
 use Exception;

@@ -6,12 +6,12 @@
  * Time: 15:39
  */
 
-namespace ZhuiTech\LaraBoot\Controllers;
+namespace ZhuiTech\BootLaravel\Controllers;
 
 /**
  *
  * Trait RestResponseTrait
- * @package ZhuiTech\LaraBoot\Controllers
+ * @package ZhuiTech\BootLaravel\Controllers
  */
 trait RestResponse
 {
@@ -46,7 +46,7 @@ trait RestResponse
      */
     protected function error($code)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
         return self::api(null, false, $code, $errors[$code]);
     }
 
@@ -57,7 +57,7 @@ trait RestResponse
      */
     protected function success($data = [])
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
         return self::api($data, true, REST_SUCCESS, $errors[REST_SUCCESS]);
     }
 }

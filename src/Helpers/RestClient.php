@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Helpers;
+namespace ZhuiTech\BootLaravel\Helpers;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
@@ -9,8 +9,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
-use ZhuiTech\LaraBoot\Exceptions\UnableToExecuteRequestException;
+use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
+use ZhuiTech\BootLaravel\Exceptions\UnableToExecuteRequestException;
 use Exception;
 
 /**

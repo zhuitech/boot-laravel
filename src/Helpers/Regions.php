@@ -6,7 +6,7 @@
  * Time: 23:41
  */
 
-namespace ZhuiTech\LaraBoot\Helpers;
+namespace ZhuiTech\BootLaravel\Helpers;
 
 use Yingou\ChinaRegion\RegionUtils;
 
@@ -14,7 +14,7 @@ use Yingou\ChinaRegion\RegionUtils;
  * 行政区划辅助类
  *
  * Class Regions
- * @package ZhuiTech\LaraBoot\Helpers
+ * @package ZhuiTech\BootLaravel\Helpers
  */
 class Regions
 {

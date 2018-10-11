@@ -6,14 +6,14 @@
  * Time: 11:03
  */
 
-namespace ZhuiTech\LaraBoot\Exceptions;
+namespace ZhuiTech\BootLaravel\Exceptions;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  *
  * Class RestCodeException
- * @package ZhuiTech\LaraBoot\Exceptions
+ * @package ZhuiTech\BootLaravel\Exceptions
  */
 class RestCodeException extends HttpException
 {
@@ -26,7 +26,7 @@ class RestCodeException extends HttpException
      */
     public function __construct(int $code = 0, $data = null)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
         $message = $errors[$code];
         $this->data = $data;
 

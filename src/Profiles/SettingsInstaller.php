@@ -6,12 +6,12 @@
  * Time: 17:37
  */
 
-namespace ZhuiTech\LaraBoot\Profiles;
+namespace ZhuiTech\BootLaravel\Profiles;
 
 /**
  * 配置项安装器
  * Class SettingsInstaller
- * @package ZhuiTech\LaraBoot\Profiles
+ * @package ZhuiTech\BootLaravel\Profiles
  */
 class SettingsInstaller implements ProfileInstaller
 {

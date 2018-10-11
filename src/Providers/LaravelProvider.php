@@ -1,16 +1,16 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Providers;
+namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\Passport;
-use ZhuiTech\LaraBoot\Console\Commands\ProfileInstall;
-use ZhuiTech\LaraBoot\Console\Commands\ProfileList;
-use ZhuiTech\LaraBoot\Exceptions\AdvancedHandler;
-use ZhuiTech\LaraBoot\Profiles\SettingsInstaller;
-use ZhuiTech\LaraBoot\Providers\PackageServiceProvider;
-use ZhuiTech\LaraBoot\Providers\ServiceProvider;
+use ZhuiTech\BootLaravel\Console\Commands\ProfileInstall;
+use ZhuiTech\BootLaravel\Console\Commands\ProfileList;
+use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
+use ZhuiTech\BootLaravel\Profiles\SettingsInstaller;
+use ZhuiTech\BootLaravel\Providers\PackageServiceProvider;
+use ZhuiTech\BootLaravel\Providers\ServiceProvider;
 use Illuminate\Support\Facades\View;
 
 class LaravelProvider extends ServiceProvider
@@ -21,7 +21,7 @@ class LaravelProvider extends ServiceProvider
         'Overtrue\LaravelUploader\UploadServiceProvider',
     ];
 
-    protected $namespace = 'ZhuiTech\LaraBoot\Controllers';
+    protected $namespace = 'ZhuiTech\BootLaravel\Controllers';
 
     protected $commands = [
         ProfileInstall::class,
@@ -60,7 +60,7 @@ class LaravelProvider extends ServiceProvider
          */
         $this->configures[] = $this->basePath('config/micro-services.php');
         $this->configures[] = $this->basePath('config/ide-helper.php');
-        $this->configures[] = $this->basePath('config/laraboot.php');
+        $this->configures[] = $this->basePath('config/boot-laravel.php');
 
         /**
          * 自定义Exception

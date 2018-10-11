@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Helpers;
+namespace ZhuiTech\BootLaravel\Helpers;
 
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Facades\Storage;

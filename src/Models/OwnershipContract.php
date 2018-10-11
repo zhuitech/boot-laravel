@@ -6,11 +6,11 @@
  * Time: 16:31
  */
 
-namespace ZhuiTech\LaraBoot\Models;
+namespace ZhuiTech\BootLaravel\Models;
 
 /**
  * Interface MemberOwnershipContract
- * @package ZhuiTech\LaraBoot\Models
+ * @package ZhuiTech\BootLaravel\Models
  */
 interface OwnershipContract
 {

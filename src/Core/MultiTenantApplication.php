@@ -6,7 +6,7 @@
  * Time: 12:03
  */
 
-namespace ZhuiTech\LaraBoot\Core;
+namespace ZhuiTech\BootLaravel\Core;
 use Illuminate\Foundation\Laraboot\LoadEnvironmentVariables;
 use Illuminate\Http\Request;
 
@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
  * 实现多租户模式
  *
  * Class MultiTenantApplication
- * @package ZhuiTech\LaraBoot\Core
+ * @package ZhuiTech\BootLaravel\Core
  */
 class MultiTenantApplication extends CompatibilityApplication
 {

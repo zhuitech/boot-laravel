@@ -6,7 +6,7 @@
  * Time: 13:44
  */
 
-namespace ZhuiTech\LaraBoot\Repositories;
+namespace ZhuiTech\BootLaravel\Repositories;
 
 use Bosnadev\Repositories\Criteria\Criteria;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +14,7 @@ use Bosnadev\Repositories\Contracts\RepositoryInterface;
 
 /**
  * Class QueryCriteria
- * @package ZhuiTech\LaraBoot\Repositories
+ * @package ZhuiTech\BootLaravel\Repositories
  */
 class QueryCriteria extends Criteria
 {

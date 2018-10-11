@@ -6,7 +6,7 @@
  * Time: 13:30
  */
 
-namespace ZhuiTech\LaraBoot\Transformers;
+namespace ZhuiTech\BootLaravel\Transformers;
 
 use Illuminate\Database\Eloquent\Model;
 use League\Fractal\TransformerAbstract;
@@ -15,7 +15,7 @@ use League\Fractal\TransformerAbstract;
  * 基础模型转换器
  *
  * Class BaseTransformer
- * @package ZhuiTech\LaraBoot\Transformers
+ * @package ZhuiTech\BootLaravel\Transformers
  */
 class BaseTransformer extends TransformerAbstract
 {

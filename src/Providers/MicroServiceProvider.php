@@ -6,12 +6,12 @@
  * Time: 21:59
  */
 
-namespace ZhuiTech\LaraBoot\Providers;
+namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
-use ZhuiTech\LaraBoot\Models\User;
+use ZhuiTech\BootLaravel\Models\User;
 
 class MicroServiceProvider extends ServiceProvider
 {

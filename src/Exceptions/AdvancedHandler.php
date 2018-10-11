@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\LaraBoot\Exceptions;
+namespace ZhuiTech\BootLaravel\Exceptions;
 
 use Exception;
 use Illuminate\Auth\AuthenticationException;
@@ -51,7 +51,7 @@ class AdvancedHandler extends ExceptionHandler
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
 
         return $request->expectsJson()
             ? response()->json($this->error(REST_NOT_LOGIN), 401)
@@ -67,7 +67,7 @@ class AdvancedHandler extends ExceptionHandler
      */
     protected function invalidJson($request, ValidationException $exception)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
 
         return response()->json(array_merge(
             $this->error(REST_DATA_VALIDATE_FAIL),
@@ -83,7 +83,7 @@ class AdvancedHandler extends ExceptionHandler
      */
     protected function convertExceptionToArray(Exception $e)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
 
         // 全局异常处理
         if ($e instanceof AccessDeniedHttpException){
@@ -119,7 +119,7 @@ class AdvancedHandler extends ExceptionHandler
      */
     private function error($code = REST_EXCEPTION)
     {
-        $errors = config('laraboot.errors');
+        $errors = config('boot-laravel.errors');
 
         return [
             'status' => false,

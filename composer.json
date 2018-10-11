@@ -1,6 +1,6 @@
 {
-    "name": "zhuitech/laraboot",
-    "description": "Add some base packages for a blank laravel project.",
+    "name": "zhuitech/boot-laravel",
+    "description": "Laravel项目基础功能增强",
     "type": "library",
     "authors": [
         {
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ZhuiTech\\LaraBoot\\": "src"
+            "ZhuiTech\\BootLaravel\\": "src"
         },
         "files": [
             "src/helpers.php"

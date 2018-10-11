@@ -6,11 +6,11 @@
  * Time: 16:43
  */
 
-namespace ZhuiTech\LaraBoot\Models;
+namespace ZhuiTech\BootLaravel\Models;
 
 /**
  * Trait MemberOwnership
- * @package ZhuiTech\LaraBoot\Models
+ * @package ZhuiTech\BootLaravel\Models
  */
 trait UserOwnership
 {

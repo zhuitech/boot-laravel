@@ -1,5 +1,5 @@
 <?php
-namespace ZhuiTech\LaraBoot\Repositories;
+namespace ZhuiTech\BootLaravel\Repositories;
 
 use Bosnadev\Repositories\Eloquent\Repository;
 use Illuminate\Container\Container as App;
@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
  * 仓库模式基类
  *
  * Class BaseRepository
- * @package ZhuiTech\LaraBoot\Repositories
+ * @package ZhuiTech\BootLaravel\Repositories
  */
 abstract class BaseRepository extends Repository
 {

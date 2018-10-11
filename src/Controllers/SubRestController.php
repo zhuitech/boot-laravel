@@ -6,19 +6,19 @@
  * Time: 12:11
  */
 
-namespace ZhuiTech\LaraBoot\Controllers;
+namespace ZhuiTech\BootLaravel\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use ZhuiTech\LaraBoot\Exceptions\RestCodeException;
-use ZhuiTech\LaraBoot\Repositories\BaseRepository;
-use ZhuiTech\LaraBoot\Repositories\SimpleCriteria;
+use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
+use ZhuiTech\BootLaravel\Repositories\BaseRepository;
+use ZhuiTech\BootLaravel\Repositories\SimpleCriteria;
 use Illuminate\Support\Str;
 
 /**
  * BaseController for sub-resources
  * Class SubRestController
- * @package ZhuiTech\LaraBoot\Controllers
+ * @package ZhuiTech\BootLaravel\Controllers
  */
 abstract class SubRestController extends RestController
 {

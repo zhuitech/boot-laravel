@@ -6,12 +6,12 @@
  * Time: 22:23
  */
 
-namespace ZhuiTech\LaraBoot\Core;
+namespace ZhuiTech\BootLaravel\Core;
 
 /**
  * 兼容5.3版本
  * Class Application
- * @package ZhuiTech\LaraBoot\Compatible
+ * @package ZhuiTech\BootLaravel\Compatible
  */
 class CompatibilityApplication extends \Illuminate\Foundation\Application
 {
