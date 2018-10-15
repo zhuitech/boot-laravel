@@ -6,10 +6,7 @@
 在项目根目录下运行如下composer命令:
 ```php
 // 推荐
-composer require trackhub/laraboot
-
-// 安装开发中版本
-composer require trackhub/laraboot:dev-dev
+composer require zhuitech/boot-laravel
 ```
 
 ### 配置内部功能
@@ -26,7 +23,6 @@ composer require laracasts/flash
 ```
 
 ### 常用命令
-更新IDE提示
 ```php
 // 更新Facade等提示
 php artisan ide-helper:generate
@@ -36,5 +32,8 @@ php artisan ide-helper:meta
 
 // 更新模型类提示，需要连接数据库
 php artisan ide-helper:models -W -R
+
+// 发布前端资源
+php artisan vendor:publish --force --tag=public
 ```
 
