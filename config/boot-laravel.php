@@ -32,10 +32,6 @@ if (!defined('REST_BUSY')) {
     define('REST_FILE_NOT_EXIST', 45001);
     define('REST_FILE_PATH_FAIL', 45002);
     define('REST_FILE_STORE_FAIL', 45003);
-
-    define('REST_URL_INVALID', 46001);
-
-    define('REST_WECHAT_AUTH_NOT_EXIST', 47001);
 }
 
 return [
@@ -68,9 +64,5 @@ return [
         REST_FILE_NOT_EXIST         => '文件不存在',
         REST_FILE_PATH_FAIL         => '文件路径生成失败',
         REST_FILE_STORE_FAIL        => '文件存储失败',
-
-        REST_URL_INVALID            => '链接已经失效',
-
-        REST_WECHAT_AUTH_NOT_EXIST  => '授权方不存在'
     ]
 ];
