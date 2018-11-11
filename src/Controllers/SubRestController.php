@@ -52,25 +52,27 @@ abstract class SubRestController extends RestController
         $this->foreignKey = $parents->freshModel()->getForeignKey();
 
         // 如果当前为子路由，添加默认条件
-        $parentId = $this->resolveParameter(request(), $this->parents->model());
-        if ($parentId) {
-            // 设置查询范围
-            $criteria = new SimpleCriteria([
-                $this->foreignKey => $parentId
-            ]);
-            $this->repository->pushCriteria($criteria);
+        if (!app()->runningInConsole()) {
+            $parentId = $this->resolveParameter(request(), $this->parents->model());
+            if ($parentId) {
+                // 设置查询范围
+                $criteria = new SimpleCriteria([
+                    $this->foreignKey => $parentId
+                ]);
+                $this->repository->pushCriteria($criteria);
 
-            // 加载父资源
-            $parent = $this->parents->find($parentId);
-            if (empty($parent)) {
-                throw new RestCodeException(REST_OBJ_NOT_EXIST);
+                // 加载父资源
+                $parent = $this->parents->find($parentId);
+                if (empty($parent)) {
+                    throw new RestCodeException(REST_OBJ_NOT_EXIST);
+                }
+                $this->parent = $parent;
+
+                // 添加父资源关联字段
+                request()->merge([
+                    $this->foreignKey => (int)$parentId
+                ]);
             }
-            $this->parent = $parent;
-
-            // 添加父资源关联字段
-            request()->merge([
-                $this->foreignKey => (int)$parentId
-            ]);
         }
     }
 
