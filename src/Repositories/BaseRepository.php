@@ -37,11 +37,11 @@ abstract class BaseRepository extends Repository
     {
         $this->pushCriteria(new QueryCriteria($query));
 
-        $size = $query['per_page'] ?? 25;
-        $limit = $query['limit'] ?? null;
+        $size = $query['_size'] ?? 25;
+        $limit = $query['_limit'] ?? null;
         
-        $columns = isset($query['columns'])
-            ? explode(',', $query['columns'])
+        $columns = isset($query['_column'])
+            ? explode(',', $query['_column'])
             : [$this->freshModel()->getTable() . '.*'];
 
         $result = $limit

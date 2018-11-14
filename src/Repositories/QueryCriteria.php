@@ -36,11 +36,11 @@ class QueryCriteria extends Criteria
     public function apply($model, RepositoryInterface $repository)
     {
         // 获取查询条件
-        $orders = $this->query['order'] ?? [];
-        $or = $this->query['or'] ?? false;
+        $orders = $this->query['_order'] ?? [];
+        $or = $this->query['_or'] ?? false;
         $boolean = $or ? 'or' : 'and';
-        $limit = $this->query['limit'] ?? null;
-        $wheres = array_except($this->query, ['order', 'or', 'limit', 'page', 'per_page', 'columns']);
+        $limit = $this->query['_limit'] ?? null;
+        $wheres = array_except($this->query, ['_order', '_or', '_limit', '_page', '_size', '_column']);
 
         // Where
         foreach ($wheres as $field => $value) {
