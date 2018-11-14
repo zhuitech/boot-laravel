@@ -8,6 +8,8 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
+use ZhuiTech\BootLaravel\Helpers\Restful;
+
 /**
  *
  * Trait RestResponseTrait
@@ -29,35 +31,41 @@ trait RestResponse
      * @param string $message
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function api($data = [], $status = true, $code = REST_SUCCESS, $message = '')
+    protected function api($data = [], $status = true, $code = REST_SUCCESS, $message = NULL)
     {
-        return response()->json([
-            'status' => $status,
-            'code' => $code,
-            'message' => $message,
-            'data' => is_array($data) && empty($data) ? null : $data
-        ]);
+        $result = Restful::format($data, $status, $code, $message);
+        return response()->json($result);
     }
 
     /**
-     * 返回错误消息
+     * 返回错误代码
      * @param $code
+     * @param array $data
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function error($code)
+    protected function error($code, $data = [])
     {
-        $errors = config('boot-laravel.errors');
-        return self::api(null, false, $code, $errors[$code]);
+        return self::api($data, false, $code);
     }
 
     /**
-     * 返回调用成功的消息
+     * 返回成功消息
      * @param array $data
      * @return \Illuminate\Http\JsonResponse
      */
     protected function success($data = [])
     {
-        $errors = config('boot-laravel.errors');
-        return self::api($data, true, REST_SUCCESS, $errors[REST_SUCCESS]);
+        return self::api($data, true, REST_SUCCESS);
+    }
+
+    /**
+     * 返回错误消息
+     * @param $message
+     * @param array $data
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function fail($message = NULL, $data = [])
+    {
+        return self::api($data, false, REST_FAIL, $message);
     }
 }

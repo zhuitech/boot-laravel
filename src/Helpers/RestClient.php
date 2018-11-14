@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
+use JsonSchema\Exception\JsonDecodingException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
@@ -19,12 +20,6 @@ use Exception;
 class RestClient
 {
     /**
-     * Used to identify handler defined by client code
-     * Maybe useful in the future.
-     */
-    const USER_DEFINED_HANDLER = 'userDefined';
-
-    /**
      * Http client.
      *
      * @var HttpClient
@@ -32,16 +27,9 @@ class RestClient
     protected $client;
 
     /**
-     * The middlewares.
-     *
      * @var array
      */
-    protected $middlewares = [];
-
-    /**
-     * @var array
-     */
-    protected static $globals = [
+    public static $globals = [
         'curl' => [
             CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
         ],
@@ -52,7 +40,7 @@ class RestClient
      *
      * @var array
      */
-    protected static $defaults = [
+    protected $defaults = [
         'headers' => [
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'
@@ -60,118 +48,118 @@ class RestClient
     ];
 
     /**
-     * Set guzzle default settings.
-     *
-     * @param array $defaults
+     * 默认的服务器
+     * @var null
      */
-    public static function setDefaultOptions($defaults = [])
+    protected $server = NULL;
+
+    /**
+     * 返回一个新实例
+     * @param $server
+     * @return $this
+     */
+    public static function server($server = NULL)
     {
-        self::$defaults = array_merge(self::$globals, $defaults);
+        $instance = new static();
+        $instance->server = $server;
+        return $instance;
     }
 
     /**
-     * Return current guzzle default settings.
+     * Set GuzzleHttp\Client.
      *
-     * @return array
+     * @param \GuzzleHttp\Client $client
+     *
+     * @return $this
      */
-    public static function getDefaultOptions()
+    public function client(HttpClient $client)
     {
-        return self::$defaults;
+        $this->client = $client;
+        return $this;
+    }
+
+    /**
+     * Set guzzle settings.
+     *
+     * @param array $defaults
+     * @return $this
+     */
+    public function options($defaults = [])
+    {
+        $this->defaults = array_merge(self::$globals, $defaults);
+        return $this;
     }
 
     /**
      * GET request.
      *
-     * @param string $url
+     * @param $url
      * @param array $queries
-     *
-     * @return ResponseInterface
-     *
-     * @throws Exception
+     * @return array|mixed
      */
     public function get($url, array $queries = [])
     {
-        $response = $this->request($url, 'GET', [
+        return $this->request($url, 'GET', [
             'query' => $queries
         ]);
-
-        return self::parseJSON($response->getBody());
     }
 
     /**
      * POST request.
      *
-     * @param string $url
-     * @param array|string $options
-     *
+     * @param $url
+     * @param array $options
      * @param array $queries
-     * @return ResponseInterface
-     *
-     * @throws Exception
+     * @return array|mixed
      */
     public function post($url, $options = [], $queries = [])
     {
-        $response = $this->request($url, 'POST', [
+        return $this->request($url, 'POST', [
             'query' => $queries,
             'body' => json_encode($options, JSON_UNESCAPED_UNICODE)
         ]);
-
-        return self::parseJSON($response->getBody());
     }
 
     /**
-     * POST request.
+     * PUT request.
      *
-     * @param string $url
-     * @param array|string $options
-     *
+     * @param $url
+     * @param array $options
      * @param array $queries
-     * @return ResponseInterface
-     *
-     * @throws Exception
+     * @return array|mixed
      */
     public function put($url, $options = [], $queries = [])
     {
-        $response = $this->request($url, 'PUT', [
+        return $this->request($url, 'PUT', [
             'query' => $queries,
             'body' => json_encode($options, JSON_UNESCAPED_UNICODE)
         ]);
-
-        return self::parseJSON($response->getBody());
     }
 
     /**
-     * POST request.
+     * DELETE request.
      *
-     * @param string $url
-     * @param array|string $options
-     *
+     * @param $url
+     * @param array $options
      * @param array $queries
-     * @return ResponseInterface
-     *
-     * @throws Exception
+     * @return array|mixed
      */
     public function delete($url, $options = [], $queries = [])
     {
-        $response = $this->request($url, 'DELETE', [
+        return $this->request($url, 'DELETE', [
             'query' => $queries,
             'body' => json_encode($options, JSON_UNESCAPED_UNICODE)
         ]);
-
-        return self::parseJSON($response->getBody());
     }
 
     /**
      * Upload file.
      *
-     * @param string $url
+     * @param $url
      * @param array $files
      * @param array $form
-     *
      * @param array $queries
-     * @return ResponseInterface
-     *
-     * @throws Exception
+     * @return array|mixed
      */
     public function upload($url, array $files = [], array $form = [], array $queries = [])
     {
@@ -188,25 +176,67 @@ class RestClient
             $multipart[] = compact('name', 'contents');
         }
 
-        $response = $this->request($url, 'POST', [
-            'query' => $queries,
-            'multipart' => $multipart
-        ]);
+        $headers = $this->defaults['headers'];
+        unset($headers['Content-Type']);
 
-        return self::parseJSON($response->getBody());
+        return $this->request($url, 'POST', [
+            'query' => $queries,
+            'multipart' => $multipart,
+            'headers' => $headers
+        ]);
     }
 
     /**
-     * Set GuzzleHttp\Client.
+     * Make a request.
      *
-     * @param \GuzzleHttp\Client $client
-     *
-     * @return RestClient
+     * @param $path
+     * @param string $method
+     * @param array $options
+     * @return array|mixed
      */
-    public function setClient(HttpClient $client)
+    public function request($path, $method = 'GET', $options = [])
     {
-        $this->client = $client;
-        return $this;
+        $url = $this->getUrl($path);
+        $method = strtoupper($method);
+        $options = array_merge($this->defaults, $options);
+
+        try {
+            $response = $this->getClient()->request($method, $url, $options);
+            $content = $response->getBody()->getContents();
+            $result = json_decode($content, true);
+
+            // 处理JSON解析失败
+            if (JSON_ERROR_NONE !== json_last_error()) {
+                return Restful::format(
+                    [
+                        'error' => json_last_error_msg(),
+                        'url' => $url,
+                        'method' => $method,
+                        'options' => $options,
+                        'status' => $response->getStatusCode(),
+                        'content' => $content
+                    ], false, REST_DATA_JSON_FAIL
+                );
+            }
+            else {
+                return $result;
+            }
+        } catch (RequestException $e) {
+            $data = [
+                'error' => $e->getMessage(),
+                'url' => $url,
+                'method' => $method,
+                'options' => $options,
+            ];
+            if ($e->hasResponse()) {
+                $data += [
+                    'status' => $e->getResponse()->getStatusCode(),
+                    'content' => $e->getResponse()->getBody()->getContents()
+                ];
+            }
+
+            return Restful::format($data, false, REST_REMOTE_FAIL);
+        }
     }
 
     /**
@@ -214,7 +244,7 @@ class RestClient
      *
      * @return \GuzzleHttp\Client
      */
-    public function getClient()
+    protected function getClient()
     {
         if (!($this->client instanceof HttpClient)) {
             $this->client = new HttpClient();
@@ -224,132 +254,24 @@ class RestClient
     }
 
     /**
-     * Add a middleware.
-     *
-     * @param callable $middleware
-     *
-     * @return $this
-     */
-    public function addMiddleware(callable $middleware)
-    {
-        array_push($this->middlewares, $middleware);
-
-        return $this;
-    }
-
-    /**
-     * Return all middlewares.
-     *
-     * @return array
-     */
-    public function getMiddlewares()
-    {
-        return $this->middlewares;
-    }
-
-    /**
-     * Make a request.
-     *
-     * @param string $url
-     * @param string $method
-     * @param array $options
-     *
-     * @return ResponseInterface
-     *
-     * @throws Exception
-     */
-    public function request($url, $method = 'GET', $options = [])
-    {
-        $method = strtoupper($method);
-        $options = array_merge(self::$defaults, $options);
-        $options['handler'] = $this->getHandler();
-
-        try {
-            $response = $this->getClient()->request($method, $url, $options);
-        } catch (RequestException $e) {
-            $data = [
-                'url' => $url,
-                'method' => $method,
-                'options' => $options
-            ];
-
-            if ($e->hasResponse()) {
-                $data += [
-                    'status' => $e->getResponse()->getStatusCode(),
-                ];
-
-                try {
-                    $data['content'] = $this->parseJSON($e->getResponse()->getBody());
-                }
-                catch (Exception $ex){
-                    $data['content'] = $this->parseJSON($e->getResponse()->getBody()->getContents());
-                }
-            }
-
-            throw new RestCodeException(REST_REMOTE_FAIL, $data);
-        }
-
-        return $response;
-    }
-
-    /**
-     * @param \Psr\Http\Message\ResponseInterface|string $body
-     *
+     * 获取正确的请求地址
+     * @param $path
      * @return mixed
-     *
-     * @throws \Exception
      */
-    public function parseJSON($body)
+    protected function getUrl($path)
     {
-        if ($body instanceof ResponseInterface) {
-            $body = $body->getBody();
+        if (str_contains($path, '://') || empty($this->server)) {
+            return $path;
         }
 
-        // XXX: json maybe contains special chars. So, let's FUCK the WeChat API developers ...
-        $body = $this->fuckTheWeChatInvalidJSON($body);
-
-        if (empty($body)) {
-            return false;
+        $prefix = '';
+        if (str_contains($this->server, '://')) {
+            $prefix = $this->server;
+        }
+        else {
+            $prefix = config('micro-services.' . $this->server);
         }
 
-        $contents = json_decode($body, true);
-
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            throw new \Exception('Failed to parse JSON: '.json_last_error_msg());
-        }
-
-        return $contents;
-    }
-
-    /**
-     * Filter the invalid JSON string.
-     *
-     * @param \Psr\Http\Message\StreamInterface|string $invalidJSON
-     *
-     * @return string
-     */
-    protected function fuckTheWeChatInvalidJSON($invalidJSON)
-    {
-        return preg_replace('/[\x00-\x1F\x80-\x9F]/u', '', trim($invalidJSON));
-    }
-
-    /**
-     * Build a handler.
-     *
-     * @return HandlerStack
-     */
-    protected function getHandler()
-    {
-        $stack = HandlerStack::create();
-
-        foreach ($this->middlewares as $middleware) {
-            $stack->push($middleware);
-        }
-
-        if (isset(static::$defaults['handler']) && is_callable(static::$defaults['handler'])) {
-            $stack->push(static::$defaults['handler'], self::USER_DEFINED_HANDLER);
-        }
-
-        return $stack;
+        return rtrim($prefix, '/') . '/' . ltrim($path, '/');
     }
 }

@@ -23,6 +23,7 @@ if (!defined('REST_BUSY')) {
 
     define('REST_DATA_VALIDATE_FAIL', 41001);
     define('REST_DATA_REQUIRE_PARAM', 41002);
+    define('REST_DATA_JSON_FAIL', 41003);
 
     define('REST_USER_BLOCKED', 43001);
     define('REST_USER_CREATE_FAIL', 43002);
@@ -55,6 +56,7 @@ return [
 
         REST_DATA_VALIDATE_FAIL     => '数据验证失败',
         REST_DATA_REQUIRE_PARAM     => '缺少参数',
+        REST_DATA_JSON_FAIL         => 'JSON解析失败',
 
         REST_USER_BLOCKED           => '用户已被禁用',
         REST_USER_CREATE_FAIL       => '用户创建失败',

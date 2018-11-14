@@ -10,47 +10,7 @@ use Overtrue\LaravelUploader\Events\FileUploaded;
 use Overtrue\LaravelUploader\Events\FileUploading;
 use Overtrue\LaravelUploader\Services\FileUpload;
 
-if (! function_exists('tenant')) {
-    /**
-     * 获取当前租户数据
-     *
-     * @param $key
-     * @return mixed
-     */
-    function tenant($key)
-    {
-        $tenant = app('tenant');
-        return $tenant[$key];
-    }
-}
-
-if (! function_exists('tenant_public')) {
-    /**
-     * 获取租户公开文件目录
-     *
-     * @param  string  $path
-     * @return string
-     */
-    function tenant_public($path = '')
-    {
-        return public_path('files'.DIRECTORY_SEPARATOR.tenant('name').($path ? DIRECTORY_SEPARATOR.$path : $path));
-    }
-}
-
-if (! function_exists('tenant_url')) {
-    /**
-     * 获取租户公开文件URL
-     *
-     * @param  string  $path
-     * @return string
-     */
-    function tenant_url($path = '')
-    {
-        return config('app.url').DIRECTORY_SEPARATOR.('files'.DIRECTORY_SEPARATOR.tenant('name').($path ? DIRECTORY_SEPARATOR.$path : $path));
-    }
-}
-
-if (! function_exists('storage')) {
+if (! function_exists('relative_path')) {
     /**
      * 从物理路径获取相对路径
      *
@@ -93,33 +53,6 @@ if (! function_exists('uploader_save')) {
         }
 
         return $result;
-    }
-}
-
-if (! function_exists('service')) {
-    /**
-     * 微服务地址
-     * @param $host
-     * @param null $path
-     * @return string
-     */
-    function service_url($host, $path = NULL, $query = [])
-    {
-        $prefix = rtrim(config('micro-services.'.$host), '/');
-
-        if (empty($path)) {
-            return $prefix;
-        }
-        
-        if (!empty($path)) {
-            $path = ltrim($path, '/');
-            
-            if (!empty($query)) {
-                $path .= '?' . http_build_query($query);
-            }
-            
-            return $prefix . '/' . $path;
-        }
     }
 }
 
