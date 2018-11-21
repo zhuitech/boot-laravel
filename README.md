@@ -23,7 +23,6 @@ composer require yingouqlj/china-region
 ```php
 <?php
 // app/Providers/AppServiceProviders.php
-
 namespace App\Providers;
 
 use ZhuiTech\BootLaravel\Providers\LaravelProvider;
@@ -70,7 +69,6 @@ php artisan make:model -c -m Models/Channel
 ```php
 <?php
 // database/migrations/2018_04_04_122200_create_channels_table.php
-
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -107,7 +105,6 @@ php artisan ide-helper:models -W -R
 ```php
 <?php
 // app/Repositories/ChannelRepository.php
-
 namespace App\Repositories;
 
 use App\Models\Channel;
@@ -128,7 +125,6 @@ class ChannelRepository extends BaseRepository
 ```php
 <?php
 // app/Http/Controllers/ChannelController.php
-
 namespace App\Http\Controllers;
 
 use App\Repositories\ChannelRepository;
