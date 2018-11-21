@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use ZhuiTech\BootLaravel\Helpers\RestClient;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
+use ZhuiTech\BootLaravel\Helpers\Restful;
 
 /**
  * Class Member
@@ -57,17 +58,19 @@ class User extends Authenticatable
             return;
         }
 
-        // 查询用户
-        $client = new RestClient();
-        $url = $this->isAdmin()
-            ? service_url('auth', 'api/users/' . $this->id)
-            : service_url('member', 'api/members/' . $this->id);
-        $result = $client->get($url);
-
-        if (!$result['status']) {
-            throw new RestCodeException(REST_FAIL, '用户不存在');
+        // 请求后端服务
+        if ($this->isAdmin()) {
+            $result = RestClient::server('admin')->get("api/admin/users/{$this->id}");
+        }
+        else {
+            $result = RestClient::server('member')->get("api/member/users/{$this->id}");
         }
 
-        $this->data = $result['data'];
+        // 处理返回结果
+        $this->data = Restful::handle($result,
+            function ($data, $message, $code) {
+                // success
+                return $data;
+            });
     }
 }

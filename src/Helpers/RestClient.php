@@ -269,7 +269,7 @@ class RestClient
             $prefix = $this->server;
         }
         else {
-            $prefix = config('micro-services.' . $this->server);
+            $prefix = env('SERVICE_' . strtoupper($this->server), false);
         }
 
         return rtrim($prefix, '/') . '/' . ltrim($path, '/');

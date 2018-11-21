@@ -51,7 +51,5 @@ class Restful
         if ($result['status'] === false && $fail != NULL) {
             return $fail($result['data'], $result['message'], $result['code']);
         }
-
-        return $result;
     }
 }
