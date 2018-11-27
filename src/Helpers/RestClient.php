@@ -258,7 +258,7 @@ class RestClient
      * @param $path
      * @return mixed
      */
-    protected function getUrl($path)
+    public function getUrl($path)
     {
         if (str_contains($path, '://') || empty($this->server)) {
             return $path;
