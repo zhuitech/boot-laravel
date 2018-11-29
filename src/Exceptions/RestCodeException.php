@@ -28,7 +28,7 @@ class RestCodeException extends HttpException
     public function __construct(int $code = 0, $data = null, $message = NULL)
     {
         $errors = config('boot-laravel.errors');
-        $message = $message || $errors[$code];
+        $message = $message ?? $errors[$code];
         $this->data = $data;
 
         parent::__construct(200, $message, null, [], $code);
