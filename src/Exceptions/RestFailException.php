@@ -16,7 +16,7 @@ namespace ZhuiTech\BootLaravel\Exceptions;
  */
 class RestFailException extends RestCodeException
 {
-    public function __construct($data = null, $message = NULL)
+    public function __construct($message, $data = null)
     {
         parent::__construct(REST_FAIL, $data, $message);
     }
