@@ -27,7 +27,7 @@ class RemoteSettingRepository implements SettingRepository
         }
 
         foreach ($settings as $key => $val) {
-            RestClient::server('system')->post('api/system/settings/' . $key, $val);
+            RestClient::server('system')->post('api/system/settings/' . $key, ['value' => $val]);
         }
     }
 
