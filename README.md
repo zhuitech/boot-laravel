@@ -268,3 +268,15 @@ X-User-Type = members
 #### 5. 子资源查询接口 [GET /api/mail/messages/{id}/sendings]
 
 #### 6. 子资源删除接口 [DELETE /api/mail/messages/{id}/sendings/{id}]
+
+## 自定义配置
+> 自定义配置功能用来在数据库存储一些个性化配置数据。
+> 该功能依赖system服务，请在env文件配置 SERVICE_SYSTEM=https://system.test.z-cloud.vip
+
+```php
+// 读取配置
+$value = setting('key');
+
+// 更新配置，$value可以是一个数组
+setting(['key' => $value]);
+```
