@@ -64,6 +64,24 @@ abstract class RestController extends Controller
         return resolve($this->formClass);
     }
 
+    /**
+     * 查询对象，没有就抛出异常
+     * @param $id
+     * @return mixed
+     */
+    protected function findOrThrow($id)
+    {
+        // 找一下
+        $result = $this->repository->find($id);
+
+        // 找不到
+        if (empty($result)) {
+            throw new RestCodeException(REST_OBJ_NOT_EXIST);
+        }
+
+        return $result;
+    }
+
     // CRUD ************************************************************************************************************
 
     /**
@@ -99,19 +117,13 @@ abstract class RestController extends Controller
         // 找一下
         $result = $this->execShow($id);
 
-        // 找不到
-        if (empty($result)) {
-            return $this->error(REST_OBJ_NOT_EXIST);
-        }
-
         // 找到了
         return self::success($result);
     }
 
     protected function execShow($id)
     {
-        $result = $this->repository->find($id);
-        return $result;
+        return $this->findOrThrow($id);
     }
 
     /**
@@ -167,7 +179,11 @@ abstract class RestController extends Controller
     {
         $data = $this->form()->all();
 
-        $result = $this->execUpdate($data, $id);
+        // 找一下
+        $model = $this->findOrThrow($id);
+
+        // 更新
+        $result = $this->execUpdate($model, $data);
 
         // 创建失败
         if (empty($result)) {
@@ -175,13 +191,13 @@ abstract class RestController extends Controller
         }
 
         // 成功了
-        $new = $this->repository->find($id);
-        return self::success($new);
+        $model = $this->findOrThrow($id);
+        return self::success($model);
     }
 
-    protected function execUpdate($data, $id)
+    protected function execUpdate($model, $data)
     {
-        $result = $this->repository->updateRich($data, $id); // Eloquent method
+        $result = $model->fill($data)->save();
         return $result;
     }
 
@@ -194,7 +210,10 @@ abstract class RestController extends Controller
      */
     public function destroy($id)
     {
-        $result = $this->execDestroy($id);
+        // 找一下
+        $model = $this->findOrThrow($id);
+
+        $result = $this->execDestroy($model);
 
         // 失败了
         if (empty($result)) {
@@ -205,9 +224,9 @@ abstract class RestController extends Controller
         return self::success($result);
     }
 
-    protected function execDestroy($id)
+    protected function execDestroy($model)
     {
-        $result = $this->repository->delete($id);
+        $result = $model->delete();
         return $result;
     }
 
@@ -306,11 +325,8 @@ abstract class RestController extends Controller
     public function erase($id)
     {
         $this->repository->onlyTrashed();
-        $model = $this->repository->find($id);
 
-        if (empty($model)) {
-            throw new RestCodeException(REST_OBJ_NOT_EXIST);
-        }
+        $model = $this->findOrThrow($id);
 
         $result = $this->execErase($model);
 
@@ -338,11 +354,8 @@ abstract class RestController extends Controller
     public function restore($id)
     {
         $this->repository->onlyTrashed();
-        $model = $this->repository->find($id);
 
-        if (empty($model)) {
-            throw new RestCodeException(REST_OBJ_NOT_EXIST);
-        }
+        $model = $this->findOrThrow($id);
 
         $result = $this->execRestore($model);
 
