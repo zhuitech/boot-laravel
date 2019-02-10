@@ -39,6 +39,7 @@ trait RestResponse
 
     /**
      * 返回错误代码
+     *
      * @param $code
      * @param array $data
      * @return \Illuminate\Http\JsonResponse
@@ -50,6 +51,7 @@ trait RestResponse
 
     /**
      * 返回成功消息
+     *
      * @param array $data
      * @return \Illuminate\Http\JsonResponse
      */
@@ -60,6 +62,7 @@ trait RestResponse
 
     /**
      * 返回错误消息
+     *
      * @param $message
      * @param array $data
      * @return \Illuminate\Http\JsonResponse

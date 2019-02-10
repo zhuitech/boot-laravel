@@ -12,6 +12,7 @@ use ZhuiTech\BootLaravel\Profiles\SettingsInstaller;
 use ZhuiTech\BootLaravel\Providers\PackageServiceProvider;
 use ZhuiTech\BootLaravel\Providers\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
 
 class LaravelProvider extends ServiceProvider
 {
@@ -76,6 +77,13 @@ class LaravelProvider extends ServiceProvider
         $paths = config('view.paths');
         array_unshift($paths, $this->basePath('views'));
         config(['view.paths' => $paths]);
+
+        /**
+         * 配置
+         */
+        $this->app->singleton('setting', function () {
+            return new RemoteSettingRepository();
+        });
 
         parent::register();
     }

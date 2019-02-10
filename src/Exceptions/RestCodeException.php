@@ -11,6 +11,7 @@ namespace ZhuiTech\BootLaravel\Exceptions;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
+ * 错误代码异常类
  *
  * Class RestCodeException
  * @package ZhuiTech\BootLaravel\Exceptions
@@ -24,10 +25,10 @@ class RestCodeException extends HttpException
      * @param int $code
      * @param null $data
      */
-    public function __construct(int $code = 0, $data = null)
+    public function __construct(int $code = 0, $data = null, $message = NULL)
     {
         $errors = config('boot-laravel.errors');
-        $message = $errors[$code];
+        $message = $message ?? $errors[$code];
         $this->data = $data;
 
         parent::__construct(200, $message, null, [], $code);

@@ -7,14 +7,17 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
+use Illuminate\Support\Facades\Auth;
 use JsonSchema\Exception\JsonDecodingException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Exceptions\UnableToExecuteRequestException;
 use Exception;
+use ZhuiTech\BootLaravel\Models\User;
 
 /**
+ * Restful客户端
  * Class Http.
  */
 class RestClient
@@ -27,6 +30,7 @@ class RestClient
     protected $client;
 
     /**
+     * 全局参数
      * @var array
      */
     public static $globals = [
@@ -36,8 +40,7 @@ class RestClient
     ];
 
     /**
-     * Guzzle client default settings.
-     *
+     * 默认请求参数
      * @var array
      */
     protected $defaults = [
@@ -54,6 +57,12 @@ class RestClient
     protected $server = NULL;
 
     /**
+     * 模拟用户
+     * @var User
+     */
+    protected $user = NULL;
+
+    /**
      * 返回一个新实例
      * @param $server
      * @return $this
@@ -62,6 +71,8 @@ class RestClient
     {
         $instance = new static();
         $instance->server = $server;
+        $instance->user = Auth::user();
+
         return $instance;
     }
 
@@ -87,6 +98,17 @@ class RestClient
     public function options($defaults = [])
     {
         $this->defaults = array_merge(self::$globals, $defaults);
+        return $this;
+    }
+
+    /**
+     * 以用户身份请求
+     * @param User $user
+     * @return $this
+     */
+    public function as(User $user)
+    {
+        $this->user = $user;
         return $this;
     }
 
@@ -199,6 +221,14 @@ class RestClient
         $url = $this->getUrl($path);
         $method = strtoupper($method);
         $options = array_merge($this->defaults, $options);
+
+        // 传递用户身份
+        if (!empty($this->user) && $this->user->id > 0) {
+            $options['headers'] += [
+                'X-User' => $this->user->id,
+                'X-User-Type' => $this->user->type
+            ];
+        }
 
         try {
             $response = $this->getClient()->request($method, $url, $options);
