@@ -101,4 +101,15 @@ abstract class BaseRepository extends Repository
         $this->model = $this->model->onlyTrashed();
         return $this;
     }
+
+    /**
+     * @param int $perPage
+     * @param array $columns
+     * @return mixed
+     */
+    public function paginate($perPage = 25, $columns = array('*'))
+    {
+        $this->applyCriteria();
+        return $this->model->paginate($perPage, $columns, '_page');
+    }
 }
