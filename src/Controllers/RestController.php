@@ -136,7 +136,6 @@ abstract class RestController extends Controller
     {
         $data = $this->form()->all();
 
-        $data = $this->assignOwner($data);
         $result = $this->execStore($data);
 
         // 创建失败
@@ -152,20 +151,6 @@ abstract class RestController extends Controller
     {
         $result = $this->repository->create($data);
         return $result;
-    }
-
-    protected function assignOwner($data)
-    {
-        // 设置所属会员
-        $model = $this->repository->makeModel();
-        if ($model instanceof OwnershipContract) {
-            $user = Auth::user();
-            if (!empty($user) && $model->assignable($user)) {
-                $model->assign($user, $data);
-            }
-        }
-
-        return $data;
     }
 
     /**
@@ -241,8 +226,10 @@ abstract class RestController extends Controller
      */
     public function findBy($field, $value)
     {
+        $data = request()->all();
+
         // 找一下
-        $result = $this->execFindBy($field, $value);
+        $result = $this->execFindBy($field, $value, $data);
 
         // 找不到
         if (empty($result)) {
@@ -253,44 +240,10 @@ abstract class RestController extends Controller
         return self::success($result);
     }
 
-    protected function execFindBy($field, $value, $columns = ['*'])
+    protected function execFindBy($field, $value, $data = [])
     {
-        $result = $this->repository->findBy($field, $value, $columns);
-        return $result;
-    }
-
-    /**
-     * Find objects belong to me
-     */
-    public function findMy()
-    {
-        $model = $this->repository->makeModel();
-        if (! $model instanceof OwnershipContract) {
-            throw new RestCodeException(REST_OBJ_NO_OWNERSHIP);
-        }
-
-        // 没有登录
-        $user = Auth::user();
-        if (empty($user)) {
-            throw new RestCodeException(REST_NOT_LOGIN);
-        }
-
-        // 用户类型不对
-        if (!$model->assignable($user)) {
-            throw new RestCodeException(REST_NOT_AUTH);
-        }
-
-        // 设置查询条件
-        $data = request()->all();
-        $data[$model->ownerKey()] = $user->id;
-
-        $result = $this->execFindMy($data);
-        return $this->success($result);
-    }
-
-    protected function execFindMy($data)
-    {
-        $result = $this->repository->query($data);
+        $this->repository->pushCriteria(new QueryCriteria($data));
+        $result = $this->repository->findBy($field, $value);
         return $result;
     }
 
