@@ -15,6 +15,7 @@ use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Exceptions\UnableToExecuteRequestException;
 use Exception;
 use ZhuiTech\BootLaravel\Models\User;
+use Illuminate\Support\Facades\App;
 
 /**
  * Restful客户端
@@ -222,11 +223,12 @@ class RestClient
         $method = strtoupper($method);
         $options = array_merge($this->defaults, $options);
 
-        // 传递用户身份
+        // 传递一些参数
         if (!empty($this->user) && $this->user->id > 0) {
             $options['headers'] += [
                 'X-User' => $this->user->id,
-                'X-User-Type' => $this->user->type
+                'X-User-Type' => $this->user->type,
+                'X-Language' => App::getLocale(),
             ];
         }
 
