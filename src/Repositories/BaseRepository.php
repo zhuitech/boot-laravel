@@ -20,6 +20,17 @@ abstract class BaseRepository extends Repository
     protected $model;
 
     /**
+     * 重新设置查询范围
+     * @return $this
+     * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
+     */
+    public function resetScope()
+    {
+        $this->makeModel();
+        return parent::resetScope();
+    }
+
+    /**
      * 获取空白Model
      * @return \Eloquent
      */
