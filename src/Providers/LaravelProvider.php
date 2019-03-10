@@ -2,9 +2,12 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\Passport;
+use Symfony\Component\HttpKernel\HttpKernel;
 use ZhuiTech\BootLaravel\Console\Commands\ProfileInstall;
 use ZhuiTech\BootLaravel\Console\Commands\ProfileList;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
@@ -20,6 +23,7 @@ class LaravelProvider extends ServiceProvider
         'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
         'Laracasts\Flash\FlashServiceProvider',
         'Overtrue\LaravelUploader\UploadServiceProvider',
+        'Overtrue\LaravelLang\TranslationServiceProvider',
     ];
 
     protected $namespace = 'ZhuiTech\BootLaravel\Controllers';
@@ -45,6 +49,12 @@ class LaravelProvider extends ServiceProvider
          * 解决 MySQL v5.7.7 以下版本会报错误：Specified key was too long error.
          */
         Schema::defaultStringLength(191);
+
+        /**
+         * 全局切换语言
+         */
+        $kernel = app(Kernel::class);
+        $kernel->pushMiddleware(\ZhuiTech\BootLaravel\Middleware\Language::class);
 
         parent::boot();
     }

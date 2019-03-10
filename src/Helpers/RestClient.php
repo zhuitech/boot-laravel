@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use JsonSchema\Exception\JsonDecodingException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -223,13 +224,13 @@ class RestClient
         $method = strtoupper($method);
         $options = array_merge($this->defaults, $options);
 
-        // 传递一些参数
-        if (!empty($this->user) && $this->user->id > 0) {
-            $options['headers'] += [
-                'X-User' => $this->user->id,
-                'X-User-Type' => $this->user->type,
-                'X-Language' => App::getLocale(),
-            ];
+        // 传递请求头信息
+        if (!app()->runningInConsole()) {
+            foreach (['X-User', 'X-User-Type', 'X-Language'] as $key) {
+                if (Request::hasHeader($key)) {
+                    $options['headers'][$key] = Request::header($key);
+                }
+            }
         }
 
         try {

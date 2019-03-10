@@ -82,6 +82,15 @@ abstract class RestController extends Controller
         return $result;
     }
 
+    /**
+     * 返回客户端的语言环境
+     * @return array|string
+     */
+    protected function clientLanguage()
+    {
+        return request()->header('X-Language');
+    }
+
     // CRUD ************************************************************************************************************
 
     /**
