@@ -72,7 +72,7 @@ abstract class RestController extends Controller
     protected function findOrThrow($id)
     {
         // 找一下
-        $result = $this->repository->resetScope()->find($id);
+        $result = $this->repository->find($id);
 
         // 找不到
         if (empty($result)) {
@@ -110,7 +110,7 @@ abstract class RestController extends Controller
 
     protected function execIndex($data)
     {
-        $result = $this->repository->resetScope()->query($data);
+        $result = $this->repository->query($data);
         return $result;
     }
 
@@ -252,7 +252,7 @@ abstract class RestController extends Controller
     protected function execFindBy($field, $value, $data = [])
     {
         $this->repository->pushCriteria(new QueryCriteria($data));
-        $result = $this->repository->resetScope()->findBy($field, $value);
+        $result = $this->repository->findBy($field, $value);
         return $result;
     }
 
@@ -272,7 +272,7 @@ abstract class RestController extends Controller
 
     protected function execTrashed($data)
     {
-        $result = $this->repository->resetScope()->onlyTrashed()->query($data);
+        $result = $this->repository->onlyTrashed()->query($data);
         return $result;
     }
 
