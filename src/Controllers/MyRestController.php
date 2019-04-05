@@ -42,21 +42,27 @@ class MyRestController extends RestController
      */
     public function __construct(BaseRepository $repository)
     {
-        if (!app()->runningInConsole()) {
-            // 获取当前用户
-            $this->user = Auth::user();
-            if (empty($this->user)) {
-                throw new RestCodeException(REST_NOT_LOGIN);
-            }
+        parent::__construct($repository);
+    }
 
-            // 只处理当前用户的资源
-            $criteria = new SimpleCriteria([
-                $this->userForeignKey => $this->user->id
-            ]);
-            $repository->pushCriteria($criteria);
+    /**
+     * 初始化
+     */
+    protected function prepare()
+    {
+        // 获取当前用户
+        $this->user = Auth::user();
+        if (empty($this->user)) {
+            throw new RestCodeException(REST_NOT_LOGIN);
         }
 
-        parent::__construct($repository);
+        // 只处理当前用户的资源
+        $criteria = new SimpleCriteria([
+            $this->userForeignKey => $this->user->id
+        ]);
+        $this->repository->pushCriteria($criteria);
+
+        parent::prepare();
     }
 
     /**

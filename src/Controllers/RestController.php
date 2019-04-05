@@ -91,6 +91,14 @@ abstract class RestController extends Controller
         return request()->header('X-Language');
     }
 
+    /**
+     * 执行一些初始化
+     */
+    protected function prepare()
+    {
+
+    }
+
     // CRUD ************************************************************************************************************
 
     /**
@@ -101,10 +109,10 @@ abstract class RestController extends Controller
      */
     public function index()
     {
+        $this->prepare();
+
         $data = request()->all();
-
         $result = $this->execIndex($data);
-
         return $this->success($result);
     }
 
@@ -123,6 +131,8 @@ abstract class RestController extends Controller
      */
     public function show($id)
     {
+        $this->prepare();
+
         // 找一下
         $result = $this->execShow($id);
 
@@ -143,6 +153,8 @@ abstract class RestController extends Controller
      */
     public function store()
     {
+        $this->prepare();
+
         $data = $this->form()->all();
 
         $result = $this->execStore($data);
@@ -171,6 +183,8 @@ abstract class RestController extends Controller
      */
     public function update($id)
     {
+        $this->prepare();
+
         $data = $this->form()->all();
 
         // 找一下
@@ -204,6 +218,8 @@ abstract class RestController extends Controller
      */
     public function destroy($id)
     {
+        $this->prepare();
+
         // 找一下
         $model = $this->findOrThrow($id);
 
@@ -235,6 +251,8 @@ abstract class RestController extends Controller
      */
     public function findBy($field, $value)
     {
+        $this->prepare();
+
         $data = request()->all();
 
         // 找一下
@@ -265,6 +283,8 @@ abstract class RestController extends Controller
      */
     public function trashed()
     {
+        $this->prepare();
+
         $data = request()->all();
         $result = $this->execTrashed($data);
         return $this->success($result);
@@ -284,10 +304,10 @@ abstract class RestController extends Controller
      */
     public function erase($id)
     {
+        $this->prepare();
+
         $this->repository->onlyTrashed();
-
         $model = $this->findOrThrow($id);
-
         $result = $this->execErase($model);
 
         // 失败了
@@ -313,10 +333,10 @@ abstract class RestController extends Controller
      */
     public function restore($id)
     {
+        $this->prepare();
+
         $this->repository->onlyTrashed();
-
         $model = $this->findOrThrow($id);
-
         $result = $this->execRestore($model);
 
         // 失败了

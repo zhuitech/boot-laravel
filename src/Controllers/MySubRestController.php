@@ -37,24 +37,21 @@ class MySubRestController extends SubRestController
     protected $userForeignKey = 'user_id';
 
     /**
-     * MyRestController constructor.
-     * @param BaseRepository $repository
+     * 初始化
      */
-    public function __construct(BaseRepository $repository)
+    protected function prepare()
     {
-        parent::__construct($repository);
+        parent::prepare();
 
-        if (!app()->runningInConsole()) {
-            // 获取当前用户
-            $this->user = Auth::user();
-            if (empty($this->user)) {
-                throw new RestCodeException(REST_NOT_LOGIN);
-            }
+        // 获取当前用户
+        $this->user = Auth::user();
+        if (empty($this->user)) {
+            throw new RestCodeException(REST_NOT_LOGIN);
+        }
 
-            // 只处理当前用户的资源
-            if ($this->parent->{$this->userForeignKey} != $this->user->id) {
-                throw new RestCodeException(REST_NOT_AUTH);
-            }
+        // 只处理当前用户的资源
+        if ($this->parent->{$this->userForeignKey} != $this->user->id) {
+            throw new RestCodeException(REST_NOT_AUTH);
         }
     }
 }

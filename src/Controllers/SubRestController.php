@@ -42,68 +42,75 @@ abstract class SubRestController extends RestController
 
     /**
      * SubRestController constructor.
+     * @param BaseRepository $repository
      * @param BaseRepository $parents
      */
     public function __construct(BaseRepository $repository, BaseRepository $parents)
     {
-        parent::__construct($repository);
-
         $this->parents = $parents;
         $this->foreignKey = $parents->freshModel()->getForeignKey();
 
-        // 如果当前为子路由，添加默认条件
-        if (!app()->runningInConsole()) {
-            $parentId = $this->resolveParameter(request(), $this->parents->model());
-            if ($parentId) {
-                // 设置查询范围
-                $criteria = new SimpleCriteria([
-                    $this->foreignKey => $parentId
-                ]);
-                $this->repository->pushCriteria($criteria);
+        parent::__construct($repository);
+    }
 
-                // 加载父资源
-                $parent = $this->parents->find($parentId);
-                if (empty($parent)) {
-                    throw new RestCodeException(REST_OBJ_NOT_EXIST);
-                }
-                $this->parent = $parent;
+    protected function parentKey()
+    {
+        return Str::snake(class_basename($this->parents->model()));
+    }
 
-                // 添加父资源关联字段
-                request()->merge([
-                    $this->foreignKey => (int)$parentId
-                ]);
-            }
-        }
+    protected function resourceKey()
+    {
+        return Str::snake(class_basename($this->repository->model()));
     }
 
     /**
-     * 获取模型对应的参数
-     * @param Request $request
-     * @param $class
-     * @return null
+     * 初始化
      */
-    private function resolveParameter(Request $request, $class)
+    protected function prepare()
     {
-        $params = $request->route()->parameters();
-        $key = Str::snake(class_basename($class));
-        return $params[$key] ?? null;
+        $params = request()->route()->parameters();
+        $parentId = $params[$this->parentKey()];
+        if ($parentId) {
+            // 设置查询范围
+            $criteria = new SimpleCriteria([
+                $this->foreignKey => $parentId
+            ]);
+            $this->repository->pushCriteria($criteria);
+
+            // 加载父资源
+            $parent = $this->parents->find($parentId);
+            if (empty($parent)) {
+                throw new RestCodeException(REST_OBJ_NOT_EXIST);
+            }
+            $this->parent = $parent;
+
+            // 添加父资源关联字段
+            request()->merge([
+                $this->foreignKey => (int)$parentId
+            ]);
+        }
+
+        parent::prepare();
     }
 
     public function show($id)
     {
-        $id = $this->resolveParameter(request(), $this->repository->model());
+        $params = request()->route()->parameters();
+        $id = $params[$this->resourceKey()];
         return parent::show($id);
     }
 
     public function update($id)
     {
-        $id = $this->resolveParameter(request(), $this->repository->model());
+        $params = request()->route()->parameters();
+        $id = $params[$this->resourceKey()];
         return parent::update($id);
     }
 
     public function destroy($id)
     {
-        $id = $this->resolveParameter(request(), $this->repository->model());
+        $params = request()->route()->parameters();
+        $id = $params[$this->resourceKey()];
         return parent::destroy($id);
     }
 
