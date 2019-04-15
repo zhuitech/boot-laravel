@@ -63,43 +63,32 @@ abstract class BaseRepository extends Repository
     }
 
     /**
-     * Inner Join
-     * @param $table
+     * Join parent
+     * @param Model $model
      * @param $foreignKey
      * @return $this
      */
-    public function join(Model $model)
+    public function joinParent(Model $model, $foreignKey = NULL)
     {
-        $foreignKey = $this->model->getTable() . '.' . $model->getForeignKey();
+        $foreignKey = $foreignKey ?? $model->getForeignKey();
+
         $this->model = $this->model
-            ->join($model->getTable(), $model->getQualifiedKeyName(), '=', $foreignKey);
+            ->join($model->getTable(), $model->getQualifiedKeyName(), '=', $this->model->getTable() . '.' . $foreignKey);
         return $this;
     }
 
     /**
-     * Left Join
+     * Join parent
      * @param Model $model
+     * @param $foreignKey
      * @return $this
      */
-    public function leftJoin(Model $model, $reverse = false)
+    public function joinChildren(Model $model, $foreignKey = NULL)
     {
-        if ($reverse) {
-            $this->model = $this->model->leftJoin(
-                $model->getTable(),
-                $this->model->getQualifiedKeyName(),
-                '=',
-                $model->getTable() . '.' . $this->model->getForeignKey()
-            );
-        }
-        else {
-            $this->model = $this->model->leftJoin(
-                $model->getTable(),
-                $this->model->getTable() . '.' . $model->getForeignKey(),
-                '=',
-                $model->getQualifiedKeyName()
-            );
-        }
+        $foreignKey = $foreignKey ?? $model->getForeignKey();
 
+        $this->model = $this->model
+            ->join($model->getTable(), $this->model->getQualifiedKeyName(), '=', $model->getTable() . '.' . $foreignKey);
         return $this;
     }
 
