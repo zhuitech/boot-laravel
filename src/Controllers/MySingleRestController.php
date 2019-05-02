@@ -35,10 +35,41 @@ class MySingleRestController extends MyRestController
         $model = $this->repository->all()->first();
 
         if (empty($model)) {
-            return parent::execStore($data);
+            return $this->storeSingle($data);
         }
         else {
-            return parent::execUpdate($model, $data);
+            return $this->updateSingle($model, $data);
         }
+    }
+
+    /**
+     * 添加
+     * @param $data
+     * @return mixed
+     */
+    protected function storeSingle($data)
+    {
+        return parent::execStore($data);
+    }
+
+    /**
+     * 更新
+     * @param $model
+     * @param $data
+     * @return mixed
+     */
+    protected function updateSingle($model, $data)
+    {
+        return parent::execUpdate($model, $data);
+    }
+
+    public function update($id)
+    {
+        return $this->fail('不支持的方法');
+    }
+
+    public function destroy($id)
+    {
+        return $this->fail('不支持的方法');
     }
 }
