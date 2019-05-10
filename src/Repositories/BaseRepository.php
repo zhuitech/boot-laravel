@@ -46,6 +46,9 @@ abstract class BaseRepository extends Repository
      */
     public function query($query)
     {
+        $query += [
+            '_order' => ['id' => 'desc']
+        ];
         $this->pushCriteria(new QueryCriteria($query));
 
         $size = $query['_size'] ?? 25;
