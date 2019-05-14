@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use JsonSchema\Exception\JsonDecodingException;
@@ -120,6 +121,7 @@ class RestClient
      * @param $url
      * @param array $queries
      * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function get($url, array $queries = [])
     {
@@ -135,6 +137,7 @@ class RestClient
      * @param array $options
      * @param array $queries
      * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function post($url, $options = [], $queries = [])
     {
@@ -151,6 +154,7 @@ class RestClient
      * @param array $options
      * @param array $queries
      * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function put($url, $options = [], $queries = [])
     {
@@ -167,6 +171,7 @@ class RestClient
      * @param array $options
      * @param array $queries
      * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function delete($url, $options = [], $queries = [])
     {
@@ -184,12 +189,18 @@ class RestClient
      * @param array $form
      * @param array $queries
      * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function upload($url, array $files = [], array $form = [], array $queries = [])
     {
         $multipart = [];
 
-        foreach ($files as $name => $path) {
+        foreach ($files as $name => $file) {
+            $path = $file;
+            if ($file instanceof UploadedFile) {
+                $path = $file->path();
+            }
+
             $multipart[] = [
                 'name' => $name,
                 'contents' => fopen($path, 'r'),
@@ -217,6 +228,7 @@ class RestClient
      * @param string $method
      * @param array $options
      * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function request($path, $method = 'GET', $options = [])
     {
