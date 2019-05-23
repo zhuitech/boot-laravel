@@ -73,8 +73,11 @@ class RestClient
     public static function server($server = NULL)
     {
         $instance = new static();
-        $instance->server = $server;
         $instance->user = Auth::user();
+
+        if (!empty($server)) {
+            $instance->server = $server;
+        }
 
         return $instance;
     }
@@ -134,16 +137,16 @@ class RestClient
      * POST request.
      *
      * @param $url
-     * @param array $options
+     * @param array $data
      * @param array $queries
      * @return array|mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function post($url, $options = [], $queries = [])
+    public function post($url, $data = [], $queries = [])
     {
         return $this->request($url, 'POST', [
             'query' => $queries,
-            'body' => json_encode($options, JSON_UNESCAPED_UNICODE)
+            'body' => json_encode($data, JSON_UNESCAPED_UNICODE)
         ]);
     }
 
@@ -151,16 +154,16 @@ class RestClient
      * PUT request.
      *
      * @param $url
-     * @param array $options
+     * @param array $data
      * @param array $queries
      * @return array|mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function put($url, $options = [], $queries = [])
+    public function put($url, $data = [], $queries = [])
     {
         return $this->request($url, 'PUT', [
             'query' => $queries,
-            'body' => json_encode($options, JSON_UNESCAPED_UNICODE)
+            'body' => json_encode($data, JSON_UNESCAPED_UNICODE)
         ]);
     }
 
@@ -168,16 +171,16 @@ class RestClient
      * DELETE request.
      *
      * @param $url
-     * @param array $options
+     * @param array $data
      * @param array $queries
      * @return array|mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function delete($url, $options = [], $queries = [])
+    public function delete($url, $data = [], $queries = [])
     {
         return $this->request($url, 'DELETE', [
             'query' => $queries,
-            'body' => json_encode($options, JSON_UNESCAPED_UNICODE)
+            'body' => json_encode($data, JSON_UNESCAPED_UNICODE)
         ]);
     }
 
