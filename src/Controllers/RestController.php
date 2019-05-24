@@ -9,6 +9,7 @@
 namespace ZhuiTech\BootLaravel\Controllers;
 
 use Bosnadev\Repositories\Eloquent\Repository;
+use function foo\func;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Models\MemberOwnershipContract;
@@ -147,25 +149,36 @@ abstract class RestController extends Controller
 
     /**
      * Save a new object
-     * POST	/photos
+     * POST    /photos
      *
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function store()
     {
         $this->prepare();
 
-        $data = $this->form()->all();
+        try {
+            DB::beginTransaction();
 
-        $result = $this->execStore($data);
+            $data = $this->form()->all();
+            $result = $this->execStore($data);
 
-        // 创建失败
-        if (empty($result)) {
-            return $this->error(REST_OBJ_CREATE_FAIL);
+            // 创建失败
+            if (empty($result)) {
+                DB::rollBack();
+                return $this->error(REST_OBJ_CREATE_FAIL);
+            }
+            else {
+                // 成功了
+                DB::commit();
+                return self::success($result);
+            }
         }
-
-        // 成功了
-        return self::success($result);
+        catch (\Exception $ex) {
+            DB::rollBack();
+            throw $ex;
+        }
     }
 
     protected function execStore($data)
@@ -176,31 +189,42 @@ abstract class RestController extends Controller
 
     /**
      * Update an exists object
-     * PUT	/photos/{photo}
+     * PUT    /photos/{photo}
      *
      * @param $id
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function update($id)
     {
         $this->prepare();
 
-        $data = $this->form()->all();
+        try {
+            DB::beginTransaction();
 
-        // 找一下
-        $model = $this->findOrThrow($id);
+            $data = $this->form()->all();
 
-        // 更新
-        $result = $this->execUpdate($model, $data);
+            // 找一下
+            $model = $this->findOrThrow($id);
 
-        // 创建失败
-        if (empty($result)) {
-            return $this->error(REST_OBJ_UPDATE_FAIL);
+            // 更新
+            $result = $this->execUpdate($model, $data);
+
+            // 更新失败
+            if (empty($result)) {
+                DB::rollBack();
+                return $this->error(REST_OBJ_UPDATE_FAIL);
+            }
+            else {
+                // 成功了
+                $model = $this->findOrThrow($id);
+                DB::commit();
+                return self::success($model);
+            }
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw $ex;
         }
-
-        // 成功了
-        $model = $this->findOrThrow($id);
-        return self::success($model);
     }
 
     protected function execUpdate($model, $data)
@@ -211,27 +235,39 @@ abstract class RestController extends Controller
 
     /**
      * Delete an object
-     * DELETE	/photos/{photo}
+     * DELETE    /photos/{photo}
      *
      * @param $id
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function destroy($id)
     {
         $this->prepare();
 
-        // 找一下
-        $model = $this->findOrThrow($id);
+        try {
+            DB::beginTransaction();
 
-        $result = $this->execDestroy($model);
+            // 找一下
+            $model = $this->findOrThrow($id);
 
-        // 失败了
-        if (empty($result)) {
-            return $this->error(REST_OBJ_DELETE_FAIL);
+            // 删除
+            $result = $this->execDestroy($model);
+
+            // 失败了
+            if (empty($result)) {
+                DB::rollBack();
+                return $this->error(REST_OBJ_DELETE_FAIL);
+            }
+            else {
+                // 成功了
+                DB::commit();
+                return self::success($result);
+            }
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw $ex;
         }
-
-        // 成功了
-        return self::success($result);
     }
 
     protected function execDestroy($model)
@@ -301,22 +337,33 @@ abstract class RestController extends Controller
      *
      * @param $id
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function erase($id)
     {
         $this->prepare();
 
-        $this->repository->onlyTrashed();
-        $model = $this->findOrThrow($id);
-        $result = $this->execErase($model);
+        try {
+            DB::beginTransaction();
 
-        // 失败了
-        if (empty($result)) {
-            return $this->error(REST_OBJ_ERASE_FAIL);
+            $this->repository->onlyTrashed();
+            $model = $this->findOrThrow($id);
+            $result = $this->execErase($model);
+
+            // 失败了
+            if (empty($result)) {
+                DB::rollBack();
+                return $this->error(REST_OBJ_ERASE_FAIL);
+            }
+            else {
+                // 成功了
+                DB::commit();
+                return self::success($result);
+            }
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw $ex;
         }
-
-        // 成功了
-        return self::success($result);
     }
 
     protected function execErase($model)
@@ -330,22 +377,33 @@ abstract class RestController extends Controller
      *
      * @param $id
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function restore($id)
     {
         $this->prepare();
 
-        $this->repository->onlyTrashed();
-        $model = $this->findOrThrow($id);
-        $result = $this->execRestore($model);
+        try {
+            DB::beginTransaction();
 
-        // 失败了
-        if (empty($result)) {
-            return $this->error(REST_OBJ_RESTORE_FAIL);
+            $this->repository->onlyTrashed();
+            $model = $this->findOrThrow($id);
+            $result = $this->execRestore($model);
+
+            // 失败了
+            if (empty($result)) {
+                DB::rollBack();
+                return $this->error(REST_OBJ_RESTORE_FAIL);
+            }
+            else {
+                // 成功了
+                DB::commit();
+                return self::success($result);
+            }
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            throw $ex;
         }
-
-        // 成功了
-        return self::success($result);
     }
 
     protected function execRestore($model)
