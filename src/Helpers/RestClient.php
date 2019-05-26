@@ -3,21 +3,13 @@
 namespace ZhuiTech\BootLaravel\Helpers;
 
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\HandlerStack;
+use GuzzleHttp\MessageFormatter;
+use GuzzleHttp\Middleware;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
-use JsonSchema\Exception\JsonDecodingException;
-use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
-use ZhuiTech\BootLaravel\Exceptions\UnableToExecuteRequestException;
-use Exception;
 use ZhuiTech\BootLaravel\Models\User;
-use Illuminate\Support\Facades\App;
 
 /**
  * Restful客户端
@@ -64,6 +56,18 @@ class RestClient
      * @var User
      */
     protected $user = NULL;
+
+    /**
+     * 日志名
+     * @var null
+     */
+    protected $logName = NULL;
+
+    /**
+     * 日志对象
+     * @var null
+     */
+    protected $logger = NULL;
 
     /**
      * 返回一个新实例
@@ -115,6 +119,17 @@ class RestClient
     public function as(User $user)
     {
         $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * 记录到日志
+     * @param $name
+     * @return $this
+     */
+    public function log($name = 'rest-client')
+    {
+        $this->logName = $name;
         return $this;
     }
 
@@ -250,7 +265,7 @@ class RestClient
 
         try {
             $response = $this->getClient()->request($method, $url, $options);
-            $content = $response->getBody()->getContents();
+            $content = (string) $response->getBody();
             $result = json_decode($content, true);
 
             // 处理JSON解析失败
@@ -279,7 +294,7 @@ class RestClient
             if ($e->hasResponse()) {
                 $data += [
                     'status' => $e->getResponse()->getStatusCode(),
-                    'content' => $e->getResponse()->getBody()->getContents()
+                    'content' => (string) $e->getResponse()->getBody()
                 ];
             }
 
@@ -295,7 +310,15 @@ class RestClient
     protected function getClient()
     {
         if (!($this->client instanceof HttpClient)) {
-            $this->client = new HttpClient();
+            // 创建处理器
+            $handlerStack = \GuzzleHttp\HandlerStack::create();
+            if (!empty($this->getLogger())) {
+                $handlerStack->push(
+                    Middleware::log($this->getLogger(), new MessageFormatter('{method} {uri} HTTP/{version} {req_body} RESPONSE: {code} - {res_body}'))
+                );
+            }
+
+            $this->client = new HttpClient(['handler' => $handlerStack]);
         }
 
         return $this->client;
@@ -321,5 +344,21 @@ class RestClient
         }
 
         return rtrim($prefix, '/') . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * 获取日志对象
+     * @return \Monolog\Logger|null
+     */
+    protected function getLogger()
+    {
+        // 如果指定了日志名称，则创建日志对象
+        if (empty($this->logger) && !empty($this->logName)) {
+            $this->logger = with(new \Monolog\Logger('rest-client'))->pushHandler(
+                new \Monolog\Handler\RotatingFileHandler(storage_path("logs/{$this->logName}.log"))
+            );
+        }
+
+        return $this->logger;
     }
 }
