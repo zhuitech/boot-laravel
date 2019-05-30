@@ -48,7 +48,7 @@ abstract class SubRestController extends RestController
     public function __construct(BaseRepository $repository, BaseRepository $parents)
     {
         $this->parents = $parents;
-        $this->foreignKey = $parents->freshModel()->getForeignKey();
+        $this->foreignKey = $parents->newModel()->getForeignKey();
 
         parent::__construct($repository);
     }
@@ -121,7 +121,7 @@ abstract class SubRestController extends RestController
      */
     public function find()
     {
-        $parent = $this->parents->freshModel();
+        $parent = $this->parents->newModel();
         
         $result = $this->repository
             ->join($parent)

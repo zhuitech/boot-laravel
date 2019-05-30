@@ -57,8 +57,9 @@ class MyRestController extends RestController
         }
 
         // 只处理当前用户的资源
+        $userKey = $this->repository->newModel()->qualifyColumn($this->userForeignKey);
         $criteria = new SimpleCriteria([
-            $this->userForeignKey => $this->user->id
+            $userKey => $this->user->id
         ]);
         $this->repository->pushCriteria($criteria);
 
