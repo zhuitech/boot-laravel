@@ -2,14 +2,9 @@
 namespace ZhuiTech\BootLaravel\Repositories;
 
 use Bosnadev\Repositories\Eloquent\Repository;
-use Illuminate\Container\Container as App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
-use Illuminate\Support\Collection;
-use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 
 /**
@@ -45,31 +40,30 @@ abstract class BaseRepository extends Repository
     {
         return $this->newModel;
     }
-    
+
     /**
-     * 组合查询
+     * 设置范围
      * @param $query
-     * @return mixed
+     * @return $this
      */
-    public function query($query)
+    public function scope($query)
     {
         $query += [
             '_order' => ['id' => 'desc']
         ];
+
         $this->pushCriteria(new QueryCriteria($query));
+        return $this;
+    }
 
-        $size = $query['_size'] ?? 25;
-        $limit = $query['_limit'] ?? null;
-        
-        $columns = isset($query['_column'])
-            ? explode(',', $query['_column'])
-            : [$this->newModel()->getTable() . '.*'];
-
-        $result = $limit
-            ? $this->all($columns)
-            : $this->paginate($size, $columns);
-
-        return $result;
+    /**
+     * Only Trashed
+     * @return $this
+     */
+    public function onlyTrashed()
+    {
+        $this->model = $this->model->onlyTrashed();
+        return $this;
     }
 
     /**
@@ -103,7 +97,7 @@ abstract class BaseRepository extends Repository
     }
 
     /**
-     * Join
+     * Join relationship table
      * @param $relationName
      * @return $this
      */
@@ -130,16 +124,7 @@ abstract class BaseRepository extends Repository
     }
 
     /**
-     * Only Trashed
-     * @return $this
-     */
-    public function onlyTrashed()
-    {
-        $this->model = $this->model->onlyTrashed();
-        return $this;
-    }
-
-    /**
+     * 分页查询
      * @param int $perPage
      * @param array $columns
      * @return mixed
@@ -148,5 +133,46 @@ abstract class BaseRepository extends Repository
     {
         $this->applyCriteria();
         return $this->model->paginate($perPage, $columns, '_page');
+    }
+
+    /**
+     * 统计总数
+     * @return int
+     */
+    public function count()
+    {
+        $this->applyCriteria();
+        return $this->model->count();
+    }
+
+    /**
+     * 获取结果
+     * @param $options
+     * @return mixed
+     */
+    public function get($options)
+    {
+        $size = $options['_size'] ?? 25;
+        $limit = $options['_limit'] ?? null;
+
+        $columns = isset($options['_column'])
+            ? explode(',', $options['_column'])
+            : [$this->newModel()->getTable() . '.*'];
+
+        $result = $limit
+            ? $this->all($columns)
+            : $this->paginate($size, $columns);
+
+        return $result;
+    }
+
+    /**
+     * 快捷查询，使用默认scope方法
+     * @param $query
+     * @return mixed
+     */
+    public function query($query)
+    {
+        return $this->scope($query)->get($query);
     }
 }
