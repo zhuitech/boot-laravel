@@ -17,11 +17,15 @@ use ZhuiTech\BootLaravel\Providers\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
 
+/**
+ * 通用Laravel项目
+ * Class LaravelProvider
+ * @package ZhuiTech\BootLaravel\Providers
+ */
 class LaravelProvider extends ServiceProvider
 {
     protected $providers = [
         'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
-        'Laracasts\Flash\FlashServiceProvider',
         'Overtrue\LaravelUploader\UploadServiceProvider',
         'Overtrue\LaravelLang\TranslationServiceProvider',
     ];
@@ -63,13 +67,13 @@ class LaravelProvider extends ServiceProvider
      * Register the application services.
      *
      * @return void
+     * @throws \ReflectionException
      */
     public function register()
     {
         /**
          * 默认配置
          */
-        $this->configures[] = $this->basePath('config/micro-services.php');
         $this->configures[] = $this->basePath('config/ide-helper.php');
         $this->configures[] = $this->basePath('config/boot-laravel.php');
 

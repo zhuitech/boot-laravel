@@ -13,6 +13,11 @@ use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
 use ZhuiTech\BootLaravel\Models\User;
 
+/**
+ * 微服务
+ * Class MicroServiceProvider
+ * @package ZhuiTech\BootLaravel\Providers
+ */
 class MicroServiceProvider extends ServiceProvider
 {
     public function register()

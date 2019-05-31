@@ -70,6 +70,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @param null $path
      * @return string
+     * @throws \ReflectionException
      */
     protected function basePath($path = NULL)
     {
