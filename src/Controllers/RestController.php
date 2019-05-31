@@ -211,15 +211,19 @@ abstract class RestController extends Controller
             $result = $this->execUpdate($model, $data);
 
             // 更新失败
-            if (empty($result)) {
+            if ($result === false) {
                 DB::rollBack();
                 return $this->error(REST_OBJ_UPDATE_FAIL);
             }
             else {
                 // 成功了
-                $model = $this->findOrThrow($id);
                 DB::commit();
-                return self::success($model);
+
+                // 默认返回新的模型
+                if ($result === true) {
+                    $result = $this->findOrThrow($id);
+                }
+                return self::success($result);
             }
         } catch (\Exception $ex) {
             DB::rollBack();
