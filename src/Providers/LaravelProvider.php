@@ -22,15 +22,13 @@ use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
  * Class LaravelProvider
  * @package ZhuiTech\BootLaravel\Providers
  */
-class LaravelProvider extends ServiceProvider
+class LaravelProvider extends AbstractServiceProvider
 {
     protected $providers = [
         'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
         'Overtrue\LaravelUploader\UploadServiceProvider',
         'Overtrue\LaravelLang\TranslationServiceProvider',
     ];
-
-    protected $namespace = 'ZhuiTech\BootLaravel\Controllers';
 
     protected $commands = [
         ProfileInstall::class,
@@ -72,12 +70,6 @@ class LaravelProvider extends ServiceProvider
     public function register()
     {
         /**
-         * 默认配置
-         */
-        $this->configures[] = $this->basePath('config/ide-helper.php');
-        $this->configures[] = $this->basePath('config/boot-laravel.php');
-
-        /**
          * 自定义Exception
          */
         $this->app->singleton(
@@ -98,6 +90,8 @@ class LaravelProvider extends ServiceProvider
         $this->app->singleton('setting', function () {
             return new RemoteSettingRepository();
         });
+
+        $this->mergeConfig();
 
         parent::register();
     }

@@ -3,18 +3,18 @@
 namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
 use Illuminate\Foundation\AliasLoader;
 
 /**
- * @deprecated
  * 基础服务提供类，封装了所有注册逻辑。
  *
  * Class ServiceProvider
  * @package ZhuiTech\BootLaravel\Providers
  */
-class ServiceProvider extends BaseServiceProvider
+abstract class AbstractServiceProvider extends BaseServiceProvider
 {
     /**
      * 注册档案安装器
@@ -91,7 +91,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
-        $this->loadMigrations();
         $this->commands($this->commands);
         $this->registerErrors();
     }
@@ -103,7 +102,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $this->registerConfig();
         $this->registerInstallers();
         $this->registerAliases();
         $this->registerFacades();
@@ -111,7 +109,7 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /* -----------------------------------------------------------------
-     |  Register function
+     |  自动注册
      | -----------------------------------------------------------------
      */
 
@@ -156,30 +154,6 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * 注册数据库
-     */
-    protected function loadMigrations()
-    {
-        foreach ($this->migrations as $path) {
-            if (file_exists($path) && is_dir($path)) {
-                $this->loadMigrationsFrom($path);
-            }
-        }
-    }
-
-    /**
-     * 注册配置文件
-     */
-    protected function registerConfig()
-    {
-        foreach ($this->configures as $path) {
-            if (file_exists($path) && is_file($path)) {
-                $this->mergeConfigFrom($path, File::name($path));
-            }
-        }
-    }
-
-    /**
      * 注册错误代码
      */
     protected function registerErrors()
@@ -188,6 +162,67 @@ class ServiceProvider extends BaseServiceProvider
             $config = config('boot-laravel');
             $config['errors'] += $this->errors;
             config(['boot-laravel' => $config]);
+        }
+    }
+
+    /* -----------------------------------------------------------------
+     |  手动注册
+     | -----------------------------------------------------------------
+     */
+
+    /**
+     * 注册数据库
+     */
+    protected function loadMigrations()
+    {
+        $path = $this->basePath('migrations');
+
+        if (file_exists($path) && is_dir($path)) {
+            $this->loadMigrationsFrom($path);
+        }
+    }
+
+    /**
+     * 注册配置文件
+     */
+    protected function mergeConfig()
+    {
+        $path = $this->basePath('config');
+
+        if (file_exists($path) && is_dir($path)) {
+            $files = File::files($path);
+
+            foreach ($files as $file) {
+                $this->mergeConfigFrom($file, File::name($file));
+            }
+        }
+    }
+
+    /**
+     * 注册路由
+     */
+    protected function loadRoutes()
+    {
+        if ($this->app->routesAreCached()) {
+            $this->app->booted(function () {
+                require $this->app->getCachedRoutesPath();
+            });
+        }
+        else {
+            $file = $this->basePath('routes/api.php');
+            if (file_exists($file)) {
+                Route::prefix('api')->middleware('api')->group($file);
+            }
+
+            $file = $this->basePath('routes/web.php');
+            if (file_exists($file)) {
+                Route::prefix('')->middleware('web')->group($file);
+            }
+
+            $this->app->booted(function () {
+                $this->app['router']->getRoutes()->refreshNameLookups();
+                $this->app['router']->getRoutes()->refreshActionLookups();
+            });
         }
     }
 }

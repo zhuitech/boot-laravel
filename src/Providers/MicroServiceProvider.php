@@ -18,7 +18,7 @@ use ZhuiTech\BootLaravel\Models\User;
  * Class MicroServiceProvider
  * @package ZhuiTech\BootLaravel\Providers
  */
-class MicroServiceProvider extends ServiceProvider
+class MicroServiceProvider extends AbstractServiceProvider
 {
     public function register()
     {

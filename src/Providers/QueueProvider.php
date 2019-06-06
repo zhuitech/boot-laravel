@@ -8,9 +8,12 @@ namespace ZhuiTech\BootLaravel\Providers;
  * Class QueueProvider
  * @package ZhuiTech\BootLaravel\Providers
  */
-class QueueProvider extends ServiceProvider
+class QueueProvider extends AbstractServiceProvider
 {
-    protected $migrations = [
-        'vendor/zhuitech/boot-laravel/migrations/queues'
-    ];
+    public function boot()
+    {
+        parent::boot();
+
+        $this->loadMigrationsFrom($this->basePath('migrations/queues'));
+    }
 }
