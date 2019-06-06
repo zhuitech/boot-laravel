@@ -2,6 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -217,6 +218,11 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
             $file = $this->basePath('routes/web.php');
             if (file_exists($file)) {
                 Route::prefix('')->middleware('web')->group($file);
+            }
+
+            $file = $this->basePath('routes/admin.php');
+            if (file_exists($file)) {
+                Route::prefix(config('admin.route.prefix'))->middleware(config('admin.route.middleware'))->group($file);
             }
 
             $this->app->booted(function () {
