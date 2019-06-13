@@ -112,3 +112,16 @@ if (! function_exists('setting')) {
         return app('setting')->get($key, $default);
     }
 }
+
+if (! function_exists('yuan')) {
+    /**
+     * 格式化以分为单位的金额
+     *
+     * @param $amount
+     * @return string
+     */
+    function yuan($amount)
+    {
+        return number_format($amount / 100, 2, ".", "");
+    }
+}
