@@ -29,6 +29,7 @@ trait RestResponse
      * @param bool $status
      * @param int $code
      * @param string $message
+     * @param null $extra
      * @return \Illuminate\Http\JsonResponse
      */
     protected function api($data = [], $status = true, $code = REST_SUCCESS, $message = NULL)

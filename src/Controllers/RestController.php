@@ -8,23 +8,22 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Bosnadev\Repositories\Eloquent\Repository;
-use function foo\func;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
-use ZhuiTech\BootLaravel\Models\MemberOwnershipContract;
-use ZhuiTech\BootLaravel\Models\OwnershipContract;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
+use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 
 /**
  * Base class for restfull api.
@@ -35,6 +34,12 @@ use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
 abstract class RestController extends Controller
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, RestResponse;
+
+    /**
+     * 版本
+     * @var int
+     */
+    protected $version = 1;
 
     /**
      * 资源仓库
@@ -49,12 +54,24 @@ abstract class RestController extends Controller
     protected $formClass = Request::class;
 
     /**
+     * @var Manager
+     */
+    protected $fractal;
+
+    /**
+     * 转化器类
+     * @var string
+     */
+    protected $transformer = ModelTransformer::class;
+
+    /**
      * RestController constructor.
      * @param BaseRepository $repository
      */
     public function __construct(BaseRepository $repository)
     {
         $this->repository = $repository;
+        $this->fractal = resolve(Manager::class);
     }
 
     /**
@@ -101,6 +118,34 @@ abstract class RestController extends Controller
 
     }
 
+    /**
+     * 转换列表数据
+     *
+     * @param $list
+     * @return Collection
+     */
+    protected function transformList($list)
+    {
+        if ($list instanceof LengthAwarePaginator) {
+            $resource = new Collection($list->getCollection(), new $this->transformer);
+            $resource->setPaginator(new IlluminatePaginatorAdapter($list));
+        } else {
+            $resource = new Collection($list, new $this->transformer);
+        }
+
+        return $resource;
+    }
+
+    /**转换数据
+     *
+     * @param $item
+     * @return Item
+     */
+    protected function transformItem($item)
+    {
+        return new Item($item, new $this->transformer);
+    }
+
     // CRUD ************************************************************************************************************
 
     /**
@@ -115,6 +160,12 @@ abstract class RestController extends Controller
 
         $data = request()->all();
         $result = $this->execIndex($data);
+
+        // v2 使用 transformer
+        if ($this->version == 2) {
+            $result = $this->transformList($result);
+        }
+
         return $this->success($result);
     }
 
@@ -137,6 +188,11 @@ abstract class RestController extends Controller
 
         // 找一下
         $result = $this->execShow($id);
+
+        // v2 使用 transformer
+        if ($this->version == 2) {
+            $result = $this->transformItem($result);
+        }
 
         // 找到了
         return self::success($result);
@@ -172,6 +228,7 @@ abstract class RestController extends Controller
             else {
                 // 成功了
                 DB::commit();
+
                 return self::success($result);
             }
         }
@@ -301,6 +358,11 @@ abstract class RestController extends Controller
         // 找不到
         if (empty($result)) {
             return $this->error(REST_OBJ_NOT_EXIST);
+        }
+
+        // v2 使用 transformer
+        if ($this->version == 2) {
+            $result = $this->transformItem($result);
         }
 
         // 找到了

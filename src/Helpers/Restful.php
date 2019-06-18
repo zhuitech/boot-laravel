@@ -8,6 +8,9 @@
 
 namespace ZhuiTech\BootLaravel\Helpers;
 
+use League\Fractal\Manager;
+use League\Fractal\Resource\ResourceAbstract;
+
 /**
  * Restful 实用方法
  * Class Restful
@@ -27,12 +30,23 @@ class Restful
     public static function format($data = [], $status = true, $code = REST_SUCCESS, $message = NULL)
     {
         $errors = config('boot-laravel.errors');
-        return [
+
+        $result = [
             'status' => $status,
             'code' => $code,
             'message' => $message ?? $errors[$code],
-            'data' => is_array($data) && empty($data) ? null : $data
         ];
+
+        if ($data instanceof ResourceAbstract) {
+            $fractal = resolve(Manager::class);
+            $result += $fractal->createData($data)->toArray();
+        } else {
+            $result += [
+                'data' => is_array($data) && empty($data) ? null : $data
+            ];
+        }
+
+        return $result;
     }
 
     /**
