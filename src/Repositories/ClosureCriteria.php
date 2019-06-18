@@ -9,6 +9,7 @@
 namespace ZhuiTech\BootLaravel\Repositories;
 
 use Bosnadev\Repositories\Criteria\Criteria;
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Bosnadev\Repositories\Contracts\RepositoryInterface;
 
@@ -16,16 +17,16 @@ use Bosnadev\Repositories\Contracts\RepositoryInterface;
  * Class SimpleCriteria
  * @package ZhuiTech\BootLaravel\Repositories
  */
-class SimpleCriteria extends Criteria
+class ClosureCriteria extends Criteria
 {
-    protected $wheres, $orders, $limit, $or;
+    /**
+     * @var Closure
+     */
+    private $callback;
 
-    public function __construct($wheres, $orders = NULL, $limit = NULL, $or = false)
+    public function __construct(Closure $callback)
     {
-        $this->wheres = $wheres;
-        $this->orders = $orders;
-        $this->limit = $limit;
-        $this->or = $or;
+        $this->callback = $callback;
     }
 
     /**
@@ -35,33 +36,6 @@ class SimpleCriteria extends Criteria
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        // Where
-        foreach ($this->wheres as $field => $value) {
-            if (is_array($value)) {
-                foreach ($value as $operator => $search) {
-                    $model = (!$this->or)
-                        ? $model->where($field, $operator, $search)
-                        : $model->orWhere($field, $operator, $search);
-                }
-            } else {
-                $model = (!$this->or)
-                    ? $model->where($field, '=', $value)
-                    : $model->orWhere($field, '=', $value);
-            }
-        }
-
-        // Order
-        if (!empty($this->orders)){
-            foreach ($this->orders as $field => $order) {
-                $model = $model->orderBy($field, $order);
-            }
-        }
-
-        // Limit
-        if (!empty($this->limit)) {
-            $model = $model->take($this->limit);
-        }
-
-        return $model;
+        return $model->where($this->callback);
     }
 }
