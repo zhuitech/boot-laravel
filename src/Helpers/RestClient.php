@@ -354,8 +354,8 @@ class RestClient
     {
         // 如果指定了日志名称，则创建日志对象
         if (empty($this->logger) && !empty($this->logName)) {
-            $this->logger = with(new \Monolog\Logger('rest-client'))->pushHandler(
-                new \Monolog\Handler\RotatingFileHandler(storage_path("logs/{$this->logName}.log"))
+            $this->logger = with(new \Monolog\Logger(app()->environment()))->pushHandler(
+                new \Monolog\Handler\RotatingFileHandler(storage_path("logs/{$this->logName}.log"), config('app.log_max_files'))
             );
         }
 
