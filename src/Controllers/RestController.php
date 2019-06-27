@@ -72,6 +72,7 @@ abstract class RestController extends Controller
     {
         $this->repository = $repository;
         $this->fractal = resolve(Manager::class);
+        $this->version = env('REST_VERSION', 1);
     }
 
     /**
@@ -127,10 +128,10 @@ abstract class RestController extends Controller
     protected function transformList($list)
     {
         if ($list instanceof LengthAwarePaginator) {
-            $resource = new Collection($list->getCollection(), new $this->transformer);
+            $resource = new Collection($list->getCollection(), new $this->transformer, 'data');
             $resource->setPaginator(new IlluminatePaginatorAdapter($list));
         } else {
-            $resource = new Collection($list, new $this->transformer);
+            $resource = new Collection($list, new $this->transformer, 'data');
         }
 
         return $resource;
@@ -143,7 +144,7 @@ abstract class RestController extends Controller
      */
     protected function transformItem($item)
     {
-        return new Item($item, new $this->transformer);
+        return new Item($item, new $this->transformer, 'data');
     }
 
     // CRUD ************************************************************************************************************

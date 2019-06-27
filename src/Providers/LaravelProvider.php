@@ -2,11 +2,13 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\Passport;
+use League\Fractal\Manager;
 use Symfony\Component\HttpKernel\HttpKernel;
 use ZhuiTech\BootLaravel\Console\Commands\ProfileInstall;
 use ZhuiTech\BootLaravel\Console\Commands\ProfileList;
@@ -16,6 +18,7 @@ use ZhuiTech\BootLaravel\Providers\PackageServiceProvider;
 use ZhuiTech\BootLaravel\Providers\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
+use ZhuiTech\BootLaravel\Transformers\ArraySerializer;
 
 /**
  * 通用Laravel项目
@@ -70,12 +73,19 @@ class LaravelProvider extends AbstractServiceProvider
     public function register()
     {
         /**
-         * 自定义Exception
+         * 注册容器对象
          */
-        $this->app->singleton(
-            \Illuminate\Contracts\Debug\ExceptionHandler::class,
-            AdvancedHandler::class
-        );
+        $this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
+
+        $this->app->singleton('setting', function () {
+            return new RemoteSettingRepository();
+        });
+
+        $this->app->bind(Manager::class, function (){
+            $manager = new Manager();
+            $manager->setSerializer(new ArraySerializer());
+            return $manager;
+        });
 
         /**
          * 默认视图
@@ -83,13 +93,6 @@ class LaravelProvider extends AbstractServiceProvider
         $paths = config('view.paths');
         array_unshift($paths, $this->basePath('views'));
         config(['view.paths' => $paths]);
-
-        /**
-         * 配置
-         */
-        $this->app->singleton('setting', function () {
-            return new RemoteSettingRepository();
-        });
 
         $this->mergeConfig();
 
