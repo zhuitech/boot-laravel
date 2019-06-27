@@ -39,7 +39,7 @@ abstract class RestController extends Controller
      * 版本
      * @var int
      */
-    protected $version = 1;
+    protected $version = 2;
 
     /**
      * 资源仓库
@@ -72,7 +72,7 @@ abstract class RestController extends Controller
     {
         $this->repository = $repository;
         $this->fractal = resolve(Manager::class);
-        $this->version = env('REST_VERSION', 1);
+        $this->version = env('REST_VERSION', 2);
     }
 
     /**
