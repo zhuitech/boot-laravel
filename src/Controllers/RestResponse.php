@@ -8,6 +8,11 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
+use League\Fractal\TransformerAbstract;
 use ZhuiTech\BootLaravel\Helpers\Restful;
 
 /**
@@ -17,11 +22,6 @@ use ZhuiTech\BootLaravel\Helpers\Restful;
  */
 trait RestResponse
 {
-    /* -----------------------------------------------------------------
-     |  Restfull result output methods
-     | -----------------------------------------------------------------
-     */
-
     /**
      * API 返回数据
      *
@@ -71,5 +71,35 @@ trait RestResponse
     protected function fail($message = NULL, $data = [])
     {
         return self::api($data, false, REST_FAIL, $message);
+    }
+
+    /**
+     * 转换列表数据
+     *
+     * @param $list
+     * @param TransformerAbstract $transformer
+     * @return Collection
+     */
+    protected function transformList($list, TransformerAbstract $transformer)
+    {
+        if ($list instanceof LengthAwarePaginator) {
+            $resource = new Collection($list->getCollection(), $transformer, 'data');
+            $resource->setPaginator(new IlluminatePaginatorAdapter($list));
+        } else {
+            $resource = new Collection($list, $transformer, 'data');
+        }
+
+        return $resource;
+    }
+
+    /**转换数据
+     *
+     * @param $item
+     * @param TransformerAbstract $transformer
+     * @return Item
+     */
+    protected function transformItem($item, TransformerAbstract $transformer)
+    {
+        return new Item($item, $transformer, 'data');
     }
 }

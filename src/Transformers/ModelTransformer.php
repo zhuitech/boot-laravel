@@ -10,9 +10,19 @@ use League\Fractal\TransformerAbstract;
  */
 class ModelTransformer extends TransformerAbstract
 {
-    protected $excepts = ['created_at', 'updated_at', 'deleted_at'];
+    protected $excepts = [];
 
     protected $only = [];
+
+    /**
+     * 默认排除项
+     *
+     * @return array
+     */
+    protected function defaultExcepts()
+    {
+        return ['updated_at', 'deleted_at'];
+    }
 
     /**
      * 转换模型
@@ -22,12 +32,17 @@ class ModelTransformer extends TransformerAbstract
      */
     public function transform(Model $model)
     {
-        $result = $this->execTransform($model);
+        if (method_exists($this, 'execTransform')) {
+            $result = call_user_func(array($this, 'execTransform'), $model);
+        } else {
+            $result = $model->toArray();
+        }
 
         if (!empty($this->only)) {
             $result = array_only($result, $this->only);
         } else {
-            $result = array_except($result, $this->excepts);
+            $excepts = array_merge($this->excepts, $this->defaultExcepts());
+            $result = array_except($result, $excepts);
         }
 
         // 转换 null 字段为空字符串
@@ -37,18 +52,6 @@ class ModelTransformer extends TransformerAbstract
             }
         }
 
-        return $result;
-    }
-
-    /**
-     * 执行转换
-     *
-     * @param Model $model
-     * @return array
-     */
-    protected function execTransform(Model $model)
-    {
-        $result = $model->toArray();
         return $result;
     }
 }

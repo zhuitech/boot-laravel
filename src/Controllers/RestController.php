@@ -54,11 +54,6 @@ abstract class RestController extends Controller
     protected $formClass = Request::class;
 
     /**
-     * @var Manager
-     */
-    protected $fractal;
-
-    /**
      * 转化器类
      * @var string
      */
@@ -71,7 +66,6 @@ abstract class RestController extends Controller
     public function __construct(BaseRepository $repository)
     {
         $this->repository = $repository;
-        $this->fractal = resolve(Manager::class);
 
         if (empty($this->version)) {
             $this->version = env('REST_VERSION', 2);
@@ -122,34 +116,6 @@ abstract class RestController extends Controller
 
     }
 
-    /**
-     * 转换列表数据
-     *
-     * @param $list
-     * @return Collection
-     */
-    protected function transformList($list)
-    {
-        if ($list instanceof LengthAwarePaginator) {
-            $resource = new Collection($list->getCollection(), new $this->transformer, 'data');
-            $resource->setPaginator(new IlluminatePaginatorAdapter($list));
-        } else {
-            $resource = new Collection($list, new $this->transformer, 'data');
-        }
-
-        return $resource;
-    }
-
-    /**转换数据
-     *
-     * @param $item
-     * @return Item
-     */
-    protected function transformItem($item)
-    {
-        return new Item($item, new $this->transformer, 'data');
-    }
-
     // CRUD ************************************************************************************************************
 
     /**
@@ -167,7 +133,7 @@ abstract class RestController extends Controller
 
         // v2 使用 transformer
         if ($this->version == 2) {
-            $result = $this->transformList($result);
+            $result = $this->transformList($result, new $this->transformer);
         }
 
         return $this->success($result);
@@ -195,7 +161,7 @@ abstract class RestController extends Controller
 
         // v2 使用 transformer
         if ($this->version == 2) {
-            $result = $this->transformItem($result);
+            $result = $this->transformItem($result, new $this->transformer);
         }
 
         // 找到了
@@ -366,7 +332,7 @@ abstract class RestController extends Controller
 
         // v2 使用 transformer
         if ($this->version == 2) {
-            $result = $this->transformItem($result);
+            $result = $this->transformItem($result, new $this->transformer);
         }
 
         // 找到了
