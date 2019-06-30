@@ -132,7 +132,8 @@ abstract class BaseRepository extends Repository
     public function paginate($perPage = 25, $columns = array('*'))
     {
         $this->applyCriteria();
-        return $this->model->paginate($perPage, $columns, '_page');
+
+        return $this->model->paginate($perPage, $columns, request()->has('_page') ? '_page' : 'page');
     }
 
     /**
