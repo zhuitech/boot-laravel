@@ -1,7 +1,8 @@
 <?php
 namespace ZhuiTech\BootLaravel\Transformers;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -25,17 +26,22 @@ class ModelTransformer extends TransformerAbstract
     }
 
     /**
-     * 转换模型
+     * 转换
      *
-     * @param Model $model
+     * @param $data
      * @return array
      */
-    public function transform(Model $model)
+    public function transform($data)
     {
+        $result =[];
         if (method_exists($this, 'execTransform')) {
-            $result = call_user_func(array($this, 'execTransform'), $model);
-        } else {
-            $result = $model->toArray();
+            $result = call_user_func(array($this, 'execTransform'), $data);
+        } elseif ($data instanceof Arrayable) {
+            $result = $data->toArray();
+        } elseif (is_array($data)) {
+            $result = $data;
+        } elseif (is_object($data)) {
+            $result = (array) $data;
         }
 
         if (!empty($this->only)) {
@@ -53,5 +59,44 @@ class ModelTransformer extends TransformerAbstract
         }
 
         return $result;
+    }
+
+    protected function includeItem($data, TransformerAbstract $transformer = NULL)
+    {
+        if (!empty($data)) {
+            if (empty($transformer)) {
+                $transformer = $this->detectTransformer($data);
+            }
+            return $this->item($data, $transformer);
+        }
+    }
+
+    protected function includeCollection($data, TransformerAbstract $transformer = NULL)
+    {
+        if (!empty($data)) {
+            if (empty($transformer)) {
+                $item = [];
+                if (is_array($data)) {
+                    $item = array_first($data);
+                } elseif ($data instanceof Collection) {
+                    $item = $data->first();
+                }
+                $transformer = $this->detectTransformer($item);
+            }
+            return $this->collection($data, $transformer);
+        }
+    }
+
+    protected function detectTransformer($data)
+    {
+        if (is_object($data)) {
+            $class = get_class($data);
+            if (property_exists($class, 'defaultTransformer')) {
+                $defaultTransformer = $class::$defaultTransformer;
+                return new $defaultTransformer;
+            }
+        }
+
+        return new static();
     }
 }
