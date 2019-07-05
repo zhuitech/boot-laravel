@@ -132,7 +132,7 @@ abstract class RestController extends Controller
         $result = $this->execIndex($data);
 
         // v2 使用 transformer
-        if ($this->version == 2) {
+        if ($this->version >= 2) {
             $result = $this->transformList($result, new $this->transformer);
         }
 
@@ -160,7 +160,7 @@ abstract class RestController extends Controller
         $result = $this->execShow($id);
 
         // v2 使用 transformer
-        if ($this->version == 2) {
+        if ($this->version >= 2) {
             $result = $this->transformItem($result, new $this->transformer);
         }
 
@@ -331,7 +331,7 @@ abstract class RestController extends Controller
         }
 
         // v2 使用 transformer
-        if ($this->version == 2) {
+        if ($this->version >= 2) {
             $result = $this->transformItem($result, new $this->transformer);
         }
 
