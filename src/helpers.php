@@ -6,6 +6,9 @@
  * Time: 18:05
  */
 
+use League\Fractal\Manager;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use Overtrue\LaravelUploader\Events\FileUploaded;
 use Overtrue\LaravelUploader\Events\FileUploading;
 use Overtrue\LaravelUploader\Services\FileUpload;
@@ -123,5 +126,25 @@ if (! function_exists('yuan')) {
     function yuan($amount)
     {
         return number_format($amount / 100, 2, ".", "");
+    }
+}
+
+if (! function_exists('transform_item')) {
+    function transform_item($item, \League\Fractal\TransformerAbstract $transformer)
+    {
+        $data = new Item($item, $transformer);
+
+        $fractal = resolve(Manager::class);
+        return $fractal->createData($data)->toArray();
+    }
+}
+
+if (! function_exists('transform_list')) {
+    function transform_list($list, \League\Fractal\TransformerAbstract $transformer)
+    {
+        $data = new Collection($list, $transformer);
+
+        $fractal = resolve(Manager::class);
+        return $fractal->createData($data)->toArray();
     }
 }
