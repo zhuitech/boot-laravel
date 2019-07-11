@@ -44,6 +44,7 @@ abstract class SubRestController extends RestController
      * SubRestController constructor.
      * @param BaseRepository $repository
      * @param BaseRepository $parents
+     * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
      */
     public function __construct(BaseRepository $repository, BaseRepository $parents)
     {

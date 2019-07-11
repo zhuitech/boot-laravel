@@ -39,6 +39,7 @@ class MyRestController extends RestController
     /**
      * MyRestController constructor.
      * @param BaseRepository $repository
+     * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
      */
     public function __construct(BaseRepository $repository)
     {

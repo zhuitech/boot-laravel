@@ -22,6 +22,7 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
+use ZhuiTech\BootLaravel\Repositories\ModelRepository;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
 use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 
@@ -60,12 +61,23 @@ abstract class RestController extends Controller
     protected $transformer;
 
     /**
+     * 模型类
+     * @var
+     */
+    protected $model;
+
+    /**
      * RestController constructor.
      * @param BaseRepository $repository
+     * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
      */
     public function __construct(BaseRepository $repository)
     {
         $this->repository = $repository;
+
+        if (empty($repository->model())) {
+            $repository->setModel($this->model);
+        }
 
         if (empty($this->version)) {
             $this->version = env('REST_VERSION', 2);

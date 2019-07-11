@@ -2,9 +2,13 @@
 namespace ZhuiTech\BootLaravel\Repositories;
 
 use Bosnadev\Repositories\Eloquent\Repository;
+use Bosnadev\Repositories\Exceptions\RepositoryException;
+use Illuminate\Container\Container as App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Support\Collection;
+use phpDocumentor\Reflection\Types\Null_;
 use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 
 /**
@@ -13,12 +17,55 @@ use ZhuiTech\BootLaravel\Exceptions\RestFailException;
  * Class BaseRepository
  * @package ZhuiTech\BootLaravel\Repositories
  */
-abstract class BaseRepository extends Repository
+class BaseRepository extends Repository
 {
     /**
      * @var \Eloquent
      */
     protected $model;
+
+    /**
+     * @var string
+     */
+    protected $modelClass;
+
+    /**
+     * Specify Model class name
+     *
+     * @return mixed
+     */
+    public function model()
+    {
+        return $this->modelClass;
+    }
+
+    /**
+     * 设置新的模型
+     *
+     * @param $eloquentModel
+     * @return Model
+     * @throws RepositoryException
+     */
+    public function setModel($eloquentModel)
+    {
+        if (empty($eloquentModel)) {
+            return null;
+        }
+
+        $this->modelClass = $eloquentModel;
+
+        return parent::setModel($eloquentModel);
+    }
+
+    /**
+     * 获取空白Model
+     *
+     * @return \Eloquent
+     */
+    public function newModel()
+    {
+        return $this->newModel;
+    }
 
     /**
      * 重新设置查询范围
@@ -31,16 +78,6 @@ abstract class BaseRepository extends Repository
         $this->makeModel();
         parent::resetScope();
         return $this;
-    }
-
-    /**
-     * 获取空白Model
-     *
-     * @return \Eloquent
-     */
-    public function newModel()
-    {
-        return $this->newModel;
     }
 
     /**
