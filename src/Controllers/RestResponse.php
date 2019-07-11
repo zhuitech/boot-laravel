@@ -80,8 +80,12 @@ trait RestResponse
      * @param TransformerAbstract $transformer
      * @return Collection
      */
-    protected function transformList($list, TransformerAbstract $transformer)
+    protected function transformList($list, TransformerAbstract $transformer = NULL)
     {
+        if (empty($transformer)){
+            $transformer = new $this->transformer;
+        }
+
         if ($list instanceof LengthAwarePaginator) {
             $resource = new Collection($list->getCollection(), $transformer, 'data');
             $resource->setPaginator(new IlluminatePaginatorAdapter($list));
@@ -98,8 +102,12 @@ trait RestResponse
      * @param TransformerAbstract $transformer
      * @return Item
      */
-    protected function transformItem($item, TransformerAbstract $transformer)
+    protected function transformItem($item, TransformerAbstract $transformer = NULL)
     {
+        if (empty($transformer)){
+            $transformer = new $this->transformer;
+        }
+
         return new Item($item, $transformer, 'data');
     }
 }

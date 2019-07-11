@@ -67,10 +67,8 @@ class User extends Authenticatable
         }
 
         // 处理返回结果
-        $this->data = Restful::handle($result,
-            function ($data, $message, $code) {
-                // success
-                return $data;
-            });
+        if ($result['status'] === true) {
+            $this->data = $result['data'];
+        }
     }
 }

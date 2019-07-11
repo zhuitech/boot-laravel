@@ -57,7 +57,7 @@ abstract class RestController extends Controller
      * 转化器类
      * @var string
      */
-    protected $transformer = ModelTransformer::class;
+    protected $transformer;
 
     /**
      * RestController constructor.
@@ -69,6 +69,10 @@ abstract class RestController extends Controller
 
         if (empty($this->version)) {
             $this->version = env('REST_VERSION', 2);
+        }
+
+        if (empty($this->transformer)) {
+            $this->transformer = ModelTransformer::defaultTransformer($repository->newModel());
         }
     }
 
@@ -133,7 +137,7 @@ abstract class RestController extends Controller
 
         // v2 使用 transformer
         if ($this->version >= 2) {
-            $result = $this->transformList($result, new $this->transformer);
+            $result = $this->transformList($result);
         }
 
         return $this->success($result);
@@ -161,7 +165,7 @@ abstract class RestController extends Controller
 
         // v2 使用 transformer
         if ($this->version >= 2) {
-            $result = $this->transformItem($result, new $this->transformer);
+            $result = $this->transformItem($result);
         }
 
         // 找到了
@@ -332,7 +336,7 @@ abstract class RestController extends Controller
 
         // v2 使用 transformer
         if ($this->version >= 2) {
-            $result = $this->transformItem($result, new $this->transformer);
+            $result = $this->transformItem($result);
         }
 
         // 找到了

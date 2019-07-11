@@ -51,7 +51,9 @@ class Restful
     }
 
     /**
+     * @deprecated
      * 处理结果
+     *
      * @param $result
      * @param callable|NULL $success
      * @param callable|NULL $fail

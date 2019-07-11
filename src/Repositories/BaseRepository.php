@@ -22,6 +22,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 重新设置查询范围
+     *
      * @return $this
      * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
      */
@@ -34,6 +35,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 获取空白Model
+     *
      * @return \Eloquent
      */
     public function newModel()
@@ -43,6 +45,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 设置范围
+     *
      * @param $query
      * @return $this
      */
@@ -58,6 +61,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * Only Trashed
+     *
      * @return $this
      */
     public function onlyTrashed()
@@ -67,7 +71,9 @@ abstract class BaseRepository extends Repository
     }
 
     /**
+     * @deprecated
      * Join parent
+     *
      * @param Model $model
      * @param $foreignKey
      * @return $this
@@ -82,7 +88,9 @@ abstract class BaseRepository extends Repository
     }
 
     /**
+     * @deprecated
      * Join parent
+     *
      * @param Model $model
      * @param $foreignKey
      * @return $this
@@ -98,6 +106,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * Join relationship table
+     *
      * @param $relationName
      * @return $this
      */
@@ -125,6 +134,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 分页查询
+     *
      * @param int $perPage
      * @param array $columns
      * @return mixed
@@ -138,6 +148,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 统计总数
+     *
      * @return int
      */
     public function count()
@@ -148,6 +159,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 获取结果
+     *
      * @param $options
      * @return mixed
      */
@@ -169,6 +181,7 @@ abstract class BaseRepository extends Repository
 
     /**
      * 快捷查询，使用默认scope方法
+     *
      * @param $query
      * @return mixed
      */

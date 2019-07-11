@@ -3,6 +3,7 @@ namespace ZhuiTech\BootLaravel\Transformers;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -65,8 +66,10 @@ class ModelTransformer extends TransformerAbstract
     {
         if (!empty($data)) {
             if (empty($transformer)) {
-                $transformer = $this->detectTransformer($data);
+                $class = self::defaultTransformer($data);
+                $transformer = new $class;
             }
+
             return $this->item($data, $transformer);
         }
     }
@@ -81,22 +84,33 @@ class ModelTransformer extends TransformerAbstract
                 } elseif ($data instanceof Collection) {
                     $item = $data->first();
                 }
-                $transformer = $this->detectTransformer($item);
+
+                $class = self::defaultTransformer($item);
+                $transformer = new $class;
             }
+
             return $this->collection($data, $transformer);
         }
     }
 
-    protected function detectTransformer($data)
+    public static function defaultTransformer($data)
     {
         if (is_object($data)) {
             $class = get_class($data);
+
+            // Model类指定的默认转化器
             if (property_exists($class, 'defaultTransformer')) {
-                $defaultTransformer = $class::$defaultTransformer;
-                return new $defaultTransformer;
+                return $class::$defaultTransformer;
+            }
+
+            // 根据命名规则找到默认转化器
+            $transformerClass = Str::replaceFirst('Models', 'Transformers', $class) . 'Transformer';
+            if (class_exists($transformerClass)) {
+                return $transformerClass;
             }
         }
 
-        return new static();
+        // 通用转化器
+        return self::class;
     }
 }
