@@ -16,6 +16,27 @@ namespace ZhuiTech\BootLaravel\Controllers;
 class MySingleRestController extends MyRestController
 {
     /**
+     * Retrive a list of objects
+     * GET	    /photos
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $this->prepare();
+
+        $data = request()->all();
+        $result = $this->execIndex($data);
+
+        // v2 使用 transformer
+        if ($this->version >= 2) {
+            $result = $this->transformItem($result);
+        }
+
+        return $this->success($result);
+    }
+
+    /**
      * 只返回一个
      * @param $data
      * @return mixed
