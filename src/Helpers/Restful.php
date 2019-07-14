@@ -39,7 +39,7 @@ class Restful
 
         if ($data instanceof ResourceAbstract) {
             $fractal = resolve(Manager::class);
-            $fractal->parseIncludes(request('include', ''));
+            $fractal->parseIncludes(request('_include', ''));
             $result += $fractal->createData($data)->toArray();
         } else {
             $result += [

@@ -40,7 +40,7 @@ class QueryCriteria extends Criteria
         $or = $this->query['_or'] ?? false;
         $boolean = $or ? 'or' : 'and';
         $limit = $this->query['_limit'] ?? null;
-        $wheres = array_except($this->query, ['_order', '_or', '_limit', '_size', '_column', 'page', '_page']);
+        $wheres = array_except($this->query, ['_order', '_or', '_limit', '_size', '_column', 'page', '_page', '_include']);
 
         // Where
         foreach ($wheres as $field => $value) {
