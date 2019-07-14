@@ -30,6 +30,13 @@ class BaseRepository extends Repository
     protected $modelClass;
 
     /**
+     * 允许同时使用同类型的条件
+     *
+     * @var bool
+     */
+    protected $preventCriteriaOverwriting = false;
+
+    /**
      * Specify Model class name
      *
      * @return mixed
