@@ -17,7 +17,7 @@ use Bosnadev\Repositories\Contracts\RepositoryInterface;
  * Class SimpleCriteria
  * @package ZhuiTech\BootLaravel\Repositories
  */
-class ClosureCriteria extends Criteria
+class GroupCriteria extends Criteria
 {
     /**
      * @var Closure
