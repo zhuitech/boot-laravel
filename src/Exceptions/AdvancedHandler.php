@@ -125,6 +125,7 @@ class AdvancedHandler extends ExceptionHandler
             'status' => false,
             'code' => $code,
             'message' => $errors[$code],
+            'data' => '',
             'request' => request()->fullUrl()
         ];
     }
