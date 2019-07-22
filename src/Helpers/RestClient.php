@@ -9,6 +9,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Models\User;
 
 /**
@@ -299,6 +300,8 @@ class RestClient
             }
 
             return Restful::format($data, false, REST_REMOTE_FAIL);
+        } catch (\Exception $e) {
+            throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
         }
     }
 
