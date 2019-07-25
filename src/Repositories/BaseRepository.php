@@ -7,6 +7,7 @@ use Illuminate\Container\Container as App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use phpDocumentor\Reflection\Types\Null_;
 use ZhuiTech\BootLaravel\Exceptions\RestFailException;
