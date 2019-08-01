@@ -16,6 +16,8 @@ class ModelTransformer extends TransformerAbstract
 
     protected $only = [];
 
+    protected $casts = [];
+
     /**
      * 默认排除项
      *
@@ -45,6 +47,22 @@ class ModelTransformer extends TransformerAbstract
             $result = (array) $data;
         }
 
+        // 转换字段
+        foreach ($this->casts as $field => $caster) {
+            if (isset($result[$field])) {
+                $value = $result[$field];
+
+                if (function_exists($caster)) {
+                    $value = $caster($result[$field]);
+                } elseif (method_exists($this, $caster)) {
+                    $value = call_user_func(array($this, $caster), $result[$field]);
+                }
+
+                $result[$field] = $value;
+            }
+        }
+
+        // 筛选字段
         if (!empty($this->only)) {
             $result = array_only($result, $this->only);
         } else {
@@ -52,7 +70,7 @@ class ModelTransformer extends TransformerAbstract
             $result = array_except($result, $excepts);
         }
 
-        // 转换 null 字段为空字符串
+        // 统一NULL为空字符串
         foreach (array_keys($result) as $key) {
             if (is_null($result[$key])) {
                 $result[$key] = '';
