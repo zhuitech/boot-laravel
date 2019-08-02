@@ -9,7 +9,6 @@
         }
     ],
     "require": {
-        "doctrine/dbal": "^2.5",
         "bosnadev/repositories": "^0.13.0",
         "paragonie/random_compat": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
