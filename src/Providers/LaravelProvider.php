@@ -18,6 +18,7 @@ use ZhuiTech\BootLaravel\Providers\PackageServiceProvider;
 use ZhuiTech\BootLaravel\Providers\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
+use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 use ZhuiTech\BootLaravel\Transformers\ArraySerializer;
 
 /**
@@ -77,15 +78,20 @@ class LaravelProvider extends AbstractServiceProvider
          */
         $this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
 
+        // 配置
         $this->app->singleton('setting', function () {
             return new RemoteSettingRepository();
         });
 
+        // Transformer
         $this->app->bind(Manager::class, function (){
             $manager = new Manager();
             $manager->setSerializer(new ArraySerializer());
             return $manager;
         });
+
+        // 定时任务
+        $this->app->singleton(ScheduleRegistry::class);
 
         /**
          * 默认视图
