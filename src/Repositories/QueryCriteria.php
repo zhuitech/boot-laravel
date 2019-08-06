@@ -11,6 +11,8 @@ namespace ZhuiTech\BootLaravel\Repositories;
 use Bosnadev\Repositories\Criteria\Criteria;
 use Illuminate\Database\Eloquent\Model;
 use Bosnadev\Repositories\Contracts\RepositoryInterface;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 
 /**
  * Class QueryCriteria
@@ -44,7 +46,7 @@ class QueryCriteria extends Criteria
 
         // Where
         foreach ($wheres as $field => $value) {
-            $field = $this->convert($field);
+            $field = $this->qualified($field, $repository);
             if (is_array($value)) {
                 foreach ($value as $operator => $search) {
                     if ($operator == 'null') {
@@ -63,7 +65,7 @@ class QueryCriteria extends Criteria
         // Order
         if (!empty($orders)){
             foreach ($orders as $field => $order) {
-                $field = $this->convert($field);
+                $field = $this->qualified($field, $repository);
                 $model = $model->orderBy($field, $order);
             }
         }
@@ -76,8 +78,29 @@ class QueryCriteria extends Criteria
         return $model;
     }
 
-    private function convert($field)
+    private function qualified($field, RepositoryInterface $repository)
     {
-        return str_replace('!', '.', $field);
+        if ($repository instanceof BaseRepository) {
+            $model = $repository->newModel();
+
+            if (str_contains($field, '!')) {
+                [$relationName, $field] = explode('!', $field);
+
+                // 替换关联表名
+                if (method_exists($model, $relationName)) {
+                    $relation = $model->$relationName();
+
+                    if ($relation instanceof Relation) {
+                        $field = $relation->getModel()->getTable() . '!' . $field;
+                    }
+                }
+
+                // 替换分隔符
+                return str_replace('!', '.', $field);
+            } else {
+                // 添加主表名
+                return $model->getTable() . '.' . $field;
+            }
+        }
     }
 }
