@@ -108,6 +108,10 @@ trait RestResponse
             $transformer = new $this->transformer;
         }
 
-        return new Item($item, $transformer, 'data');
+        if (!empty($item)) {
+            return new Item($item, $transformer, 'data');
+        }
+        
+        return null;
     }
 }
