@@ -359,7 +359,7 @@ class RestClient
         if (empty($this->logger) && !empty($this->logName)) {
             $logName = $this->logName;
             if (app()->runningInConsole()) {
-                $logName = 'console-'.$logName;
+                $logName = $logName . '-console';
             }
 
             $this->logger = with(new \Monolog\Logger(app()->environment()))->pushHandler(
