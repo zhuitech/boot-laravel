@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "barryvdh/laravel-cors": "^0.10",
+        "barryvdh/laravel-cors": "^0.11",
         "bosnadev/repositories": "^0.13.0",
         "paragonie/random_compat": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
