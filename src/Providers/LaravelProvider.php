@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\Passport;
 use League\Fractal\Manager;
 use Symfony\Component\HttpKernel\HttpKernel;
+use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Console\Commands\ProfileInstall;
 use ZhuiTech\BootLaravel\Console\Commands\ProfileList;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
@@ -35,12 +36,7 @@ class LaravelProvider extends AbstractServiceProvider
     ];
 
     protected $commands = [
-        ProfileInstall::class,
-        ProfileList::class
-    ];
-
-    protected $installers = [
-        SettingsInstaller::class
+        PassportInstall::class
     ];
 
     /**
