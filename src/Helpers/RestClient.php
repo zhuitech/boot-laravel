@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Models\User;
+use ZhuiTech\BootLaravel\Models\UserContract;
 
 /**
  * Restful客户端
@@ -54,7 +55,7 @@ class RestClient
 
     /**
      * 模拟用户
-     * @var User
+     * @var UserContract
      */
     protected $user = NULL;
 
@@ -71,6 +72,14 @@ class RestClient
     protected $logger = NULL;
 
     /**
+     * 返回原始内容
+     * @var bool
+     */
+    protected $plain = false;
+
+    /*Fluent***********************************************************************************************************/
+
+    /**
      * 返回一个新实例
      * @param $server
      * @return $this
@@ -78,6 +87,8 @@ class RestClient
     public static function server($server = NULL)
     {
         $instance = new static();
+
+        // 当前用户
         $instance->user = Auth::user();
 
         if (!empty($server)) {
@@ -114,10 +125,11 @@ class RestClient
 
     /**
      * 以用户身份请求
-     * @param User $user
+     *
+     * @param UserContract $user
      * @return $this
      */
-    public function as(User $user)
+    public function as(UserContract $user)
     {
         $this->user = $user;
         return $this;
@@ -125,6 +137,7 @@ class RestClient
 
     /**
      * 记录到日志
+     *
      * @param $name
      * @return $this
      */
@@ -133,6 +146,20 @@ class RestClient
         $this->logName = $name;
         return $this;
     }
+
+    /**
+     * 原样返回
+     *
+     * @param bool $plain
+     * @return $this
+     */
+    public function plain($plain = true)
+    {
+        $this->plain = $plain;
+        return $this;
+    }
+
+    /*Request**********************************************************************************************************/
 
     /**
      * GET request.
@@ -255,21 +282,38 @@ class RestClient
         $method = strtoupper($method);
         $options = array_merge($this->defaults, $options);
 
-        // 传递请求头信息
+        // 设置语言
+        $headers = [];
+        $headers['X-Language'] = app()->getLocale();
+
+        // 设置访问用户
+        if (!empty($this->user) && $this->user instanceof UserContract) {
+            $headers['X-User'] = $this->user->getAuthId();
+            $headers['X-User-Type'] = $this->user->getAuthType();
+        }
+
+        // 设置真实IP
         if (!app()->runningInConsole()) {
-            foreach (['X-User', 'X-User-Type', 'X-Language'] as $key) {
-                if (Request::hasHeader($key)) {
-                    $options['headers'][$key] = Request::header($key);
+            foreach (['X-FORWARDED-PROTO', 'X-FORWARDED-PORT', 'X-FORWARDED-HOST', 'X-FORWARDED-FOR'] as $item) {
+                if (Request::hasHeader($item)) {
+                    $headers[$item] = Request::header($item);
                 }
             }
         }
 
+        $options['headers'] = $headers + $options['headers'];
+
         try {
             $response = $this->getClient()->request($method, $url, $options);
             $content = (string) $response->getBody();
-            $result = json_decode($content, true);
 
-            // 处理JSON解析失败
+            // 返回原始
+            if ($this->plain) {
+                return $content;
+            }
+
+            // 返回JSON
+            $result = json_decode($content, true);
             if (JSON_ERROR_NONE !== json_last_error()) {
                 return Restful::format(
                     [
@@ -305,6 +349,8 @@ class RestClient
         }
     }
 
+    /*Helper***********************************************************************************************************/
+
     /**
      * Return GuzzleHttp\Client instance.
      *
@@ -338,7 +384,6 @@ class RestClient
             return $path;
         }
 
-        $prefix = '';
         if (str_contains($this->server, '://')) {
             $prefix = $this->server;
         }
@@ -359,7 +404,7 @@ class RestClient
         if (empty($this->logger) && !empty($this->logName)) {
             $logName = $this->logName;
             if (app()->runningInConsole()) {
-                $logName = $logName . '-console';
+                $logName = 'console-'.$logName;
             }
 
             $this->logger = with(new \Monolog\Logger(app()->environment()))->pushHandler(

@@ -16,6 +16,7 @@ use Illuminate\Support\Arr;
 
 /**
  * 微服务
+ *
  * Class MicroServiceProvider
  * @package ZhuiTech\BootLaravel\Providers
  */
@@ -31,13 +32,10 @@ class MicroServiceProvider extends AbstractServiceProvider
                 $id = $request->header('X-User');
                 $type = $request->header('X-User-Type', 'members');
 
-                if ($id && $type) {
-                    $scopes = $request->header('X-Token-Scopes');
+                if ($id) {
                     return new User([
                         'id' => $id,
                         'type' => $type,
-                        'scopes' => $scopes ? explode(',', $scopes) : null,
-                        'ip' => $request->header('X-Client-Ip'),
                     ]);
                 }
             }, $this->app['request']);
