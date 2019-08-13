@@ -2,7 +2,9 @@
 
 namespace ZhuiTech\BootLaravel\Helpers;
 
+use Exception;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
@@ -167,7 +169,6 @@ class RestClient
      * @param $url
      * @param array $queries
      * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function get($url, array $queries = [])
     {
@@ -183,7 +184,6 @@ class RestClient
      * @param array $data
      * @param array $queries
      * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function post($url, $data = [], $queries = [])
     {
@@ -200,7 +200,6 @@ class RestClient
      * @param array $data
      * @param array $queries
      * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function put($url, $data = [], $queries = [])
     {
@@ -217,7 +216,6 @@ class RestClient
      * @param array $data
      * @param array $queries
      * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function delete($url, $data = [], $queries = [])
     {
@@ -235,7 +233,6 @@ class RestClient
      * @param array $form
      * @param array $queries
      * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function upload($url, array $files = [], array $form = [], array $queries = [])
     {
@@ -274,7 +271,7 @@ class RestClient
      * @param string $method
      * @param array $options
      * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws RestCodeException
      */
     public function request($path, $method = 'GET', $options = [])
     {
@@ -344,7 +341,9 @@ class RestClient
             }
 
             return Restful::format($data, false, REST_REMOTE_FAIL);
-        } catch (\Exception $e) {
+        } catch (GuzzleException $e) {
+            throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
+        } catch (Exception $e) {
             throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
         }
     }
