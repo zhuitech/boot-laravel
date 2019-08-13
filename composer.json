@@ -9,6 +9,7 @@
         }
     ],
     "require": {
+        "league/fractal": "^0.17.0",
         "barryvdh/laravel-cors": "^0.11",
         "bosnadev/repositories": "^0.13.0",
         "paragonie/random_compat": "^2.0",

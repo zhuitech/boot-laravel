@@ -33,10 +33,10 @@ class MicroServiceProvider extends AbstractServiceProvider
                 $type = $request->header('X-User-Type', 'members');
 
                 if ($id) {
-                    return new User([
-                        'id' => $id,
-                        'type' => $type,
-                    ]);
+                    $user = new User();
+                    $user->id = $id;
+                    $user->type = $type;
+                    return $user;
                 }
             }, $this->app['request']);
         });
