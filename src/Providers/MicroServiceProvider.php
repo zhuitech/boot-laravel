@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
 use ZhuiTech\BootLaravel\Models\User;
+use Illuminate\Support\Arr;
 
 /**
  * 微服务
@@ -25,28 +26,12 @@ class MicroServiceProvider extends AbstractServiceProvider
         /**
          * 配置微服务授权
          */
-        Auth::extend('admins', function ($app, $name, array $config) {
-            return new RequestGuard(function (Request $request) use ($config) {
-                // 从网关传递的用户信息已经验证过，所以直接实例化
-                $id = $request->header('X-User');
-                $type = $request->header('X-User-Type');
-                if ($id && $type == 'admins') {
-                    $scopes = $request->header('X-Token-Scopes');
-                    return new User([
-                        'id' => $id,
-                        'type' => $type,
-                        'scopes' => $scopes ? explode(',', $scopes) : null,
-                        'ip' => $request->header('X-Client-Ip'),
-                    ]);
-                }
-            }, $this->app['request']);
-        });
         Auth::extend('members', function ($app, $name, array $config) {
             return new RequestGuard(function (Request $request) use ($config) {
-                // 从网关传递的用户信息已经验证过，所以直接实例化
                 $id = $request->header('X-User');
-                $type = $request->header('X-User-Type');
-                if ($id && $type == 'members') {
+                $type = $request->header('X-User-Type', 'members');
+
+                if ($id && $type) {
                     $scopes = $request->header('X-Token-Scopes');
                     return new User([
                         'id' => $id,
@@ -57,7 +42,8 @@ class MicroServiceProvider extends AbstractServiceProvider
                 }
             }, $this->app['request']);
         });
-        $auth = array_replace_recursive(config('auth'), [
+
+        $auth = [
             'defaults' => [
                 'guard' => 'members'
             ],
@@ -65,12 +51,9 @@ class MicroServiceProvider extends AbstractServiceProvider
                 'members' => [
                     'driver' => 'members',
                 ],
-                'admins' => [
-                    'driver' => 'admins',
-                ],
             ],
-        ]);
-        config(['auth' => $auth]);
+        ];
+        config(Arr::dot($auth, 'auth.'));
 
         parent::register();
     }
