@@ -66,5 +66,16 @@ return [
         REST_FILE_NOT_EXIST         => '文件不存在',
         REST_FILE_PATH_FAIL         => '文件路径生成失败',
         REST_FILE_STORE_FAIL        => '文件存储失败',
-    ]
+    ],
+
+    'route' => [
+        'api' => [
+            'prefix' => 'api',
+            'middleware' => ['api'],
+        ],
+        'web' => [
+            'prefix' => '',
+            'middleware' => ['web'],
+        ]
+    ],
 ];

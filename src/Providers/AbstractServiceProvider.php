@@ -212,17 +212,23 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
         else {
             $file = $this->basePath('routes/api.php');
             if (file_exists($file)) {
-                Route::prefix('api')->middleware('api')->group($file);
+                Route::prefix(config('boot-laravel.route.api.prefix'))
+                    ->middleware(config('boot-laravel.route.api.middleware'))
+                    ->group($file);
             }
 
             $file = $this->basePath('routes/web.php');
             if (file_exists($file)) {
-                Route::prefix('')->middleware('web')->group($file);
+                Route::prefix(config('boot-laravel.route.web.prefix'))
+                    ->middleware(config('boot-laravel.route.web.middleware'))
+                    ->group($file);
             }
 
             $file = $this->basePath('routes/admin.php');
             if (file_exists($file)) {
-                Route::prefix(config('admin.route.prefix'))->middleware(config('admin.route.middleware'))->group($file);
+                Route::prefix(config('admin.route.prefix'))
+                    ->middleware(config('admin.route.middleware'))
+                    ->group($file);
             }
 
             $this->app->booted(function () {
