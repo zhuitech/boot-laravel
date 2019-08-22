@@ -11,6 +11,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Symfony\Component\HttpFoundation\File\File;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Models\User;
 use ZhuiTech\BootLaravel\Models\UserContract;
@@ -236,24 +237,22 @@ class RestClient
      */
     public function upload($url, array $files = [], array $form = [], array $queries = [])
     {
-        $multipart = [];
+        return $this->postForm($url, $files + $form, $queries);
+    }
 
-        foreach ($files as $name => $file) {
-            $path = $file;
-            if ($file instanceof UploadedFile) {
-                $path = $file->path();
-            }
+    /**
+     * POST form
+     *
+     * @param $url
+     * @param array $form
+     * @param array $queries
+     * @return array|mixed
+     */
+    public function postForm($url, array $form = [], array $queries = [])
+    {
+        $multipart = $this->createMultipart($form);
 
-            $multipart[] = [
-                'name' => $name,
-                'contents' => fopen($path, 'r'),
-            ];
-        }
-
-        foreach ($form as $name => $contents) {
-            $multipart[] = compact('name', 'contents');
-        }
-
+        // 去除默认的内容类型
         $headers = $this->defaults['headers'];
         unset($headers['Content-Type']);
 
@@ -412,5 +411,45 @@ class RestClient
         }
 
         return $this->logger;
+    }
+
+    public function createMultipart(array $parameters, $prefix = '')
+    {
+        $return = [];
+        foreach ($parameters as $name => $value) {
+            $item = [
+                'name' => empty($prefix) ? $name : "{$prefix}[{$name}]",
+            ];
+
+            switch (true) {
+                    // 上传文件
+                case (is_object($value) && ($value instanceof UploadedFile)):
+                    $item['contents'] = fopen($value->getFilename(), 'r');
+                    $item['filename'] = $value->getClientOriginalName();
+                    $item['headers'] = [
+                        'content-type' => $value->getMimeType(),
+                    ];
+                    break;
+
+                    // 本地文件
+                case (is_string($value) && is_file($value)):
+                    $item['contents'] = fopen($value, 'r');
+                    break;
+
+                    // 数组
+                case is_array($value):
+                    $return = array_merge($return, $this->createMultipart($value, $item['name']));
+                    continue 2;
+
+                    // 文本
+                default:
+                    $item['contents'] = $value;
+                    break;
+            }
+
+            $return[] = $item;
+        }
+
+        return $return;
     }
 }
