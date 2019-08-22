@@ -8,12 +8,11 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
-use Symfony\Component\HttpFoundation\File\File;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
-use ZhuiTech\BootLaravel\Models\User;
 use ZhuiTech\BootLaravel\Models\UserContract;
 
 /**
@@ -79,6 +78,11 @@ class RestClient
      * @var bool
      */
     protected $plain = false;
+
+    /**
+     * @var Response
+     */
+    protected $response = null;
 
     /*Fluent***********************************************************************************************************/
 
@@ -300,8 +304,8 @@ class RestClient
         $options['headers'] = $headers + $options['headers'];
 
         try {
-            $response = $this->getClient()->request($method, $url, $options);
-            $content = (string) $response->getBody();
+            $this->response = $this->getClient()->request($method, $url, $options);
+            $content = (string) $this->response->getBody();
 
             // 返回原始
             if ($this->plain) {
@@ -317,7 +321,7 @@ class RestClient
                         'url' => $url,
                         'method' => $method,
                         'options' => $options,
-                        'status' => $response->getStatusCode(),
+                        'status' => $this->response->getStatusCode(),
                         'content' => $content
                     ], false, REST_DATA_JSON_FAIL
                 );
@@ -333,6 +337,8 @@ class RestClient
                 'options' => $options,
             ];
             if ($e->hasResponse()) {
+                $this->response = $e->getResponse();
+
                 $data += [
                     'status' => $e->getResponse()->getStatusCode(),
                     'content' => (string) $e->getResponse()->getBody()
@@ -451,5 +457,15 @@ class RestClient
         }
 
         return $return;
+    }
+
+    /**
+     * 返回原始响应对象
+     *
+     * @return Response
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 }
