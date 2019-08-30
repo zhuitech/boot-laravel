@@ -35,19 +35,11 @@ class ProxyClient extends RestClient
             }
         }
 
+        // 若包含文件，以multipart方式转发
         if (count($request->allFiles()) > 0) {
-            // 目前不支持同时上传文件和数据
             unset($options['headers']['Content-Type']);
             unset($options['body']);
-
-            $options['multipart'] = [];
-            foreach ($request->allFiles() as $key => $file) {
-                $options['multipart'][] = [
-                    'name' => $key,
-                    'contents' => fopen($file->getRealPath(), 'r'),
-                    'filename' => $file->getClientOriginalName()
-                ];
-            }
+            $options['multipart'] = $this->createMultipart($request->all());
         }
 
         $this->plain()->request($request->path(), $request->method(), $options);

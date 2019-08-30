@@ -26,39 +26,6 @@ if (! function_exists('relative_path')) {
     }
 }
 
-if (! function_exists('uploader_save')) {
-    /**
-     * 保存上传文件
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param string $strategy
-     * @return array|bool|null
-     * @throws Exception
-     */
-    function uploader_save(\Illuminate\Http\Request $request, $strategy = 'default')
-    {
-        $config = uploader_strategy($strategy);
-
-        $inputName = array_get($config, 'input_name', 'file');
-        $directory = array_get($config, 'directory', '{Y}/{m}/{d}');
-        $disk = array_get($config, 'disk', 'public');
-
-        if (!$request->hasFile($inputName)) {
-            throw new \Exception('文件不存在或为空');
-        }
-        $file = $request->file($inputName);
-
-        Event::fire(new FileUploading($file));
-
-        $result = app(FileUpload::class)->store($file, $disk, $directory);
-        if (!is_null($modified = Event::fire(new FileUploaded($file, $result, $strategy, $config), [], true))) {
-            $result = $modified;
-        }
-
-        return $result;
-    }
-}
-
 if (! function_exists('magic_replace')) {
     /**
      * 替换魔法变量
@@ -92,30 +59,6 @@ if (! function_exists('cdn')) {
     }
 }
 
-if (! function_exists('setting')) {
-    /**
-     * Get / set the specified settings value.
-     *
-     * If an array is passed as the key, we will assume you want to set an array of values.
-     *
-     * @param  array|string  $key
-     * @param  mixed  $default
-     * @return mixed|\Illuminate\Config\Repository
-     */
-    function setting($key = null, $default = null)
-    {
-        if (is_null($key)) {
-            return app('setting');
-        }
-
-        if (is_array($key)) {
-            return app('setting')->set($key);
-        }
-
-        return app('setting')->get($key, $default);
-    }
-}
-
 if (! function_exists('yuan')) {
     /**
      * 格式化以分为单位的金额
@@ -130,6 +73,13 @@ if (! function_exists('yuan')) {
 }
 
 if (! function_exists('transform_item')) {
+    /**
+     * 转换对象
+     *
+     * @param $item
+     * @param \League\Fractal\TransformerAbstract $transformer
+     * @return array
+     */
     function transform_item($item, \League\Fractal\TransformerAbstract $transformer)
     {
         $data = new Item($item, $transformer);
@@ -140,11 +90,38 @@ if (! function_exists('transform_item')) {
 }
 
 if (! function_exists('transform_list')) {
+    /**
+     * 转换集合
+     *
+     * @param $list
+     * @param \League\Fractal\TransformerAbstract $transformer
+     * @return array
+     */
     function transform_list($list, \League\Fractal\TransformerAbstract $transformer)
     {
         $data = new Collection($list, $transformer);
 
         $fractal = resolve(Manager::class);
         return $fractal->createData($data)->toArray();
+    }
+}
+
+if (! function_exists('morph_alias')) {
+    /**
+     * 获取别名
+     *
+     * @param $class
+     * @return string
+     */
+    function morph_alias($class)
+    {
+        $map = \Illuminate\Database\Eloquent\Relations\Relation::$morphMap;
+
+        foreach ($map as $alias => $fullname) {
+            if ($class == $fullname) {
+                return $alias;
+            }
+        }
+        return $class;
     }
 }
