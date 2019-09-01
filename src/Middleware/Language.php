@@ -20,7 +20,8 @@ class Language
      * @param Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next){
+    public function handle($request, Closure $next)
+    {
         $lang = $request->header('X-Language');
 
         if (!empty($lang)) {

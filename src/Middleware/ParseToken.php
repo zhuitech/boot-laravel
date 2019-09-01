@@ -19,7 +19,8 @@ class ParseToken
      * @param Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next){
+    public function handle($request, Closure $next)
+    {
         $raw = $request->bearerToken();
 
         if (!empty($raw)) {
