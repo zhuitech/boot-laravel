@@ -31,33 +31,34 @@ class Signature
     {
         $data = $request->input();
 
-        $required = Arr::only($data, ['client_id', 'signature', 'time']);
+        $required = Arr::only($data, ['_client', '_sign', '_time']);
         if (empty($required)) {
-            return $this->fail('请检查必要参数', [
-                'client_id' => '客户ID：从管理员获取',
-                'signature' => '签名算法：1.业务参数+time参数，去除对象，2.按参数名称字母升序，3.拼接成 querystring 字符串，4.在字符串后追加密钥，经过 md5 计算后转大写',
-                'time' => '当前时间：' . Carbon::now()->toDateTimeString(),
+            return $this->fail('Missing parameters', [
+                '_client' => '客户ID：从管理员获取',
+                '_sign' => '签名算法：1.业务参数去除对象，2.按参数名称字母升序，3.拼接成 querystring 字符串，4.在字符串后追加密钥进行MD5计算',
+                '_time' => '当前时间：' . Carbon::now()->toDateTimeString(),
             ]);
         }
 
-        $time = Carbon::parse($data['time']);
-        if ($time->diffInMinutes() > 5) {
-            return $this->fail('请求超时', [
-                'server_time' => Carbon::now()->toDateTimeString(),
+        $_time = Carbon::parse($data['_time']);
+        if ($_time->diffInMinutes() > 5) {
+            return $this->fail('Request timeout', [
+                'server' => Carbon::now()->toDateTimeString(),
+                '_time' => $data['_time'],
             ]);
         }
 
-        $client = DB::table('oauth_clients')->where('id', $data['client_id'])->first();
+        $client = DB::table('oauth_clients')->where('id', $data['_client'])->first();
         if (empty($client)) {
-            return $this->fail('客户ID不存在', [
-                'client_id' => $data['client_id'],
+            return $this->fail('Client not exist', [
+                '_client' => $data['_client'],
             ]);
         }
 
         // 1.
         $paras = [];
         foreach ($data as $key => $value) {
-            if (in_array($key, ['client_id', 'signature']) || is_array($value)) {
+            if (in_array($key, ['_client', '_sign']) || is_array($value)) {
                 continue;
             }
             $paras[$key] = $value;
@@ -70,11 +71,11 @@ class Signature
         $parameters = http_build_query($paras);
 
         // 4.
-        $signature = Str::upper(md5($parameters . $client->secret));
+        $_sign = md5($parameters . $client->secret);
 
-        if ($signature != $data['signature']) {
-            return $this->fail('签名错误', [
-                'parameters' => $parameters,
+        if ($_sign != $data['_sign']) {
+            return $this->fail('Wrong signature', [
+                'string' => $parameters,
             ]);
         }
 
