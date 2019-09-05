@@ -2,12 +2,13 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
-use Illuminate\Routing\Router;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
-use Illuminate\Foundation\AliasLoader;
+use ZhuiTech\BootLaravel\Helpers\MenuCollection;
+use ZhuiTech\BootLaravel\Helpers\MenuRegistry;
 
 /**
  * 基础服务提供类，封装了所有注册逻辑。
@@ -42,22 +43,10 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
     protected $facades = [];
 
     /**
-     * 注册数据库
-     * @var array
-     */
-    protected $migrations = [];
-
-    /**
      * 注册命令
      * @var array
      */
     protected $commands = [];
-
-    /**
-     * 注册配置目录
-     * @var array
-     */
-    protected $configures = [];
 
     /**
      * 错误代码
