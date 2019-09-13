@@ -46,6 +46,7 @@ class FileHelper
 
     /**
      * 获取新文件路径
+     * 
      * @param string $category
      * @param string $extension
      * @param string $dir
@@ -56,5 +57,17 @@ class FileHelper
         $filename = Str::random(8) . $extension;
         $path = self::formatDir("$category/$dir/$filename");
         return $path;
+    }
+
+    /**
+     * 获取文件目录
+     * 
+     * @param string $category
+     * @param string $dir
+     * @return string
+     */
+    public static function dir($category = 'files', $dir = '{Y}/{m}/{d}')
+    {
+        return self::formatDir("$category/$dir");
     }
 }

@@ -35,6 +35,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
         '_order' => ['id' => 'desc']
     ];
 
+    /**
+     * 是否启用缓存
+     * @var bool
+     */
+    protected $cache = true;
+
+    /**
+     * 缓存前缀
+     * @var string
+     */
+    protected $cache_prefix = 'Remote';
+
     # Model 复写 ########################################################################################################
 
     /**
@@ -49,6 +61,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
         // 处理返回结果
         if ($result['status'] === true) {
             $this->exists = false;
+            
+            // 更新缓存
+            \Cache::delete($this->itemCacheKey($this->getKey()));
         } else {
             throw new RestCodeException($result['code'], $result['data'], $result['message']);
         }
@@ -82,6 +97,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
             if ($result['status'] === true) {
                 $this->fireModelEvent('updated', false);
                 $this->syncChanges();
+
+                // 更新缓存
+                \Cache::delete($this->itemCacheKey($this->getKey()));
             } else {
                 throw new RestCodeException($result['code'], $result['data'], $result['message']);
             }
@@ -160,15 +178,27 @@ class Model extends \Illuminate\Database\Eloquent\Model
      */
     public function find($id, $columns = ['*'])
     {
+        $key = $this->itemCacheKey($id);
+        
+        // 查询缓存
+        if ($this->cache and $data = \Cache::get($key)) {
+            return $data;
+        }
+
         // 请求后端服务
         $result = RestClient::server($this->server)->get("{$this->resource}/{$id}");
 
         // 处理返回结果
         if ($result['status'] === true) {
-            return static::newFromBuilder($result['data']);
+            $data = static::newFromBuilder($result['data']);
+            
+            // 设置缓存
+            if ($this->cache) {
+                \Cache::put($key, $data);
+            }
         }
 
-        return null;
+        return $data ?? null;
     }
 
     /**
@@ -344,4 +374,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     # 辅助方法 ##########################################################################################################
+    
+    protected function itemCacheKey($id)
+    {
+        return implode('.', [$this->cache_prefix, class_basename($this), $id]);
+    }
 }

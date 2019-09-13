@@ -155,6 +155,10 @@ abstract class RestController extends Controller
         return $this->success($result);
     }
 
+    /**
+     * @param $data
+     * @return \Illuminate\Support\Collection
+     */
     protected function execIndex($data)
     {
         $result = $this->repository->query($data);

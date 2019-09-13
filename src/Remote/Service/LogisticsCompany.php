@@ -14,8 +14,14 @@ use ZhuiTech\BootLaravel\Remote\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  *
- * @deprecated 
  */
-class ShippingCompany extends LogisticsCompany
+class LogisticsCompany extends Model
 {
+    protected $server = 'service';
+    protected $resource = 'api/svc/logistics/companies';
+
+    protected $queries = [
+        '_limit' => -1,
+        '_order' => ['id' => 'asc']
+    ];
 }

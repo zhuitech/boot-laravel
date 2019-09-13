@@ -47,6 +47,8 @@ class LaravelProvider extends AbstractServiceProvider
          */
         $kernel = app(Kernel::class);
         $kernel->pushMiddleware(\ZhuiTech\BootLaravel\Middleware\Language::class);
+        
+        parent::loadRoutes();
 
         parent::boot();
     }
