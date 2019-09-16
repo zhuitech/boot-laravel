@@ -61,9 +61,7 @@ class LaravelProvider extends AbstractServiceProvider
      */
     public function register()
     {
-        /**
-         * 注册容器对象
-         */
+        // 异常处理
         $this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
 
         // 配置
@@ -81,15 +79,24 @@ class LaravelProvider extends AbstractServiceProvider
         // 定时任务
         $this->app->singleton(ScheduleRegistry::class);
 
-        /**
-         * 默认视图
-         */
+        // 视图
         $paths = config('view.paths');
         array_unshift($paths, $this->basePath('views'));
         config(['view.paths' => $paths]);
+        
+        // 员工
+        $auth = [
+            'guards' => [
+                'staff' => [
+                    'driver' => 'token',
+                    'provider' => 'admin',
+                    'hash' => false,
+                ],
+            ],
+        ];
+        config(Arr::dot($auth, 'auth.'));
 
         $this->mergeConfig();
-
         parent::register();
     }
 }
