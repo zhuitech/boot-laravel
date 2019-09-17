@@ -41,6 +41,12 @@ abstract class SubRestController extends RestController
     protected $parent;
 
     /**
+     * 父模型类
+     * @var 
+     */
+    protected $parentModel;
+
+    /**
      * SubRestController constructor.
      * @param BaseRepository $repository
      * @param BaseRepository $parents
@@ -48,6 +54,10 @@ abstract class SubRestController extends RestController
      */
     public function __construct(BaseRepository $repository, BaseRepository $parents)
     {
+        if (empty($parents->model())) {
+            $parents->setModel($this->parentModel);
+        }
+        
         $this->parents = $parents;
         $this->foreignKey = $parents->newModel()->getForeignKey();
 

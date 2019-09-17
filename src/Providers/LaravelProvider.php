@@ -4,6 +4,7 @@ namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 use League\Fractal\Manager;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
@@ -61,6 +62,8 @@ class LaravelProvider extends AbstractServiceProvider
      */
     public function register()
     {
+        $this->mergeConfig();
+        
         // 异常处理
         $this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
 
@@ -84,19 +87,6 @@ class LaravelProvider extends AbstractServiceProvider
         array_unshift($paths, $this->basePath('views'));
         config(['view.paths' => $paths]);
         
-        // 员工
-        $auth = [
-            'guards' => [
-                'staff' => [
-                    'driver' => 'token',
-                    'provider' => 'admin',
-                    'hash' => false,
-                ],
-            ],
-        ];
-        config(Arr::dot($auth, 'auth.'));
-
-        $this->mergeConfig();
         parent::register();
     }
 }

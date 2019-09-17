@@ -14,6 +14,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class User extends Authenticatable implements UserContract
 {
+    protected $fillable = ['id'];
+    
     function getAuthId()
     {
         return $this->id;
