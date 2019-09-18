@@ -125,3 +125,21 @@ if (! function_exists('morph_alias')) {
         return $class;
     }
 }
+
+if (! function_exists('storage_url')) {
+    /**
+     * 获取存储文件URL
+     * 
+     * @param $path
+     * @param null $disk
+     * @return string
+     */
+    function storage_url($path, $disk = null)
+    {
+        if (URL::isValidUrl($path)) {
+            return $path;
+        }
+
+        return Storage::disk($disk)->url($path);
+    }
+}
