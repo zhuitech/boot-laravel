@@ -2,7 +2,6 @@
 
 namespace ZhuiTech\BootLaravel\Remote;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
@@ -26,16 +25,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
     protected $resource;
 
     /**
-     * 查询参数
-     * _order, _or, _limit, _page, _size, _column
-     * @var array
-     */
-    protected $queries = [
-        '_limit' => -1,
-        '_order' => ['id' => 'desc']
-    ];
-
-    /**
      * 是否启用缓存
      * @var bool
      */
@@ -46,6 +35,16 @@ class Model extends \Illuminate\Database\Eloquent\Model
      * @var string
      */
     protected $cache_prefix = 'Remote';
+
+    /**
+     * 查询参数
+     * _order, _or, _limit, _page, _size, _column
+     * @var array
+     */
+    public $queries = [
+        '_limit' => -1,
+        '_order' => ['id' => 'desc']
+    ];
 
     # Model 复写 ########################################################################################################
 
@@ -75,7 +74,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return bool
      */
-    protected function performUpdate(Builder $query)
+    protected function performUpdate(\Illuminate\Database\Eloquent\Builder $query)
     {
         // If the updating event returns false, we will cancel the update operation so
         // developers can hook Validation systems into their models and cancel this
@@ -114,7 +113,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return bool
      */
-    protected function performInsert(Builder $query)
+    protected function performInsert(\Illuminate\Database\Eloquent\Builder $query)
     {
         if ($this->fireModelEvent('creating') === false) {
             return false;
@@ -133,6 +132,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
             $this->exists = true;
             $this->wasRecentlyCreated = true;
             $this->fireModelEvent('created', false);
+            
+            // 重新初始化对象，获取自增字段值
+            $this->setRawAttributes($result['data']);
         } else {
             throw new RestCodeException($result['code'], $result['data'], $result['message']);
         }
@@ -141,45 +143,33 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * @return static
+     * @return \Illuminate\Database\Eloquent\Builder|Builder
      */
     public function newQuery()
     {
-        return new static();
+        return new Builder($this);
     }
 
     /**
-     *
      * @param array|string $relations
-     * @return static
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|Builder
      */
     public static function with($relations)
     {
-        return new static();
+        return static::newQuery();
     }
 
-    /**
-     * @return static
-     */
-    public static function query()
+    # 辅助方法 ##########################################################################################################
+    
+    public function itemCacheKey($id)
     {
-        return (new static)->newQuery();
+        return implode('.', [$this->cache_prefix, class_basename($this), $id]);
     }
 
-    # Builder 复写 ######################################################################################################
-    # 由于Model使用魔术方法转发Builder的调用，所以这里需要重写，并且不能用parent调用
-
-    /**
-     * 查找单个
-     *
-     * @param mixed $id
-     * @param array $columns
-     * @return static
-     */
-    public function find($id, $columns = ['*'])
+    public function performFind($id, $columns = ['*'])
     {
         $key = $this->itemCacheKey($id);
-        
+
         // 查询缓存
         if ($this->cache and $data = \Cache::get($key)) {
             return $data;
@@ -191,7 +181,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         // 处理返回结果
         if ($result['status'] === true) {
             $data = static::newFromBuilder($result['data']);
-            
+
             // 设置缓存
             if ($this->cache) {
                 \Cache::put($key, $data);
@@ -201,13 +191,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         return $data ?? null;
     }
 
-    /**
-     * 查询
-     *
-     * @param  array  $columns
-     * @return \Illuminate\Support\Collection
-     */
-    public function get($columns = ['*'])
+    public function performQuery($columns = ['*'])
     {
         // 请求后端服务
         $result = RestClient::server($this->server)->get($this->resource, $this->queries);
@@ -218,165 +202,16 @@ class Model extends \Illuminate\Database\Eloquent\Model
             foreach ($result['data'] as $item) {
                 $list[] = static::newFromBuilder($item);
             }
+            
+            if (!empty($result['meta']['pagination'])){
+                $paginator = new LengthAwarePaginator($list, $result['meta']['pagination']['total'], $perPage);
+                $paginator->setPath(url()->current());
+                return $paginator;
+            } else {
+                return $list;
+            }
         }
-
+        
         return $list;
-    }
-
-    /**
-     * 分页查询
-     *
-     * @param  int  $perPage
-     * @param  array  $columns
-     * @param  string  $pageName
-     * @param  int|null  $page
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     *
-     * @throws \InvalidArgumentException
-     */
-    public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
-    {
-        // 分页
-        $page = $page ?: Paginator::resolveCurrentPage($pageName);
-        $perPage = $perPage ?: $this->getPerPage();
-        $this->forPage($page, $perPage);
-
-        // 请求后端服务
-        $result = RestClient::server($this->server)->get($this->resource, $this->queries);
-
-        $list = collect();
-        if ($result['status'] === true) {
-            foreach ($result['data'] as $item) {
-                $list[] = static::newFromBuilder($item);
-            }
-        }
-
-        $paginator = new LengthAwarePaginator($list, $result['meta']['pagination']['total'], $perPage);
-        $paginator->setPath(url()->current());
-        return $paginator;
-    }
-
-    /**
-     * 分批处理数据
-     * @param int $count
-     * @param callable $callback
-     * @return bool
-     */
-    public function chunk($count, callable $callback)
-    {
-        // 添加默认排序
-        if (empty($this->queries['_order'])) {
-            $this->orderBy($this->getKeyName(), 'asc');
-        }
-
-        $page = 1;
-        do {
-            // We'll execute the query for the given page and get the results. If there are
-            // no results we can just break and return from here. When there are results
-            // we will call the callback with the current chunk of these results here.
-            $results = $this->forPage($page, $count)->get();
-
-            $countResults = $results->count();
-            if ($countResults == 0) {
-                break;
-            }
-
-            // On each chunk result set, we will pass them to the callback and then let the
-            // developer take care of everything within the callback, which allows us to
-            // keep the memory low for spinning through large result sets for working.
-            if ($callback($results, $page) === false) {
-                return false;
-            }
-
-            unset($results);
-            $page++;
-        } while ($countResults == $count);
-
-        return true;
-    }
-
-    /**
-     * 删选
-     * @param $column
-     * @param null $operator
-     * @param null $value
-     * @param string $boolean
-     * @return static
-     */
-    public function where($column, $operator = null, $value = null, $boolean = 'and')
-    {
-        if ($value == NULL) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->queries += [$column => []];
-        $this->queries[$column][$operator] = $value;
-
-        return $this;
-    }
-
-    /**
-     * 排序
-     * @param $column
-     * @param string $direction
-     * @return static
-     */
-    public function orderBy($column, $direction = 'asc')
-    {
-        $this->queries += ['_order' => []];
-        $this->queries['_order'][$column] = $direction;
-
-        return $this;
-    }
-
-    /**
-     * 分页
-     * @param  int  $page
-     * @param  int  $perPage
-     * @return static
-     */
-    public function forPage($page, $perPage = 15)
-    {
-        $this->queries['_page'] = $page;
-        $this->queries['_size'] = $perPage;
-        unset($this->queries['_limit']);
-
-        return $this;
-    }
-
-    /**
-     * @param int $value
-     * @return static
-     */
-    public function limit($value)
-    {
-        $this->queries['_limit'] = $value;
-        return $this;
-    }
-
-    /**
-     * @param int $value
-     * @return static
-     */
-    public function take($value)
-    {
-        return $this->limit($value);
-    }
-
-    /**
-     * @param array $columns
-     * @return static
-     */
-    public function first($columns = ['*'])
-    {
-        return $this->take(1)->get($columns)->first();
-    }
-
-    # 辅助方法 ##########################################################################################################
-    
-    protected function itemCacheKey($id)
-    {
-        return implode('.', [$this->cache_prefix, class_basename($this), $id]);
     }
 }

@@ -20,7 +20,7 @@ class LogisticsCompany extends Model
     protected $server = 'service';
     protected $resource = 'api/svc/logistics/companies';
 
-    protected $queries = [
+    public $queries = [
         '_limit' => -1,
         '_order' => ['id' => 'asc']
     ];

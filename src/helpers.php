@@ -80,8 +80,13 @@ if (! function_exists('transform_item')) {
      * @param \League\Fractal\TransformerAbstract $transformer
      * @return array
      */
-    function transform_item($item, \League\Fractal\TransformerAbstract $transformer)
+    function transform_item($item, \League\Fractal\TransformerAbstract $transformer = null)
     {
+        if (empty($transformer)) {
+            $class = \ZhuiTech\BootLaravel\Transformers\ModelTransformer::defaultTransformer($item);
+            $transformer = new $class;
+        }
+        
         $data = new Item($item, $transformer);
 
         $fractal = resolve(Manager::class);
@@ -97,8 +102,13 @@ if (! function_exists('transform_list')) {
      * @param \League\Fractal\TransformerAbstract $transformer
      * @return array
      */
-    function transform_list($list, \League\Fractal\TransformerAbstract $transformer)
+    function transform_list($list, \League\Fractal\TransformerAbstract $transformer = null)
     {
+        if (empty($transformer)) {
+            $class = \ZhuiTech\BootLaravel\Transformers\ModelTransformer::defaultTransformer($item);
+            $transformer = new $class;
+        }
+        
         $data = new Collection($list, $transformer);
 
         $fractal = resolve(Manager::class);
@@ -141,5 +151,31 @@ if (! function_exists('storage_url')) {
         }
 
         return Storage::disk($disk)->url($path);
+    }
+}
+
+if (!function_exists('unique_no')) {
+    /**
+     * 创建唯一编号
+     * 
+     * @param string $prefix
+     * @return string
+     */
+    function unique_no($prefix = 'O')
+    {
+        // 订单号码主体（YYYYMMDDHHIISSNNNNNNNN）
+        $order_id_main = date('Ymd') . rand(100000000,999999999);
+
+        // 订单号码主体长度
+        $order_id_len = strlen($order_id_main);
+        $order_id_sum = 0;
+
+        for($i=0; $i<$order_id_len; $i++){
+            $order_id_sum += (int)(substr($order_id_main, $i,1));
+        }
+
+        // 唯一订单号码（YYYYMMDDHHIISSNNNNNNNNCC）
+        $order_id = $order_id_main . str_pad((100 - $order_id_sum % 100) % 100,2,'0',STR_PAD_LEFT);
+        return $prefix.$order_id;
     }
 }

@@ -1,8 +1,10 @@
 <?php
 
-namespace ZhuiTech\BootLaravel\Remote\Service;
+namespace ZhuiTech\BootLaravel\Remote\Traits;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use ZhuiTech\BootLaravel\Remote\Service\LogisticsRegion;
 
 /**
  * Trait RegionRelation
@@ -18,21 +20,21 @@ trait RegionRelation
     public function getProvinceAttribute()
     {
         if (!empty($this->province_code)) {
-            return LogisticsRegion::query()->find($this->province_code);
+            return LogisticsRegion::find($this->province_code);
         }
     }
 
     public function getCityAttribute()
     {
         if (!empty($this->city_code)) {
-            return LogisticsRegion::query()->find($this->city_code);
+            return LogisticsRegion::find($this->city_code);
         }
     }
 
     public function getDistrictAttribute()
     {
         if (!empty($this->district_code)) {
-            return LogisticsRegion::query()->find($this->district_code);
+            return LogisticsRegion::find($this->district_code);
         }
     }
     

@@ -10,6 +10,7 @@ namespace ZhuiTech\BootLaravel\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
 use ZhuiTech\BootLaravel\Repositories\SimpleCriteria;
@@ -29,12 +30,6 @@ abstract class SubRestController extends RestController
     protected $parents;
 
     /**
-     * 外键
-     * @var
-     */
-    protected $foreignKey;
-
-    /**
      * 父资源
      * @var Model
      */
@@ -47,6 +42,12 @@ abstract class SubRestController extends RestController
     protected $parentModel;
 
     /**
+     * 外键
+     * @var
+     */
+    protected $foreignKey;
+
+    /**
      * SubRestController constructor.
      * @param BaseRepository $repository
      * @param BaseRepository $parents
@@ -54,24 +55,37 @@ abstract class SubRestController extends RestController
      */
     public function __construct(BaseRepository $repository, BaseRepository $parents)
     {
-        if (empty($parents->model())) {
-            $parents->setModel($this->parentModel);
+        $this->parents = $parents;
+        
+        if (empty($this->parents->model())) {
+            $this->parents->setModel($this->parentModel);
         }
         
-        $this->parents = $parents;
-        $this->foreignKey = $parents->newModel()->getForeignKey();
+        if (empty($this->foreignKey)) {
+            $this->foreignKey = $this->parents->newModel()->getForeignKey();
+        }
 
         parent::__construct($repository);
     }
 
+    /**
+     * 获取父主键
+     * 
+     * @return mixed
+     */
     protected function parentKey()
     {
-        return Str::snake(class_basename($this->parents->model()));
+        return Arr::first(request()->route()->parameters());
     }
 
-    protected function resourceKey()
+    /**
+     * 获取主键
+     * 
+     * @return mixed
+     */
+    protected function key()
     {
-        return Str::snake(class_basename($this->repository->model()));
+        return Arr::last(request()->route()->parameters());
     }
 
     /**
@@ -79,8 +93,8 @@ abstract class SubRestController extends RestController
      */
     protected function prepare()
     {
-        $params = request()->route()->parameters();
-        $parentId = $params[$this->parentKey()];
+        $parentId = $this->parentKey();
+        
         if ($parentId) {
             // 设置查询范围
             $criteria = new SimpleCriteria([
@@ -106,22 +120,19 @@ abstract class SubRestController extends RestController
 
     public function show($id)
     {
-        $params = request()->route()->parameters();
-        $id = $params[$this->resourceKey()];
+        $id = $this->key();
         return parent::show($id);
     }
 
     public function update($id)
     {
-        $params = request()->route()->parameters();
-        $id = $params[$this->resourceKey()];
+        $id = $this->key();
         return parent::update($id);
     }
 
     public function destroy($id)
     {
-        $params = request()->route()->parameters();
-        $id = $params[$this->resourceKey()];
+        $id = $this->key();
         return parent::destroy($id);
     }
 
@@ -133,11 +144,7 @@ abstract class SubRestController extends RestController
     public function find()
     {
         $parent = $this->parents->newModel();
-        
-        $result = $this->repository
-            ->join($parent)
-            ->query(request()->all());
-        
+        $result = $this->repository->join($parent)->query(request()->all());
         return $this->success($result);
     }
 }

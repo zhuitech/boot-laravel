@@ -17,6 +17,8 @@ class ModelTransformer extends TransformerAbstract
     protected $only = [];
 
     protected $casts = [];
+    
+    protected $appends = [];
 
     /**
      * 默认排除项
@@ -68,6 +70,10 @@ class ModelTransformer extends TransformerAbstract
         } else {
             $excepts = array_merge($this->excepts, $this->defaultExcepts());
             $result = array_except($result, $excepts);
+        }
+        
+        foreach ($this->appends as $field) {
+            $result[$field] = $data->$field;
         }
 
         // 统一NULL为空字符串

@@ -8,6 +8,8 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
     $registry = [
         ['get', 'logistics/regions/select'], ['get', 'logistics/regions'],
         ['post', 'sms/verify'], ['post', 'sms/check'],
+        ['get', 'cms/ads/slug/{slug}'],
+        ['post', 'pay/notify/{channel}']
     ];
 
     foreach ($registry as $item) {
