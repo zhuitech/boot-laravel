@@ -20,16 +20,15 @@ class ProxyClient extends RestClient
         $options = [
             'allow_redirects' => false,
             'headers' => [
-                'Content-Type' => 'application/json',
                 'X-FORWARDED-PROTO' => $request->getScheme(),
                 'X-FORWARDED-HOST' => $request->server('HTTP_HOST'),
             ],
             'query' => $request->query(),
-            'body' => json_encode($request->input())
+            'body' => $request->getContent(),
         ];
 
         // 传递一些头信息
-        foreach (['X-PJAX', 'X-PJAX-Container', 'Accept'] as $item) {
+        foreach (['X-PJAX', 'X-PJAX-Container', 'Accept', 'Content-Type'] as $item) {
             if ($request->hasHeader($item)) {
                 $options['headers'][$item] = $request->header($item);
             }

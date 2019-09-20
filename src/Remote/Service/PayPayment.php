@@ -9,7 +9,7 @@ use ZhuiTech\BootLaravel\Remote\Model;
 /**
  * Class PayPayment
  * @package ZhuiTech\BootLaravel\Remote\Service
- * 
+ *
  * @property int $id
  * @property int $user_id 用户ID
  * @property int $order_id 业务ID
@@ -21,11 +21,14 @@ use ZhuiTech\BootLaravel\Remote\Model;
  * @property int $actual_amount 实际支付金额
  * @property string|null $subject 标题
  * @property string|null $body 描述
- * @property string|null $callback 回调地址
+ * @property string|null $notify_url 异步通知
+ * @property string|null $return_url 同步通知
  * @property int|null $status 状态：0=未支付，1=支付成功
- * @property int|null $channel_id 通道ID
- * @property string|null $transaction_no 交易流水号
- * @property mixed|null $result 结果
+ * @property string|null $channel 支付通道
+ * @property string|null $method 支付方式
+ * @property string|null $trade_no 交易流水号
+ * @property string|null $buyer 交易用户
+ * @property array|null $result 结果
  * @property string|null $paid_at 付款时间
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
