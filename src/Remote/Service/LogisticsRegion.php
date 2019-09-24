@@ -12,6 +12,7 @@ use ZhuiTech\BootLaravel\Remote\Model;
  * @property string $code
  * @property string $name
  * @property string $parent_code
+ * @property LogisticsRegion $parent
  */
 class LogisticsRegion extends Model
 {
@@ -21,7 +22,7 @@ class LogisticsRegion extends Model
     protected $resource = 'api/svc/logistics/regions';
 
     /**
-     * 获取选项
+     * 多级下拉框选项
      * 
      * @param null $parentCode
      * @return array|\Illuminate\Support\Collection
@@ -29,11 +30,14 @@ class LogisticsRegion extends Model
     public static function selectOptions($parentCode = null)
     {
         $result = RestClient::server('service')->get(self::OPTIONS_URL, ['q' => $parentCode]);
-
         if (!empty($result) && (!isset($result['status']) || $result['status'] == false)) {
             return collect($result)->pluck('text', 'id');
         }
-        
         return [];
+    }
+
+    public function getParentAttribute()
+    {
+        return self::find($this->parent_code);
     }
 }
