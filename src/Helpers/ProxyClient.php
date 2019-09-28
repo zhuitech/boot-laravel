@@ -2,6 +2,8 @@
 
 namespace ZhuiTech\BootLaravel\Helpers;
 
+use Illuminate\Support\Str;
+
 /**
  * 反向代理
  *
@@ -34,8 +36,8 @@ class ProxyClient extends RestClient
             }
         }
 
-        // 若包含文件，以multipart方式转发
-        if (count($request->allFiles()) > 0) {
+        // multipart
+        if (Str::startsWith($request->header('Content-Type'), 'multipart/form-data')) {
             unset($options['headers']['Content-Type']);
             unset($options['body']);
             $options['multipart'] = $this->createMultipart($request->all());

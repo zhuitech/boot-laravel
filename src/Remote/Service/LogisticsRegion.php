@@ -20,6 +20,7 @@ class LogisticsRegion extends Model
     
     protected $server = 'service';
     protected $resource = 'api/svc/logistics/regions';
+    protected $cache = true;
 
     /**
      * 多级下拉框选项

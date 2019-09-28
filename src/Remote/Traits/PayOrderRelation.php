@@ -7,7 +7,6 @@ use ZhuiTech\BootLaravel\Remote\Service\PayOrder;
 /**
  * Trait PayOrderRelation
  * @package ZhuiTech\BootLaravel\Remote\Traits
- * @property PayOrder $pay_order
  */
 trait PayOrderRelation
 {
@@ -16,7 +15,7 @@ trait PayOrderRelation
     /**
      * @return \ZhuiTech\BootLaravel\Remote\Service\PayOrder|null
      */
-    public function getPayOrderAttribute()
+    public function getRemoteOrder()
     {
         return PayOrder::where('order_type', static::$order_type)->where('order_no', $this->order_no)->first();
     }

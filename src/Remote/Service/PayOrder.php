@@ -23,13 +23,14 @@ use ZhuiTech\BootLaravel\Remote\Model;
  * @property string|null $paid_at 付款时间
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read mixed $paid_amount
+ * @property-read int $can_refund_amount
+ * @property-read string $channel_text
+ * @property-read int $paid_amount
+ * @property-read int $refund_amount
  * 
  */
 class PayOrder extends Model
 {
-    protected $cache = false;
-
     const STATUS_WAIT = 0;
     const STATUS_PAID = 1;
     const STATUS_PARTPAID = 2;
@@ -48,6 +49,16 @@ class PayOrder extends Model
     public function charge($channel, $method, $options = null)
     {
         $result = RestClient::server($this->server)->post("api/svc/pay/orders/{$this->id}/charge", compact('channel', 'method', 'options'));
+        if ($result['status'] === true) {
+            return $result['data'];
+        } else {
+            throw new RestFailException($result['message'], $result);
+        }
+    }
+    
+    public function refund($amount)
+    {
+        $result = RestClient::server($this->server)->post("api/svc/pay/orders/{$this->id}/refund", compact('amount'));
         if ($result['status'] === true) {
             return $result['data'];
         } else {

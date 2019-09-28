@@ -28,7 +28,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
      * 是否启用缓存
      * @var bool
      */
-    protected $cache = true;
+    protected $cache = false;
 
     /**
      * 缓存前缀
@@ -213,5 +213,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
         }
         
         return $list;
+    }
+    
+    public function reload()
+    {
+        // 更新缓存
+        \Cache::delete($this->itemCacheKey($this->getKey()));
+        return $this->performFind($this->getKey());
     }
 }

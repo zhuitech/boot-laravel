@@ -19,6 +19,7 @@ class LogisticsCompany extends Model
 {
     protected $server = 'service';
     protected $resource = 'api/svc/logistics/companies';
+    protected $cache = true;
 
     public $queries = [
         '_limit' => -1,
