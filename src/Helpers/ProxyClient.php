@@ -26,24 +26,25 @@ class ProxyClient extends RestClient
                 'X-FORWARDED-HOST' => $request->server('HTTP_HOST'),
             ],
             'query' => $request->query(),
-            'body' => $request->getContent(),
         ];
-
-        // 传递一些头信息
-        foreach (['X-PJAX', 'X-PJAX-Container', 'Accept', 'Content-Type'] as $item) {
+        foreach (['X-PJAX', 'X-PJAX-Container', 'Accept'] as $item) {
             if ($request->hasHeader($item)) {
                 $options['headers'][$item] = $request->header($item);
             }
         }
 
-        // multipart
+        // Multipart
         if (Str::startsWith($request->header('Content-Type'), 'multipart/form-data')) {
-            unset($options['headers']['Content-Type']);
-            unset($options['body']);
             $options['multipart'] = $this->createMultipart($request->all());
+        } else {
+            // Other
+            $options['headers']['Content-Type'] = $request->header('Content-Type');
+            $options['body'] = $request->getContent();
         }
 
-        $this->plain()->request($request->path(), $request->method(), $options);
+        // 注意此处不能用 $request->method()，要完全模拟原始请求
+        $method = strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
+        $this->plain()->request($request->path(), $method, $options);
         return $this->getResponse();
     }
 }

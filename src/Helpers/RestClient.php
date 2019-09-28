@@ -426,31 +426,24 @@ class RestClient
             $item = [
                 'name' => empty($prefix) ? $name : "{$prefix}[{$name}]",
             ];
-
-            switch (true) {
-                    // 上传文件
-                case (is_object($value) && ($value instanceof UploadedFile)):
-                    $item['contents'] = fopen($value->getFilename(), 'r');
-                    $item['filename'] = $value->getClientOriginalName();
-                    $item['headers'] = [
-                        'content-type' => $value->getMimeType(),
-                    ];
-                    break;
-
-                    // 本地文件
-                case (is_string($value) && is_file($value)):
-                    $item['contents'] = fopen($value, 'r');
-                    break;
-
-                    // 数组
-                case is_array($value):
-                    $return = array_merge($return, $this->createMultipart($value, $item['name']));
-                    continue 2;
-
-                    // 文本
-                default:
-                    $item['contents'] = $value;
-                    break;
+            
+            if (is_object($value) && ($value instanceof UploadedFile)) {
+                // 上传文件
+                $item['contents'] = fopen($value->getRealPath(), 'r');
+                $item['filename'] = $value->getClientOriginalName();
+                $item['headers'] = [
+                    'content-type' => $value->getMimeType(),
+                ];
+            } else if (is_string($value) && is_file($value)) {
+                // 本地文件
+                $item['contents'] = fopen($value, 'r');
+            } else if (is_array($value)) {
+                // 数组
+                $return = array_merge($return, $this->createMultipart($value, $item['name']));
+                continue;
+            } else {
+                // 文本
+                $item['contents'] = $value;
             }
 
             $return[] = $item;
