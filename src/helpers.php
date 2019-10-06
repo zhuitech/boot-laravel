@@ -66,9 +66,15 @@ if (! function_exists('yuan')) {
      * @param $amount
      * @return string
      */
-    function yuan($amount)
+    function yuan($amount, $symbol = false)
     {
-        return number_format($amount / 100, 2, ".", "");
+        $value = number_format($amount / 100, 2, ".", "");
+        
+        if ($symbol) {
+            $value = '￥' . $value;
+        }
+        
+        return $value;
     }
 }
 
