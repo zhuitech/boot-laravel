@@ -32,7 +32,7 @@ class LogisticsRegion extends Model
     {
         $result = RestClient::server('service')->get(self::OPTIONS_URL, ['q' => $parentCode]);
         if (!empty($result) && (!isset($result['status']) || $result['status'] == false)) {
-            return collect($result)->pluck('text', 'id');
+            return collect($result)->pluck('text', 'id')->toArray();
         }
         return [];
     }

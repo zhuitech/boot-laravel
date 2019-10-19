@@ -17,6 +17,9 @@ use ZhuiTech\BootLaravel\Remote\Service\LogisticsRegion;
  */
 trait RegionRelation
 {
+    /**
+     * @return ZhuiTech\BootLaravel\Remote\Service\LogisticsRegion
+     */
     public function getProvinceAttribute()
     {
         if (!empty($this->province_code)) {
@@ -24,6 +27,9 @@ trait RegionRelation
         }
     }
 
+    /**
+     * @return ZhuiTech\BootLaravel\Remote\Service\LogisticsRegion
+     */
     public function getCityAttribute()
     {
         if (!empty($this->city_code)) {
@@ -31,6 +37,9 @@ trait RegionRelation
         }
     }
 
+    /**
+     * @return ZhuiTech\BootLaravel\Remote\Service\LogisticsRegion
+     */
     public function getDistrictAttribute()
     {
         if (!empty($this->district_code)) {
