@@ -15,7 +15,7 @@ use ZhuiTech\BootLaravel\Transformers\ArraySerializer;
 
 /**
  * 通用Laravel项目
- * Class LaravelProvider
+ * 
  * @package ZhuiTech\BootLaravel\Providers
  */
 class LaravelProvider extends AbstractServiceProvider
@@ -49,8 +49,8 @@ class LaravelProvider extends AbstractServiceProvider
         $kernel = app(Kernel::class);
         $kernel->pushMiddleware(\ZhuiTech\BootLaravel\Middleware\Language::class);
         
+        parent::loadMigrations();
         parent::loadRoutes();
-
         parent::boot();
     }
 
