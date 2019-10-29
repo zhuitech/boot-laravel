@@ -25,4 +25,22 @@ class LogisticsCompany extends Model
         '_limit' => -1,
         '_order' => ['id' => 'asc']
     ];
+
+    public static function ensure($name, $code = null) : LogisticsCompany
+    {
+        if (!empty($code)) {
+            $company = LogisticsCompany::where('code', $code)->first();
+        } elseif (!empty($name)) {
+            $company = LogisticsCompany::where('name', $name)->first();
+        }
+
+        if (empty($company)) {
+            $company = new LogisticsCompany();
+            $company->code = $code;
+            $company->name = $name;
+            $company->save();
+        }
+
+        return $company;
+    }
 }
