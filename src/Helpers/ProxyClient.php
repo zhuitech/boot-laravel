@@ -13,9 +13,11 @@ use Illuminate\Support\Str;
 class ProxyClient extends RestClient
 {
     /**
+     * @param null $url
+     * @param null $method
      * @return \GuzzleHttp\Psr7\Response
      */
-    public function pass()
+    public function pass($url = null, $method = null)
     {
         $request = request();
 
@@ -43,8 +45,7 @@ class ProxyClient extends RestClient
         }
 
         // 注意此处不能用 $request->method()，要完全模拟原始请求
-        $method = strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
-        $this->plain()->request($request->path(), $method, $options);
+        $this->plain()->request($url ?? $request->path(), $method ?? strtoupper($request->server->get('REQUEST_METHOD', 'GET')), $options);
         return $this->getResponse();
     }
 }

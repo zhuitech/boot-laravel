@@ -24,4 +24,10 @@ class SMS
         
         return RestClient::server('service')->post('api/svc/sms/send', $data);
     }
+
+    public static function check($to, $code)
+    {
+        $result = RestClient::server('service')->post('api/svc/sms/check', ['mobile' => $to, 'verify_code' => $code]);
+        return $result['status'] ?? false;
+    }
 }
