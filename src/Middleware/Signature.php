@@ -55,7 +55,7 @@ class Signature
             ]);
         }
 
-        // 1.
+        // 1.过滤
         $paras = [];
         foreach ($data as $key => $value) {
             if (in_array($key, ['_client', '_sign']) || is_array($value)) {
@@ -64,16 +64,16 @@ class Signature
             $paras[$key] = $value;
         }
 
-        // 2.
+        // 2.排序
         ksort($paras);
 
-        // 3.
-        $parameters = http_build_query($paras);
+        // 3.编码，URL-encoded query string
+        $parameters = http_build_query($paras, null, null, PHP_QUERY_RFC3986);
 
-        // 4.
+        // 4.计算
         $_sign = md5($parameters . $client->secret);
 
-        if ($_sign != $data['_sign']) {
+        if (Str::upper($_sign) != Str::upper($data['_sign'])) {
             return $this->fail('Wrong signature', [
                 'string' => $parameters,
             ]);
