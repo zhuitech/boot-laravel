@@ -50,16 +50,32 @@ class ModelTransformer extends TransformerAbstract
         }
 
         // 转换字段
-        foreach ($this->casts as $field => $caster) {
+        foreach ($this->casts as $field => $caster_setting) {
+            // 支持管道
+            $casters = explode('|', $caster_setting);
+
             if (isset($result[$field])) {
+                // 获取原始值
                 $value = $result[$field];
 
-                if (function_exists($caster)) {
-                    $value = $caster($result[$field]);
-                } elseif (method_exists($this, $caster)) {
-                    $value = call_user_func(array($this, $caster), $result[$field]);
+                // 遍历管道
+                foreach ($casters as $caster) {
+                    $caster_items = explode(':', $caster);
+
+                    // 简单转换函数
+                    if (count($caster_items) == 1) {
+                        $func = $caster_items[0];
+                        $value = $func($value);
+                    }
+
+                    // 嵌套转换函数
+                    if (count($caster_items) == 2) {
+                        $func = $caster_items[0];
+                        $value = $func($caster_items[1], $value);
+                    }
                 }
 
+                // 设置处理后的结果
                 $result[$field] = $value;
             }
         }
