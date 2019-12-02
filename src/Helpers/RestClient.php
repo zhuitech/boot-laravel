@@ -84,6 +84,12 @@ class RestClient
      */
     protected $response = null;
 
+    /**
+     * 内部模式
+     * @var bool
+     */
+    protected $internal = true;
+
     /*Fluent***********************************************************************************************************/
 
     /**
@@ -282,25 +288,24 @@ class RestClient
         $method = strtoupper($method);
         $options = array_merge($this->defaults, $options);
 
-        // 设置语言
         $headers = [];
-        $headers['X-Language'] = app()->getLocale();
-
-        // 设置访问用户
-        if (!empty($this->user) && $this->user instanceof UserContract) {
-            $headers['X-User'] = $this->user->getAuthId();
-            $headers['X-User-Type'] = $this->user->getAuthType();
-        }
-
-        // 设置真实IP
-        if (!app()->runningInConsole()) {
-            foreach (['X-FORWARDED-PROTO', 'X-FORWARDED-PORT', 'X-FORWARDED-HOST', 'X-FORWARDED-FOR'] as $item) {
-                if (Request::hasHeader($item)) {
-                    $headers[$item] = Request::header($item);
+        if ($this->internal) {
+            // 设置语言
+            $headers['X-Language'] = app()->getLocale();
+            // 设置访问用户
+            if (!empty($this->user) && $this->user instanceof UserContract) {
+                $headers['X-User'] = $this->user->getAuthId();
+                $headers['X-User-Type'] = $this->user->getAuthType();
+            }
+            // 设置真实IP
+            if (!app()->runningInConsole()) {
+                foreach (['X-FORWARDED-PROTO', 'X-FORWARDED-PORT', 'X-FORWARDED-HOST', 'X-FORWARDED-FOR'] as $item) {
+                    if (Request::hasHeader($item)) {
+                        $headers[$item] = Request::header($item);
+                    }
                 }
             }
         }
-
         $options['headers'] = $headers + $options['headers'];
 
         try {
