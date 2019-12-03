@@ -156,6 +156,10 @@ if (! function_exists('storage_url')) {
             return $path;
         }
 
+        if (empty($path)) {
+            return null;
+        }
+
         return Storage::disk($disk)->url($path);
     }
 }
