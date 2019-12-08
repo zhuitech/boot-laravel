@@ -52,8 +52,10 @@ class QueryCriteria extends Criteria
                     if ($operator == 'null') {
                         $not = $search == '1' ? false : true;
                         $model = $model->whereNull($field, $boolean, $not);
-                    }
-                    else {
+                    } elseif ($operator == 'in') {
+                        $values = explode(',', $search);
+                        $model = $model->whereIn($field, $values, $boolean);
+                    } else {
                         $model = $model->where($field, $operator, $search, $boolean);
                     }
                 }
