@@ -189,3 +189,11 @@ if (!function_exists('unique_no')) {
         return $prefix.$order_id;
     }
 }
+
+if (!function_exists('random_string')) {
+    function random_string($length = 10)
+    {
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+        return strtoupper(substr(str_shuffle($permitted_chars), 0, $length));
+    }
+}

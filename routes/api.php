@@ -19,11 +19,20 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['post', 'file/upload/{strategy}'], ['post', 'file/upload/callback/{disk}'], ['post', 'file/upload/{disk}'], ['post', 'file/upload/form/token'],
 
         ['get', 'cms/ads/slug/{slug}'],
-        ['get', 'cms/page/categories/tree'], ['get', 'cms/page/articles']
+        ['get', 'cms/page/categories/tree'], ['get', 'cms/page/articles'],
+        
+        ['get', 'wechat/mp/auth'],
+
+        ['post', 'user/login/quick', 'token'], ['post', 'user/register/quick', 'token'], ['get', 'user/me'],
     ];
 
     foreach ($registry as $item) {
         $method = $item[0];
-        $router->{$method}($item[1], 'ServiceProxyController@api');
+        $url = $item[1];
+        $function = $item[2] ?? 'api';
+        
+        $router->{$method}($url, 'ServiceProxyController@' . $function);
     }
+
+    Route::post('notify', 'ServiceProxyController@notify');
 });

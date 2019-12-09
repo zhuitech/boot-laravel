@@ -12,12 +12,7 @@ use Illuminate\Support\Str;
  */
 class ProxyClient extends RestClient
 {
-    /**
-     * @param null $url
-     * @param null $method
-     * @return \GuzzleHttp\Psr7\Response
-     */
-    public function pass($url = null, $method = null)
+    private function buildOptions()
     {
         $request = request();
 
@@ -43,9 +38,38 @@ class ProxyClient extends RestClient
             $options['headers']['Content-Type'] = $request->header('Content-Type');
             $options['body'] = $request->getContent();
         }
-
+        
+        return $options;
+    }
+    
+    /**
+     * 返回原始请求
+     * @param null $url
+     * @param null $method
+     * @return \GuzzleHttp\Psr7\Response
+     */
+    public function pass($url = null, $method = null)
+    {
+        $request = request();
+        $url = $url ?? $request->path();
+        $method = $method ?? strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
+        
         // 注意此处不能用 $request->method()，要完全模拟原始请求
-        $this->plain()->request($url ?? $request->path(), $method ?? strtoupper($request->server->get('REQUEST_METHOD', 'GET')), $options);
+        $this->plain()->request($url, $method, $this->buildOptions());
         return $this->getResponse();
+    }
+
+    /**
+     * 返回JSON
+     * @param null $url
+     * @param null $method
+     */
+    public function passJson($url = null, $method = null)
+    {
+        $request = request();
+        $url = $url ?? $request->path();
+        $method = $method ?? strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
+        
+        return $this->request($url, $method, $this->buildOptions());
     }
 }

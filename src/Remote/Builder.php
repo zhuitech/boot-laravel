@@ -116,6 +116,10 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
             $value = $operator;
             $operator = '=';
         }
+        
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
 
         $this->model->queries += [$column => []];
         $this->model->queries[$column][$operator] = $value;
