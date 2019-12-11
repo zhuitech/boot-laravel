@@ -21,7 +21,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['get', 'cms/ads/slug/{slug}'],
         ['get', 'cms/page/categories/tree'], ['get', 'cms/page/articles'],
         
-        ['get', 'wechat/mp/auth'],
+        ['get', 'wechat/mp/auth'], ['post', 'wechat/mp/qrcode'],
 
         ['post', 'user/login/quick', 'token'], ['post', 'user/register/quick', 'token'], ['get', 'user/me'],
     ];

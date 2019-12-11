@@ -8,6 +8,7 @@ use Encore\Admin\Layout\Row;
 use Illuminate\Routing\Controller;
 use ZhuiTech\BootAdmin\Admin\Controllers\AdminController;
 use ZhuiTech\BootLaravel\Helpers\ProxyClient;
+use ZhuiTech\BootLaravel\Helpers\Restful;
 use ZhuiTech\BootLaravel\Models\TokenUser;
 use ZhuiTech\BootLaravel\Models\User;
 
@@ -48,6 +49,7 @@ class ServiceProxyController extends Controller
         $event = $data['action'] ?? $data['event'];
         event("service.notify.$event", [$data]);
 
-        return 'OK';
+        $result = Restful::format();
+        return response()->json($result);
     }
 }

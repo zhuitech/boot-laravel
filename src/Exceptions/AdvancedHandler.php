@@ -67,12 +67,17 @@ class AdvancedHandler extends ExceptionHandler
      */
     protected function invalidJson($request, ValidationException $exception)
     {
-        $errors = config('boot-laravel.errors');
+        $errors = $exception->errors();
 
-        return response()->json(array_merge(
-            $this->error(REST_DATA_VALIDATE_FAIL),
-            ['errors' => $exception->errors()]
-        ), 200);
+        $message = null;
+        if (is_array($errors)) {
+            $message = Arr::first($errors);
+            if (is_array($message)) {
+                $message = Arr::first($message);
+            }
+        }
+
+        return response()->json(array_merge($this->error(REST_DATA_VALIDATE_FAIL, $message), ['errors' => $errors]), 200);
     }
 
     /**
@@ -117,14 +122,14 @@ class AdvancedHandler extends ExceptionHandler
      * @param $code
      * @return array
      */
-    private function error($code = REST_EXCEPTION)
+    private function error($code = REST_EXCEPTION, $message = NULL)
     {
         $errors = config('boot-laravel.errors');
 
         return [
             'status' => false,
             'code' => $code,
-            'message' => $errors[$code],
+            'message' => $message ?? $errors[$code],
             'data' => '',
             'request' => request()->fullUrl()
         ];
