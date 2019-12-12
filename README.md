@@ -13,8 +13,6 @@ Laravel >= 5.5
 ```bash
 #安装主模块
 composer require zhuitech/boot-laravel
-#安装行政区
-composer require yingouqlj/china-region
 ```
 
 ## 配置

@@ -1,7 +1,4 @@
 <?php
-/**
- * 状态码
- */
 
 if (!defined('REST_BUSY')) {
     define('REST_BUSY', -1);
@@ -77,5 +74,11 @@ return [
             'prefix' => '',
             'middleware' => ['web'],
         ]
+    ],
+    
+    'setting' => [
+        'table_name' => 'system_settings',
+        'cache' => true,
+        'minute' => 120
     ],
 ];

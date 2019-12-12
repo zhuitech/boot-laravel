@@ -11,6 +11,10 @@ use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
 use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
 use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
+use ZhuiTech\BootLaravel\Setting\CacheDecorator;
+use ZhuiTech\BootLaravel\Setting\EloquentSetting;
+use ZhuiTech\BootLaravel\Setting\SettingInterface;
+use ZhuiTech\BootLaravel\Setting\SystemSetting;
 use ZhuiTech\BootLaravel\Transformers\ArraySerializer;
 
 /**
@@ -51,6 +55,7 @@ class LaravelProvider extends AbstractServiceProvider
         
         parent::loadMigrations();
         parent::loadRoutes();
+        
         parent::boot();
     }
 
@@ -67,11 +72,6 @@ class LaravelProvider extends AbstractServiceProvider
         // 异常处理
         $this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
 
-        // 配置
-        $this->app->singleton('setting', function () {
-            return new RemoteSettingRepository();
-        });
-
         // Transformer
         $this->app->bind(Manager::class, function (){
             $manager = new Manager();
@@ -86,6 +86,16 @@ class LaravelProvider extends AbstractServiceProvider
         $paths = config('view.paths');
         array_unshift($paths, $this->basePath('views'));
         config(['view.paths' => $paths]);
+        
+        // Setting
+        $this->app->singleton(SettingInterface::class, function ($app) {
+            $repository = new EloquentSetting(new SystemSetting());
+            if (!config('boot-laravel.setting.cache')) {
+                return $repository;
+            }
+            return new CacheDecorator($repository);
+        });
+        $this->app->alias(SettingInterface::class, 'system_setting');
         
         parent::register();
     }

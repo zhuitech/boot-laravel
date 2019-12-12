@@ -197,3 +197,28 @@ if (!function_exists('random_string')) {
         return strtoupper(substr(str_shuffle($permitted_chars), 0, $length));
     }
 }
+
+if (!function_exists('settings')) {
+    /**
+     * get settings.
+     * @param null $key
+     * @param null $value
+     * @return \Illuminate\Foundation\Application|mixed|string
+     */
+    function settings($key = null, $value = null)
+    {
+        if (is_null($key)) {
+            return app('system_setting');
+        }
+
+        if (is_string($key)) {
+            return app('system_setting')->getSetting($key, $value);
+        }
+
+        if (is_array($key)) {
+            return app('system_setting')->setSetting($key);
+        }
+
+        return '';
+    }
+}

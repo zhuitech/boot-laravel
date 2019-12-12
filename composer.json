@@ -14,7 +14,8 @@
         "bosnadev/repositories": "^0.13.0",
         "paragonie/random_compat": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
-        "overtrue/laravel-lang": "~3.0"
+        "overtrue/laravel-lang": "~3.0",
+        "ibrand/setting": "~1.0"
     },
     "autoload": {
         "psr-4": {

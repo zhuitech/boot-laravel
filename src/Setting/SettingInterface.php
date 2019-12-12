@@ -1,23 +1,24 @@
 <?php
 
-namespace ZhuiTech\BootLaravel\Repositories;
+namespace ZhuiTech\BootLaravel\Setting;
 
 /**
  * Interface SettingInterface
+ * @package iBrand\Component\Setting\Repositories
  */
-interface SettingRepository
+interface SettingInterface
 {
     /**
      * @param array $settings
      * @return mixed
      */
-    public function set(array $settings);
+    public function setSetting(array $settings);
 
     /**
      * @param $key
      * @return mixed
      */
-    public function get($key, $default = null);
+    public function getSetting($key,$input=null);
 
     /**
      * @return mixed
