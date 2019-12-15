@@ -28,6 +28,16 @@ class MicroServiceProxyProvider extends AbstractServiceProvider
 {
     public function register()
     {
+        $this->configAuth();
+
+        parent::register();
+    }
+
+    /**
+     * 调用方授权机制
+     */
+    private function configAuth()
+    {
         Auth::provider('members', function ($app, array $config) {
             return new MemberUserProvider();
         });
@@ -66,7 +76,5 @@ class MicroServiceProxyProvider extends AbstractServiceProvider
             ],
         ];
         config(Arr::dot($auth, 'auth.'));
-
-        parent::register();
     }
 }
