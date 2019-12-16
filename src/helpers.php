@@ -139,14 +139,14 @@ if (! function_exists('transform_list')) {
     /**
      * 转换集合
      *
-     * @param $list
+     * @param \Illuminate\Support\Collection $list
      * @param \League\Fractal\TransformerAbstract $transformer
      * @return array
      */
     function transform_list($list, \League\Fractal\TransformerAbstract $transformer = null)
     {
         if (empty($transformer)) {
-            $class = \ZhuiTech\BootLaravel\Transformers\ModelTransformer::defaultTransformer($item);
+            $class = \ZhuiTech\BootLaravel\Transformers\ModelTransformer::defaultTransformer($list->first());
             $transformer = new $class;
         }
         

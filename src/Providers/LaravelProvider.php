@@ -60,6 +60,10 @@ class LaravelProvider extends AbstractServiceProvider
 
         parent::loadMigrations();
         parent::loadRoutes();
+
+        // hook 接口，不限制请求
+        $file = $this->basePath('routes/hook.php');
+        \Route::prefix(config('boot-laravel.route.api.prefix'))->group($file);
         
         parent::boot();
     }

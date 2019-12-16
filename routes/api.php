@@ -1,9 +1,6 @@
 <?php
 use Illuminate\Routing\Router;
 
-/*
- * 微服务接口
- */
 Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controllers'], function (Router $router) {
     $registry = [
         ['get', 'logistics/regions/select'], ['get', 'logistics/regions'], ['get', 'logistics/companies'], ['get', 'logistics/query'],
@@ -33,6 +30,4 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         
         $router->{$method}($url, 'ServiceProxyController@' . $function);
     }
-
-    Route::post('notify', 'ServiceProxyController@notify');//->middleware('intranet');
 });
