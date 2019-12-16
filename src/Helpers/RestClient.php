@@ -85,10 +85,10 @@ class RestClient
     protected $response = null;
 
     /**
-     * 内部模式
+     * 代理模式
      * @var bool
      */
-    protected $internal = true;
+    protected $proxy = true;
 
     /*Fluent***********************************************************************************************************/
 
@@ -169,6 +169,16 @@ class RestClient
     public function plain($plain = true)
     {
         $this->plain = $plain;
+        return $this;
+    }
+
+    /**
+     * 代理模式
+     * @param bool $proxy
+     * @return $this
+     */
+    public function proxy($proxy = true) {
+        $this->proxy = $proxy;
         return $this;
     }
 
@@ -289,7 +299,9 @@ class RestClient
         $options = array_merge($this->defaults, $options);
 
         $headers = [];
-        if ($this->internal) {
+
+        // 代理模式设置头
+        if ($this->proxy) {
             // 设置语言
             $headers['X-Language'] = app()->getLocale();
             // 设置访问用户
