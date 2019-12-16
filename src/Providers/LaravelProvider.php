@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Schema;
 use League\Fractal\Manager;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
+use ZhuiTech\BootLaravel\Middleware\Intranet;
+use ZhuiTech\BootLaravel\Middleware\Signature;
 use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
 use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 use ZhuiTech\BootLaravel\Setting\CacheDecorator;
@@ -52,7 +54,10 @@ class LaravelProvider extends AbstractServiceProvider
          */
         $kernel = app(Kernel::class);
         $kernel->pushMiddleware(\ZhuiTech\BootLaravel\Middleware\Language::class);
-        
+
+        $this->app['router']->aliasMiddleware('intranet', Intranet::class);
+        $this->app['router']->aliasMiddleware('sign', Signature::class);
+
         parent::loadMigrations();
         parent::loadRoutes();
         

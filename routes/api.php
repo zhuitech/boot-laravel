@@ -34,5 +34,5 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         $router->{$method}($url, 'ServiceProxyController@' . $function);
     }
 
-    Route::post('notify', 'ServiceProxyController@notify');
+    Route::post('notify', 'ServiceProxyController@notify');//->middleware('intranet');
 });
