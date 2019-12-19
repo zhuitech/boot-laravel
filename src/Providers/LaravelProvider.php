@@ -4,11 +4,12 @@ namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Support\Arr;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Schema;
 use League\Fractal\Manager;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
+use ZhuiTech\BootLaravel\Middleware\Cache;
 use ZhuiTech\BootLaravel\Middleware\Intranet;
 use ZhuiTech\BootLaravel\Middleware\Signature;
 use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
@@ -55,8 +56,11 @@ class LaravelProvider extends AbstractServiceProvider
         $kernel = app(Kernel::class);
         $kernel->pushMiddleware(\ZhuiTech\BootLaravel\Middleware\Language::class);
 
-        $this->app['router']->aliasMiddleware('intranet', Intranet::class);
-        $this->app['router']->aliasMiddleware('sign', Signature::class);
+        /* @var Router $router */
+        $router = $this->app['router'];
+        $router->aliasMiddleware('intranet', Intranet::class);
+        $router->aliasMiddleware('sign', Signature::class);
+        $router->aliasMiddleware('cache', Cache::class);
 
         parent::loadMigrations();
         parent::loadRoutes();
