@@ -4,11 +4,16 @@ namespace ZhuiTech\BootLaravel\Remote;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Helpers\RestClient;
+use ZhuiTech\BootLaravel\Remote\Service\UserAccount;
 
 /**
  * 远程模型
+ * 
+ * @mixin Builder
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
@@ -220,5 +225,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
         // 更新缓存
         \Cache::delete($this->itemCacheKey($this->getKey()));
         return $this->performFind($this->getKey());
+    }
+
+    /**
+     * 批量加载
+     * 
+     * @param Collection $items
+     * @return Collection
+     */
+    public static function batchInclude(Collection $list, $foreignKey, $transformer = 'public')
+    {
+        $ids = array_unique($list->pluck($foreignKey)->toArray());
+        $models = static::where('id', 'in', $ids)->limit(-1)->transformer($transformer)->get();
+        $foreignModel = Arr::first(explode('_', $foreignKey));
+        
+        $list->map(function ($item) use ($models, $foreignKey, $foreignModel) {
+            $item->$foreignModel = $models->where('id', $item->$foreignKey)->first();
+        });
+
+        return $list;
     }
 }

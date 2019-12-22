@@ -183,4 +183,14 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
     {
         return $this->take(1)->get($columns)->first();
     }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function transformer($value)
+    {
+        $this->model->queries['_transformer'] = $value;
+        return $this;
+    }
 }

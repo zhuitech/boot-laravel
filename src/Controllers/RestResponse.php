@@ -14,6 +14,7 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 use ZhuiTech\BootLaravel\Helpers\Restful;
+use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 
 /**
  *
