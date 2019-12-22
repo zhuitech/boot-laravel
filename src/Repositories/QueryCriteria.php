@@ -12,6 +12,7 @@ use Bosnadev\Repositories\Criteria\Criteria;
 use Illuminate\Database\Eloquent\Model;
 use Bosnadev\Repositories\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Arr;
 use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 
 /**
@@ -42,7 +43,7 @@ class QueryCriteria extends Criteria
         $or = $this->query['_or'] ?? false;
         $boolean = $or ? 'or' : 'and';
         $limit = $this->query['_limit'] ?? null;
-        $wheres = array_except($this->query, ['_order', '_or', '_limit', '_size', '_column', 'page', '_page', '_include']);
+        $wheres = Arr::except($this->query, ['_order', '_or', '_limit', '_size', '_column', 'page', '_page', '_include', '_transformer']);
 
         // Where
         foreach ($wheres as $field => $value) {
