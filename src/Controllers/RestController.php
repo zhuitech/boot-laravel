@@ -8,7 +8,6 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,13 +15,8 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use League\Fractal\Manager;
-use League\Fractal\Pagination\IlluminatePaginatorAdapter;
-use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\Item;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
-use ZhuiTech\BootLaravel\Repositories\ModelRepository;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
 use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 
@@ -145,6 +139,12 @@ abstract class RestController extends Controller
         $this->prepare();
 
         $data = request()->all();
+
+        // 指定转化器
+        if (isset($data['_transformer'])) {
+            $this->transformer = ModelTransformer::defaultTransformer($this->repository->newModel(), $data['_transformer']);
+        }
+
         $result = $this->execIndex($data);
 
         // v2 使用 transformer

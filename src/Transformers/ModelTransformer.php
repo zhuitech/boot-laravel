@@ -133,7 +133,14 @@ class ModelTransformer extends TransformerAbstract
         }
     }
 
-    public static function defaultTransformer($data)
+    /**
+     * 获取默认转化器
+     *
+     * @param $data
+     * @param string $type 转化器类型
+     * @return string
+     */
+    public static function defaultTransformer($data, $type = '')
     {
         if (is_object($data)) {
             $class = get_class($data);
@@ -144,7 +151,7 @@ class ModelTransformer extends TransformerAbstract
             }
 
             // 根据命名规则找到默认转化器
-            $transformerClass = Str::replaceFirst('Models', 'Transformers', $class) . 'Transformer';
+            $transformerClass = Str::replaceFirst('Models', 'Transformers', $class) . ucwords($type) . 'Transformer';
             if (class_exists($transformerClass)) {
                 return $transformerClass;
             }
