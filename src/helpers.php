@@ -6,6 +6,7 @@
  * Time: 18:05
  */
 
+use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
@@ -220,5 +221,17 @@ if (!function_exists('settings')) {
         }
 
         return '';
+    }
+}
+
+if (!function_exists('is_version')) {
+    /**
+     * 是否是版本
+     * @param $version
+     * @return bool
+     */
+    function is_version($version)
+    {
+        return Str::startsWith(app()->version(), $version);
     }
 }

@@ -24,6 +24,8 @@ class Cache
     /**
      * @param \Illuminate\Http\Request $request
      * @param Closure $next
+     * @param string $groups
+     * @param string $ttl
      * @return mixed
      */
     public function handle($request, Closure $next, $groups = '', $ttl = '20m')
@@ -39,22 +41,32 @@ class Cache
             // TTL
             preg_match('/((?<h>[\d]+)h)?((?<m>[\d]+)m)?((?<s>[\d]+)s)?/', $ttl, $m);
             $m = array_filter($m);
-            $seconds = (($m['h'] ?? 0) * 60 + ($m['m'] ?? 0)) * 60 + ($m['s'] ?? 0);
-            
+            $time = (($m['h'] ?? 0) * 60 + ($m['m'] ?? 0)) * 60 + ($m['s'] ?? 0);
+
+            if (is_version('5.5')) { // 5.5 use minutes
+                $time = $time / 60;
+            }
+
             // Group
-            $parameters = $request->route()->originalParameters();
+            $parameters = is_version('5.5') ? $request->route()->parameters() : $request->route()->originalParameters();
             $groups = explode('|', $groups);
             foreach ($groups as $group) {
                 $group = magic_replace($group, $parameters);
                 $key_group = \Cache::get("group:$group", []);
                 $key_group[] = $key;
                 $key_group = array_unique($key_group);
-                \Cache::put("group:$group", $key_group);
+                \Cache::forever("group:$group", $key_group);//dd($key_group);
             }
 
             $content = $response->content();
             $headers = $response->headers->all();
-            \Cache::put($key, compact('content', 'headers'), $seconds);
+            $value = compact('content', 'headers');
+
+            if ($time > 0) {
+                \Cache::put($key, $value, $time);
+            } else {
+                \Cache::forever($key, $value);
+            }
         }
 
         return $response;
