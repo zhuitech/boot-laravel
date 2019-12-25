@@ -36,7 +36,7 @@ class Cache
         // 设置缓存
         if ($response->status() == 200) {
             // Key
-            $key = md5($request->getRequestUri());
+            $key = 'page:' . md5($request->getRequestUri());
 
             // TTL
             preg_match('/((?<h>[\d]+)h)?((?<m>[\d]+)m)?((?<s>[\d]+)s)?/', $ttl, $m);
@@ -52,10 +52,10 @@ class Cache
             $groups = explode('|', $groups);
             foreach ($groups as $group) {
                 $group = magic_replace($group, $parameters);
-                $key_group = \Cache::get("group:$group", []);
+                $key_group = \Cache::get("page.group:$group", []);
                 $key_group[] = $key;
                 $key_group = array_unique($key_group);
-                \Cache::forever("group:$group", $key_group);//dd($key_group);
+                \Cache::forever("page.group:$group", $key_group);//dd($key_group);
             }
 
             $content = $response->content();
@@ -80,7 +80,7 @@ class Cache
     public static function forget($groups = [])
     {
         foreach ($groups as $group) {
-            $key_group = \Cache::get("group:$group", []);
+            $key_group = \Cache::get("page.group:$group", []);
             \Cache::deleteMultiple($key_group);
         }
     }
