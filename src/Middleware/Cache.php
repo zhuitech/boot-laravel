@@ -49,6 +49,8 @@ class Cache
 
             // Group
             $parameters = is_version('5.5') ? $request->route()->parameters() : $request->route()->originalParameters();
+            $parameters += $request->all();
+
             $groups = explode('|', $groups);
             foreach ($groups as $group) {
                 $group = magic_replace($group, $parameters);
