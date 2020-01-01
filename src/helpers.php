@@ -185,9 +185,9 @@ if (!function_exists('unique_no')) {
      * @param string $prefix
      * @return string
      */
-    function unique_no($prefix = 'O')
+    function unique_no($prefix = 'O', $length = 13)
     {
-        return $prefix . date('ymd') . substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
+        return $prefix . date('ymd') . substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, $length);
     }
 }
 
