@@ -181,13 +181,20 @@ if (! function_exists('morph_alias')) {
 if (!function_exists('unique_no')) {
     /**
      * 创建唯一编号
+     *
+     * uniqid()：此函数获取一个带前缀、基于当前时间微秒数的唯一ID。
+     * substr(uniqid(), 7, 13)：由于uniqid()函数生成的结果前面7位很久才会发生变化，所以有或者没有对于我们没有多少影响，所以我们截取后面经常发生变化的几位。
+     * str_split(substr(uniqid(), 7, 13),1)：我们将刚刚生成的字符串进行分割放到数组里面，str_split()第二个参数是每个数组元素的长度。
+     * array_map('ord', str_split(substr(uniqid(), 7, 13),1)))：返回字符串的首个字符的 ASCII值，意思就是把第二个参数生成的数组每个元素全部转换为数字，因为刚刚我们截取的字符串中含有字母，不适合订单号。
+     * 由于刚刚生成的随机数可能会长短不一（原因就是，每个字符转换为ASCII值可能不一样，有些是2位，有些可能是一位），所以我们截取0-8
      * 
      * @param string $prefix
      * @return string
      */
-    function unique_no($prefix = 'O', $length = 13)
+    function unique_no($prefix = '')
     {
-        return $prefix . date('ymd') . substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, $length);
+        $uniqid = substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
+        return $prefix . date('Ymd') . $uniqid . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
     }
 }
 
