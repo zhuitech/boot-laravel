@@ -26,7 +26,7 @@ class MicroServiceProvider extends AbstractServiceProvider
 {
     public function boot()
     {
-        $this->configSession();
+        //$this->configSession();
 
         parent::boot();
     }
