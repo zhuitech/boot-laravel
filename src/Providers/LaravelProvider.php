@@ -13,7 +13,6 @@ use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
 use ZhuiTech\BootLaravel\Middleware\Cache;
 use ZhuiTech\BootLaravel\Middleware\Intranet;
 use ZhuiTech\BootLaravel\Middleware\Signature;
-use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
 use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 use ZhuiTech\BootLaravel\Setting\CacheDecorator;
 use ZhuiTech\BootLaravel\Setting\EloquentSetting;
@@ -42,6 +41,7 @@ class LaravelProvider extends AbstractServiceProvider
      * Bootstrap the application services.
      *
      * @return void
+     * @throws \ReflectionException
      */
     public function boot()
     {
