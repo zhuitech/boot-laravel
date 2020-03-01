@@ -6,7 +6,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['get', 'logistics/regions/select'], ['get', 'logistics/regions'], ['get', 'logistics/companies'], ['get', 'logistics/query'],
         ['get', 'system/shipping/query'], ['get', 'system/shipping/company'],
 
-        ['post', 'sms/verify'], ['post', 'sms/check'],
+        ['post', 'sms/verify'], ['post', 'sms/check'], ['post', 'sms/send'],
 
         ['post', 'pay/notify/{channel}'], ['post', 'pay/return/{channel}/{method}'], ['post', 'pay/notify/{channel}/{method}'],
 

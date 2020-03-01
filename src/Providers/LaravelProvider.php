@@ -6,13 +6,13 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
 use ZhuiTech\BootLaravel\Middleware\Cache;
 use ZhuiTech\BootLaravel\Middleware\Intranet;
 use ZhuiTech\BootLaravel\Middleware\Signature;
-use ZhuiTech\BootLaravel\Repositories\RemoteSettingRepository;
 use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 use ZhuiTech\BootLaravel\Setting\CacheDecorator;
 use ZhuiTech\BootLaravel\Setting\EloquentSetting;
@@ -41,9 +41,13 @@ class LaravelProvider extends AbstractServiceProvider
      * Bootstrap the application services.
      *
      * @return void
+     * @throws \ReflectionException
      */
     public function boot()
     {
+        // 加载设置
+        $this->loadSettings();
+
         /**
          * 配置Eloquent
          * 解决 MySQL v5.7.7 以下版本会报错误：Specified key was too long error.
@@ -111,5 +115,18 @@ class LaravelProvider extends AbstractServiceProvider
         $this->app->alias(SettingInterface::class, 'system_setting');
         
         parent::register();
+    }
+
+    /**
+     * 加载已经修改的配置
+     */
+    private function loadSettings()
+    {
+        $settings = settings()->allToArray();
+        foreach ($settings as $key => $value) {
+            if (Str::contains($key, '.')) {
+                config([$key => $value]);
+            }
+        }
     }
 }
