@@ -24,6 +24,7 @@ class RestCodeException extends HttpException
      * RestCodeException constructor.
      * @param int $code
      * @param null $data
+     * @param null $message
      */
     public function __construct(int $code = 0, $data = null, $message = NULL)
     {
