@@ -36,7 +36,7 @@ class LogisticsCompany extends Model
 
         if (empty($company)) {
             $company = new LogisticsCompany();
-            $company->code = $code;
+            $company->code = $code ?? $name;
             $company->name = $name;
             $company->save();
         }
