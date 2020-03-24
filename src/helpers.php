@@ -50,15 +50,19 @@ if (! function_exists('storage_url')) {
      */
     function storage_url($path, $disk = null)
     {
-        if (URL::isValidUrl($path)) {
-            return $path;
-        }
-
         if (empty($path)) {
             return null;
         }
 
-        return Storage::disk($disk)->url($path);
+        // 生成URL
+        if (URL::isValidUrl($path)) {
+            $url = $path;
+        } else {
+            $url = Storage::disk($disk)->url($path);
+        }
+
+        // 返回CDN地址
+        return cdn($url);
     }
 }
 
@@ -90,8 +94,20 @@ if (! function_exists('cdn')) {
      */
     function cdn($path)
     {
-        $cdn = env('CDN_URL', '');
-        return $cdn.'/'.trim($path, '/');
+        $cdn = trim(env('CDN_URL', ''), '/');
+
+        // 没有配置CDN
+        if (empty($cdn)) {
+            return $path;
+        }
+
+        if (URL::isValidUrl($path)) {
+            // 替换域名
+            return str_replace(env('APP_URL', ''), $cdn, $path);
+        } else {
+            // 直接添加前缀
+            return $cdn . '/' . trim($path, '/');
+        }
     }
 }
 
