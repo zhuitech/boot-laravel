@@ -27,7 +27,7 @@ class ModelTransformer extends TransformerAbstract
      */
     protected function defaultExcepts()
     {
-        return ['updated_at', 'deleted_at'];
+        return ['deleted_at'];
     }
 
     /**
