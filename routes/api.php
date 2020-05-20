@@ -16,7 +16,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['post', 'file/upload/{strategy}'], ['post', 'file/upload/callback/{disk}'], ['post', 'file/upload/{disk}'], ['post', 'file/upload/form/token'],
 
         ['get', 'cms/ads/slug/{slug}'],
-        ['get', 'cms/page/categories/tree'], ['get', 'cms/page/articles'],
+        ['get', 'cms/page/categories/tree'], ['get', 'cms/page/articles'], ['get', 'cms/page/articles/{id}'],
 
         ['get', 'wechat/pub/auth'], ['get', 'wechat/mp/auth'], ['post', 'wechat/mp/qrcode'], ['get', 'wechat/pub/jssdk'], ['post', 'wechat/mp/poster'],
 
