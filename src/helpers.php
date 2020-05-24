@@ -111,6 +111,21 @@ if (! function_exists('cdn')) {
     }
 }
 
+if (! function_exists('resize')) {
+    function resize($url, $width = null, $height = null, $options = null)
+    {
+        // 没有指定，默认使用请求参数
+        $resize = request('_resize');
+        if ($resize && !$width && !$height) {
+            $values = explode(',', $resize);
+            $width = $values[0] ?? null;
+            $height = $values[1] ?? null;
+        }
+
+        return Croppa::url($url, $width, $height, $options);
+    }
+}
+
 if (! function_exists('yuan')) {
     /**
      * 格式化以分为单位的金额
