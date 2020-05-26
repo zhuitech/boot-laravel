@@ -41,12 +41,12 @@ class FileHelper
     {
         $base = base64_encode($content);
 
-        return 'data:'.$mime.';base64,'.$base;
+        return 'data:' . $mime . ';base64,' . $base;
     }
 
     /**
      * 获取新文件路径
-     * 
+     *
      * @param string $category
      * @param string $extension
      * @param string $dir
@@ -54,14 +54,14 @@ class FileHelper
      */
     public static function hashPath($category = 'images', $extension = '.png', $dir = '{Y}/{m}/{d}')
     {
-        $filename = Str::random(8) . $extension;
+        $filename = md5(uniqid()) . $extension;
         $path = self::formatDir("$category/$dir/$filename");
         return $path;
     }
 
     /**
      * 获取文件目录
-     * 
+     *
      * @param string $category
      * @param string $dir
      * @return string
@@ -69,5 +69,15 @@ class FileHelper
     public static function dir($category = 'files', $dir = '{Y}/{m}/{d}')
     {
         return self::formatDir("$category/$dir");
+    }
+
+    /**
+     * 生成唯一文件名
+     * @param $extension
+     * @return string
+     */
+    public static function uniqueName($extension)
+    {
+        return md5(uniqid()) . '.' . $extension;
     }
 }
