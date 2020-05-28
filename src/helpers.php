@@ -6,6 +6,9 @@
  * Time: 18:05
  */
 
+use AetherUpload\ConfigMapper;
+use AetherUpload\Resource;
+use AetherUpload\SavedPathResolver;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
@@ -112,6 +115,14 @@ if (! function_exists('cdn')) {
 }
 
 if (! function_exists('resize')) {
+    /**
+     * 生成缩略图
+     * @param $url
+     * @param null $width
+     * @param null $height
+     * @param null $options
+     * @return string
+     */
     function resize($url, $width = null, $height = null, $options = null)
     {
         // 没有指定，默认使用请求参数
@@ -125,6 +136,24 @@ if (! function_exists('resize')) {
         return Croppa::url($url, $width, $height, $options);
     }
 }
+
+if (! function_exists('large_url')) {
+    /**
+     * 生成大文件上传的地址
+     * @param $uri
+     * @return string
+     * @throws Exception
+     */
+    function large_url($uri)
+    {
+        $params = SavedPathResolver::decode($uri);
+        ConfigMapper::instance()->applyGroupConfig($params->group);
+        $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
+        return $resource->getPath();
+    }
+}
+
+/***************************************************************************************************************************************************************/
 
 if (! function_exists('yuan')) {
     /**
@@ -239,7 +268,7 @@ if (!function_exists('random_string')) {
 
 if (!function_exists('settings')) {
     /**
-     * get settings.
+     * 获取系统设置
      * @param null $key
      * @param null $value
      * @return \Illuminate\Foundation\Application|mixed|string
@@ -275,6 +304,13 @@ if (!function_exists('is_version')) {
 }
 
 if (!function_exists('var_export_new')) {
+    /**
+     * 生成格式化的php数组
+     *
+     * @param $expression
+     * @param bool $return
+     * @return mixed|string|string[]|null
+     */
     function var_export_new($expression, $return = FALSE)
     {
         $export = var_export($expression, TRUE);
