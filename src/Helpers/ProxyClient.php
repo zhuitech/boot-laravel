@@ -24,7 +24,7 @@ class ProxyClient extends RestClient
             ],
             'query' => $request->query(),
         ];
-        foreach (['X-PJAX', 'X-PJAX-Container', 'Accept', 'Referer'] as $item) {
+        foreach (['X-PJAX', 'X-PJAX-Container', 'Accept', 'Referer', 'x-requested-with'] as $item) {
             if ($request->hasHeader($item)) {
                 $options['headers'][$item] = $request->header($item);
             }
