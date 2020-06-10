@@ -23,6 +23,8 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['post', 'user/login/ticket', 'token'], ['post', 'user/login/quick', 'token'], ['post', 'user/register/quick', 'token'], ['get', 'user/me'],
 
         ['post', 'ar/targets/search'], ['get', 'vr/tours/{id}'], ['get', 'vr/tours/{id}/xml'], ['get', 'vr/tours'], ['get', 'vr/tours/{id}/preview'],
+	    
+	    ['get', 'device/devices/code/{code}'],
     ];
 
     foreach ($registry as $item) {
