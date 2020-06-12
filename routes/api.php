@@ -6,7 +6,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['get', 'logistics/regions/select'], ['get', 'logistics/regions'], ['get', 'logistics/companies'], ['get', 'logistics/query'],
         ['get', 'system/shipping/query'], ['get', 'system/shipping/company'],
 
-        ['post', 'sms/verify'], ['post', 'sms/check'], ['post', 'sms/send'],
+        ['post', 'sms/verify', ['middleware' => ['throttle:20,1']]], ['post', 'sms/check'], ['post', 'sms/send'],
 
         ['post', 'pay/notify/{channel}'], ['post', 'pay/return/{channel}/{method}'], ['post', 'pay/notify/{channel}/{method}'],
 
@@ -20,7 +20,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 
         ['get', 'wechat/pub/auth'], ['get', 'wechat/mp/auth'], ['post', 'wechat/mp/qrcode'], ['get', 'wechat/pub/jssdk'], ['post', 'wechat/mp/poster'],
 
-        ['post', 'user/login/ticket', 'token'], ['post', 'user/login/quick', 'token'], ['post', 'user/register/quick', 'token'], ['get', 'user/me'],
+        ['post', 'user/login/ticket', ['method' => 'token']], ['post', 'user/login/quick', ['method' => 'token']], ['post', 'user/register/quick', ['method' => 'token']], ['get', 'user/me'],
 
         ['post', 'ar/targets/search'], ['get', 'vr/tours/{id}'], ['get', 'vr/tours/{id}/xml'], ['get', 'vr/tours'], ['get', 'vr/tours/{id}/preview'],
 	    
@@ -30,8 +30,12 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
     foreach ($registry as $item) {
         $method = $item[0];
         $url = $item[1];
-        $function = $item[2] ?? 'api';
-        
-        $router->{$method}($url, 'ServiceProxyController@' . $function);
+        $function = $item[2]['method'] ?? 'api';
+
+        $routeItem = $router->{$method}($url, 'ServiceProxyController@' . $function);
+
+        if (isset($item[2]['middleware'])) {
+	        $routeItem->middleware($item[2]['middleware']);
+        }
     }
 });
