@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
+use Jialeo\LaravelSchemaExtend\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -17,9 +17,10 @@ class CreateSystemSettingTable extends Migration
 
         Schema::create($table, function(Blueprint $table) {
             $table->increments('id');
-            $table->string('key')->index();
-            $table->text('value');
+            $table->string('key')->comment('键')->index();
+            $table->text('value')->comment('值');
             $table->timestamps();
+	        $table->comment = '系统配置表';
         });
     }
 
