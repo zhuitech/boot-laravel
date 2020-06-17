@@ -278,3 +278,4 @@ $value = setting('key');
 // 更新配置，$value可以是一个数组
 setting(['key' => $value]);
 ```
+
