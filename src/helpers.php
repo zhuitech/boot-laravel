@@ -9,323 +9,469 @@
 use AetherUpload\ConfigMapper;
 use AetherUpload\Resource;
 use AetherUpload\SavedPathResolver;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
-use Overtrue\LaravelUploader\Events\FileUploaded;
-use Overtrue\LaravelUploader\Events\FileUploading;
-use Overtrue\LaravelUploader\Services\FileUpload;
+use League\Fractal\TransformerAbstract;
+use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 
-if (! function_exists('relative_path')) {
-    /**
-     * 从物理路径获取相对路径
-     *
-     * @param $real_path
-     * @return mixed
-     */
-    function relative_path($real_path)
-    {
-        return str_replace(public_path(), '', $real_path);
-    }
+if (!function_exists('relative_path')) {
+	/**
+	 * 从物理路径获取相对路径
+	 *
+	 * @param $real_path
+	 * @return mixed
+	 */
+	function relative_path($real_path)
+	{
+		return str_replace(public_path(), '', $real_path);
+	}
 }
 
-if (! function_exists('local_path')) {
-    /**
-     * 获取本地路径
-     *
-     * @param $real_path
-     * @return mixed
-     */
-    function local_path($path, $disk = null)
-    {
-        return Storage::disk($disk)->path($path);
-    }
+if (!function_exists('local_path')) {
+	/**
+	 * 获取本地路径
+	 *
+	 * @param $real_path
+	 * @return mixed
+	 */
+	function local_path($path, $disk = null)
+	{
+		return Storage::disk($disk)->path($path);
+	}
 }
 
-if (! function_exists('storage_url')) {
-    /**
-     * 获取存储文件URL
-     *
-     * @param $path
-     * @param null $disk
-     * @return string
-     */
-    function storage_url($path, $disk = null)
-    {
-        if (empty($path)) {
-            return null;
-        }
+if (!function_exists('storage_url')) {
+	/**
+	 * 获取存储文件URL
+	 *
+	 * @param $path
+	 * @param null $disk
+	 * @return string
+	 */
+	function storage_url($path, $disk = null)
+	{
+		if (empty($path)) {
+			return null;
+		}
 
-        // 生成URL
-        if (URL::isValidUrl($path)) {
-            $url = $path;
-        } else {
-            $url = Storage::disk($disk)->url($path);
-        }
+		// 生成URL
+		if (URL::isValidUrl($path)) {
+			$url = $path;
+		} else {
+			$url = Storage::disk($disk)->url($path);
+		}
 
-        // 返回CDN地址
-        return cdn($url);
-    }
+		// 返回CDN地址
+		return cdn($url);
+	}
 }
 
-if (! function_exists('magic_replace')) {
-    /**
-     * 替换魔法变量
-     * @param $url
-     * @param $data
-     * @return null|string
-     */
-    function magic_replace($url, $data)
-    {
-        if (!empty($url)) {
-            $replacements = [];
-            foreach ($data as $key => $value) {
-                $replacements["{{$key}}"] = $value;
-            }
-            return strtr($url, $replacements);
-        }
-        return $url;
-    }
+if (!function_exists('magic_replace')) {
+	/**
+	 * 替换魔法变量
+	 * @param $url
+	 * @param $data
+	 * @return null|string
+	 */
+	function magic_replace($url, $data)
+	{
+		if (!empty($url)) {
+			$replacements = [];
+			foreach ($data as $key => $value) {
+				$replacements["{{$key}}"] = $value;
+			}
+			return strtr($url, $replacements);
+		}
+		return $url;
+	}
 }
 
-if (! function_exists('cdn')) {
-    /**
-     * 生成CDN地址
-     * @param $path
-     * @return string
-     */
-    function cdn($path)
-    {
-        $cdn = trim(env('CDN_URL', ''), '/');
+if (!function_exists('cdn')) {
+	/**
+	 * 生成CDN地址
+	 * @param $path
+	 * @return string
+	 */
+	function cdn($path)
+	{
+		$cdn = trim(env('CDN_URL', ''), '/');
 
-        // 没有配置CDN
-        if (empty($cdn)) {
-            return $path;
-        }
+		// 没有配置CDN
+		if (empty($cdn)) {
+			return $path;
+		}
 
-        if (URL::isValidUrl($path)) {
-            // 替换域名
-            return str_replace(env('APP_URL', ''), $cdn, $path);
-        } else {
-            // 直接添加前缀
-            return $cdn . '/' . trim($path, '/');
-        }
-    }
+		if (URL::isValidUrl($path)) {
+			// 替换域名
+			return str_replace(env('APP_URL', ''), $cdn, $path);
+		} else {
+			// 直接添加前缀
+			return $cdn . '/' . trim($path, '/');
+		}
+	}
 }
 
-if (! function_exists('resize')) {
-    /**
-     * 生成缩略图
-     * @param $url
-     * @param null $width
-     * @param null $height
-     * @param null $options
-     * @return string
-     */
-    function resize($url, $width = null, $height = null, $options = null)
-    {
-        // 没有指定，默认使用请求参数
-        $resize = request('_resize');
-        if ($resize && !$width && !$height) {
-            $values = explode(',', $resize);
-            $width = $values[0] ?? null;
-            $height = $values[1] ?? null;
-        }
+if (!function_exists('resize')) {
+	/**
+	 * 生成缩略图
+	 * @param $url
+	 * @param null $width
+	 * @param null $height
+	 * @param null $options
+	 * @return string
+	 */
+	function resize($url, $width = null, $height = null, $options = null)
+	{
+		// 没有指定，默认使用请求参数
+		$resize = request('_resize');
+		if ($resize && !$width && !$height) {
+			$values = explode(',', $resize);
+			$width = $values[0] ?? null;
+			$height = $values[1] ?? null;
+		}
 
-        return Croppa::url($url, $width, $height, $options);
-    }
+		return Croppa::url($url, $width, $height, $options);
+	}
 }
 
-if (! function_exists('large_url')) {
-    /**
-     * 生成大文件上传的地址
-     * @param $uri
-     * @return string
-     * @throws Exception
-     */
-    function large_url($uri)
-    {
-        $params = SavedPathResolver::decode($uri);
-        ConfigMapper::instance()->applyGroupConfig($params->group);
-        $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
-        return $resource->getPath();
-    }
+if (!function_exists('large_url')) {
+	/**
+	 * 生成大文件上传的地址
+	 * @param $uri
+	 * @return string
+	 * @throws Exception
+	 */
+	function large_url($uri)
+	{
+		$params = SavedPathResolver::decode($uri);
+		ConfigMapper::instance()->applyGroupConfig($params->group);
+		$resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
+		return $resource->getPath();
+	}
 }
 
 /***************************************************************************************************************************************************************/
 
-if (! function_exists('yuan')) {
-    /**
-     * 格式化以分为单位的金额
-     *
-     * @param $amount
-     * @return string
-     */
-    function yuan($amount, $symbol = false)
-    {
-        $value = number_format($amount / 100, 2, ".", "");
-        
-        if ($symbol) {
-            $value = '￥' . $value;
-        }
-        
-        return $value;
-    }
+if (!function_exists('yuan')) {
+	/**
+	 * 格式化以分为单位的金额
+	 *
+	 * @param $amount
+	 * @return string
+	 */
+	function yuan($amount, $symbol = false)
+	{
+		$value = number_format($amount / 100, 2, ".", "");
+
+		if ($symbol) {
+			$value = '￥' . $value;
+		}
+
+		return $value;
+	}
 }
 
-if (! function_exists('transform_item')) {
-    /**
-     * 转换对象
-     *
-     * @param $item
-     * @param \League\Fractal\TransformerAbstract $transformer
-     * @return array
-     */
-    function transform_item($item, \League\Fractal\TransformerAbstract $transformer = null)
-    {
-        if (empty($transformer)) {
-            $class = \ZhuiTech\BootLaravel\Transformers\ModelTransformer::defaultTransformer($item);
-            $transformer = new $class;
-        }
-        
-        $data = new Item($item, $transformer);
+if (!function_exists('transform_item')) {
+	/**
+	 * 转换对象
+	 *
+	 * @param $item
+	 * @param TransformerAbstract $transformer
+	 * @return array
+	 */
+	function transform_item($item, TransformerAbstract $transformer = null)
+	{
+		if (empty($transformer)) {
+			$class = ModelTransformer::defaultTransformer($item);
+			$transformer = new $class;
+		}
 
-        $fractal = resolve(Manager::class);
-        return $fractal->createData($data)->toArray();
-    }
+		$data = new Item($item, $transformer);
+
+		$fractal = resolve(Manager::class);
+		return $fractal->createData($data)->toArray();
+	}
 }
 
-if (! function_exists('transform_list')) {
-    /**
-     * 转换集合
-     *
-     * @param \Illuminate\Support\Collection $list
-     * @param \League\Fractal\TransformerAbstract $transformer
-     * @return array
-     */
-    function transform_list($list, \League\Fractal\TransformerAbstract $transformer = null)
-    {
-        if (empty($transformer)) {
-            $class = \ZhuiTech\BootLaravel\Transformers\ModelTransformer::defaultTransformer($list->first());
-            $transformer = new $class;
-        }
-        
-        $data = new Collection($list, $transformer);
+if (!function_exists('transform_list')) {
+	/**
+	 * 转换集合
+	 *
+	 * @param \Illuminate\Support\Collection $list
+	 * @param TransformerAbstract $transformer
+	 * @return array
+	 */
+	function transform_list($list, TransformerAbstract $transformer = null)
+	{
+		if (empty($transformer)) {
+			$class = ModelTransformer::defaultTransformer($list->first());
+			$transformer = new $class;
+		}
 
-        $fractal = resolve(Manager::class);
-        return $fractal->createData($data)->toArray();
-    }
+		$data = new Collection($list, $transformer);
+
+		$fractal = resolve(Manager::class);
+		return $fractal->createData($data)->toArray();
+	}
 }
 
-if (! function_exists('morph_alias')) {
-    /**
-     * 获取别名
-     *
-     * @param $class
-     * @return string
-     */
-    function morph_alias($class)
-    {
-        $map = \Illuminate\Database\Eloquent\Relations\Relation::$morphMap;
+if (!function_exists('morph_alias')) {
+	/**
+	 * 获取别名
+	 *
+	 * @param $class
+	 * @return string
+	 */
+	function morph_alias($class)
+	{
+		$map = Relation::$morphMap;
 
-        foreach ($map as $alias => $fullname) {
-            if ($class == $fullname) {
-                return $alias;
-            }
-        }
-        return $class;
-    }
+		foreach ($map as $alias => $fullname) {
+			if ($class == $fullname) {
+				return $alias;
+			}
+		}
+		return $class;
+	}
 }
 
 if (!function_exists('unique_no')) {
-    /**
-     * 创建唯一编号
-     *
-     * uniqid()：此函数获取一个带前缀、基于当前时间微秒数的唯一ID。
-     * substr(uniqid(), 7, 13)：由于uniqid()函数生成的结果前面7位很久才会发生变化，所以有或者没有对于我们没有多少影响，所以我们截取后面经常发生变化的几位。
-     * str_split(substr(uniqid(), 7, 13),1)：我们将刚刚生成的字符串进行分割放到数组里面，str_split()第二个参数是每个数组元素的长度。
-     * array_map('ord', str_split(substr(uniqid(), 7, 13),1)))：返回字符串的首个字符的 ASCII值，意思就是把第二个参数生成的数组每个元素全部转换为数字，因为刚刚我们截取的字符串中含有字母，不适合订单号。
-     * 由于刚刚生成的随机数可能会长短不一（原因就是，每个字符转换为ASCII值可能不一样，有些是2位，有些可能是一位），所以我们截取0-8
-     * 
-     * @param string $prefix
-     * @return string
-     */
-    function unique_no($prefix = '')
-    {
-        $uniqid = substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
-        return $prefix . date('Ymd') . $uniqid . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-    }
+	/**
+	 * 创建唯一编号
+	 *
+	 * uniqid()：此函数获取一个带前缀、基于当前时间微秒数的唯一ID。
+	 * substr(uniqid(), 7, 13)：由于uniqid()函数生成的结果前面7位很久才会发生变化，所以有或者没有对于我们没有多少影响，所以我们截取后面经常发生变化的几位。
+	 * str_split(substr(uniqid(), 7, 13),1)：我们将刚刚生成的字符串进行分割放到数组里面，str_split()第二个参数是每个数组元素的长度。
+	 * array_map('ord', str_split(substr(uniqid(), 7, 13),1)))：返回字符串的首个字符的 ASCII值，意思就是把第二个参数生成的数组每个元素全部转换为数字，因为刚刚我们截取的字符串中含有字母，不适合订单号。
+	 * 由于刚刚生成的随机数可能会长短不一（原因就是，每个字符转换为ASCII值可能不一样，有些是2位，有些可能是一位），所以我们截取0-8
+	 *
+	 * @param string $prefix
+	 * @return string
+	 */
+	function unique_no($prefix = '')
+	{
+		$uniqid = substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
+		return $prefix . date('Ymd') . $uniqid . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+	}
 }
 
 if (!function_exists('random_string')) {
-    function random_string($length = 10)
-    {
-        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-        return strtoupper(substr(str_shuffle($permitted_chars), 0, $length));
-    }
+	function random_string($length = 10)
+	{
+		$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+		return strtoupper(substr(str_shuffle($permitted_chars), 0, $length));
+	}
 }
 
 if (!function_exists('settings')) {
-    /**
-     * 获取系统设置
-     * @param null $key
-     * @param null $value
-     * @return \Illuminate\Foundation\Application|mixed|string
-     */
-    function settings($key = null, $value = null)
-    {
-        if (is_null($key)) {
-            return app('system_setting');
-        }
+	/**
+	 * 获取系统设置
+	 * @param null $key
+	 * @param null $value
+	 * @return Application|mixed|string
+	 */
+	function settings($key = null, $value = null)
+	{
+		if (is_null($key)) {
+			return app('system_setting');
+		}
 
-        if (is_string($key)) {
-            return app('system_setting')->getSetting($key, $value);
-        }
+		if (is_string($key)) {
+			return app('system_setting')->getSetting($key, $value);
+		}
 
-        if (is_array($key)) {
-            return app('system_setting')->setSetting($key);
-        }
+		if (is_array($key)) {
+			return app('system_setting')->setSetting($key);
+		}
 
-        return '';
-    }
+		return '';
+	}
 }
 
 if (!function_exists('is_version')) {
-    /**
-     * 是否是版本
-     * @param $version
-     * @return bool
-     */
-    function is_version($version)
-    {
-        return Str::startsWith(app()->version(), $version);
-    }
+	/**
+	 * 是否是版本
+	 * @param $version
+	 * @return bool
+	 */
+	function is_version($version)
+	{
+		return Str::startsWith(app()->version(), $version);
+	}
 }
 
 if (!function_exists('var_export_new')) {
-    /**
-     * 生成格式化的php数组
-     *
-     * @param $expression
-     * @param bool $return
-     * @return mixed|string|string[]|null
-     */
-    function var_export_new($expression, $return = FALSE)
-    {
-        $export = var_export($expression, TRUE);
-        $export = preg_replace("/^([ ]*)(.*)/m", '$1$1$2', $export);
+	/**
+	 * 生成格式化的php数组
+	 *
+	 * @param $expression
+	 * @param bool $return
+	 * @return mixed|string|string[]|null
+	 */
+	function var_export_new($expression, $return = FALSE)
+	{
+		$export = var_export($expression, TRUE);
+		$export = preg_replace("/^([ ]*)(.*)/m", '$1$1$2', $export);
 
-        $array = preg_split("/\r\n|\n|\r/", $export);
-        $array = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [NULL, ']$1', ' => ['], $array);
-        $array = preg_replace("/\d+ =>/", '', $array);
+		$array = preg_split("/\r\n|\n|\r/", $export);
+		$array = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [NULL, ']$1', ' => ['], $array);
+		$array = preg_replace("/\d+ =>/", '', $array);
 
-        $export = join(PHP_EOL, array_filter(["["] + $array));
+		$export = join(PHP_EOL, array_filter(["["] + $array));
 
-        if ((bool)$return) {
-            return $export;
-        } else {
-            echo $export;
-        }
-    }
+		if ((bool)$return) {
+			return $export;
+		} else {
+			echo $export;
+		}
+	}
+}
+
+if (!function_exists('is_mobile')) {
+	/**
+	 * isMobile函数:检测参数的值是否为正确的中国手机号码格式
+	 * 返回值:是正确的手机号码返回手机号码,不是返回false
+	 *
+	 * @param $arg
+	 * @return bool
+	 */
+	function is_mobile($arg)
+	{
+		$RegExp = '/^(\+?0?86\-?)?((13\d|14[57]|15[^4,\D]|17[678]|18\d)\d{8}|170[059]\d{7})$/';
+		return preg_match($RegExp, $arg) ? $arg : false;
+	}
+}
+
+if (!function_exists('is_mail')) {
+	/**
+	 * isMail函数:检测是否为正确的邮件格式
+	 * 返回值:是正确的邮件格式返回邮件,不是返回false
+	 * @param $arg
+	 * @return bool
+	 */
+	function is_mail($arg)
+	{
+		$RegExp = '/^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/';
+		return preg_match($RegExp, $arg) ? $arg : false;
+	}
+}
+
+if (!function_exists('is_username')) {
+	/**
+	 * 是否符合用户名规范
+	 * @param $arg
+	 * @return bool
+	 */
+	function is_username($arg)
+	{
+		$RegExp = '/^[a-zA-Z\d\x{4e00}-\x{9fa5}]{2,20}$/u';
+		return preg_match($RegExp, $arg) ? $arg : false;
+	}
+}
+
+if (!function_exists('is_wechat')) {
+	/**
+	 * 是否微信浏览器
+	 * @return bool
+	 */
+	function is_wechat()
+	{
+		if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
+			return true;
+		}
+		return false;
+	}
+}
+
+if (!function_exists('is_number')) {
+	/**
+	 * 是否是数字
+	 * @param $arg
+	 * @return bool
+	 */
+	function is_number($arg)
+	{
+		$RegExp = '/^[0-9]*$/';
+		return preg_match($RegExp, $arg) ? $arg : false;
+	}
+}
+
+if (!function_exists('collect_to_array')) {
+	/**
+	 * 集合对象转数组
+	 *
+	 * @param $collection
+	 * @return array
+	 */
+	function collect_to_array($collection)
+	{
+		$array = [];
+		foreach ($collection as $item) {
+			$array[] = $item;
+		}
+		return $array;
+	}
+}
+
+
+if (!function_exists('str2hex')) {
+	/**
+	 * Generate the str to 16hex.
+	 *
+	 * @param string $str
+	 * @param bool $center center:居中1B 61 1;
+	 * @param bool $bold
+	 * @return array
+	 */
+	function str2hex($str, $center = false, $bold = false)
+	{
+		$str = iconv('utf-8', 'gbk', $str);
+		$hex = '';
+
+		for ($i = 0, $length = strlen($str); $i < $length; $i++) {
+			$hex .= dechex(ord($str[$i]));
+		}
+
+		//$array = ['20', '20', '20', '20'];
+
+		/*添加样式*/
+		if ($center) {  //居中
+			$array[] = '1B';
+			$array[] = '61';
+			$array[] = '1';
+		}
+
+		if ($bold) {  //字体放大
+			$array[] = '1B';
+			$array[] = '21';
+			$array[] = '18';
+		}
+		/*end添加样式*/
+
+		for ($start = 0; $start < strlen($hex); $start += 2) {
+			$array[] = substr($hex, $start, 2);
+		}
+
+		/*取消样式*/
+		if ($bold) {  //字体放大
+			$array[] = '1B';
+			$array[] = '21';
+			$array[] = '0';
+		}
+
+		$array[] = '0a';
+		if ($center) {  //居中
+			$array[] = '1B';
+			$array[] = '61';
+			$array[] = '0';
+
+		}
+		/*end取消样式*/
+
+		return $array;
+	}
 }

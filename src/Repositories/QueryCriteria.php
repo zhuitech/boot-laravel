@@ -8,12 +8,11 @@
 
 namespace ZhuiTech\BootLaravel\Repositories;
 
+use Bosnadev\Repositories\Contracts\RepositoryInterface;
 use Bosnadev\Repositories\Criteria\Criteria;
 use Illuminate\Database\Eloquent\Model;
-use Bosnadev\Repositories\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
-use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 
 /**
  * Class QueryCriteria
@@ -21,89 +20,89 @@ use ZhuiTech\BootLaravel\Exceptions\RestFailException;
  */
 class QueryCriteria extends Criteria
 {
-    protected $query;
+	protected $query;
 
-    /**
-     * QueryStringCriteria constructor.
-     */
-    public function __construct($query)
-    {
-        $this->query = $query;
-    }
+	/**
+	 * QueryStringCriteria constructor.
+	 */
+	public function __construct($query)
+	{
+		$this->query = $query;
+	}
 
-    /**
-     * @param Model $model
-     * @param RepositoryInterface $repository
-     * @return mixed
-     */
-    public function apply($model, RepositoryInterface $repository)
-    {
-        // 获取查询条件
-        $orders = $this->query['_order'] ?? [];
-        $or = $this->query['_or'] ?? false;
-        $boolean = $or ? 'or' : 'and';
-        $limit = $this->query['_limit'] ?? null;
-        $wheres = Arr::except($this->query, ['_order', '_or', '_limit', '_size', '_column', 'page', '_page', '_include', '_transformer', '_resize']);
+	/**
+	 * @param Model $model
+	 * @param RepositoryInterface $repository
+	 * @return mixed
+	 */
+	public function apply($model, RepositoryInterface $repository)
+	{
+		// 获取查询条件
+		$orders = $this->query['_order'] ?? [];
+		$or = $this->query['_or'] ?? false;
+		$boolean = $or ? 'or' : 'and';
+		$limit = $this->query['_limit'] ?? null;
+		$wheres = Arr::except($this->query, ['_order', '_or', '_limit', '_size', '_column', 'page', '_page', '_include', '_transformer', '_resize']);
 
-        // Where
-        foreach ($wheres as $field => $value) {
-            $field = $this->qualified($field, $repository);
-            if (is_array($value)) {
-                foreach ($value as $operator => $search) {
-                    if ($operator == 'null') {
-                        $not = $search == '1' ? false : true;
-                        $model = $model->whereNull($field, $boolean, $not);
-                    } elseif ($operator == 'in') {
-                        $values = explode(',', $search);
-                        $model = $model->whereIn($field, $values, $boolean);
-                    } else {
-                        $model = $model->where($field, $operator, $search, $boolean);
-                    }
-                }
-            } else {
-                $model = $model->where($field, '=', $value, $boolean);
-            }
-        }
+		// Where
+		foreach ($wheres as $field => $value) {
+			$field = $this->qualified($field, $repository);
+			if (is_array($value)) {
+				foreach ($value as $operator => $search) {
+					if ($operator == 'null') {
+						$not = $search == '1' ? false : true;
+						$model = $model->whereNull($field, $boolean, $not);
+					} elseif ($operator == 'in') {
+						$values = explode(',', $search);
+						$model = $model->whereIn($field, $values, $boolean);
+					} else {
+						$model = $model->where($field, $operator, $search, $boolean);
+					}
+				}
+			} else {
+				$model = $model->where($field, '=', $value, $boolean);
+			}
+		}
 
-        // Order
-        if (!empty($orders)){
-            foreach ($orders as $field => $order) {
-                $field = $this->qualified($field, $repository);
-                $model = $model->orderBy($field, $order);
-            }
-        }
+		// Order
+		if (!empty($orders)) {
+			foreach ($orders as $field => $order) {
+				$field = $this->qualified($field, $repository);
+				$model = $model->orderBy($field, $order);
+			}
+		}
 
-        // Limit
-        if (!empty($limit)) {
-            $model = $model->take($limit);
-        }
+		// Limit
+		if (!empty($limit)) {
+			$model = $model->take($limit);
+		}
 
-        return $model;
-    }
+		return $model;
+	}
 
-    private function qualified($field, RepositoryInterface $repository)
-    {
-        if ($repository instanceof BaseRepository) {
-            $model = $repository->newModel();
+	private function qualified($field, RepositoryInterface $repository)
+	{
+		if ($repository instanceof BaseRepository) {
+			$model = $repository->newModel();
 
-            if (str_contains($field, '!')) {
-                [$relationName, $field] = explode('!', $field);
+			if (str_contains($field, '!')) {
+				[$relationName, $field] = explode('!', $field);
 
-                // 替换关联表名
-                if (method_exists($model, $relationName)) {
-                    $relation = $model->$relationName();
+				// 替换关联表名
+				if (method_exists($model, $relationName)) {
+					$relation = $model->$relationName();
 
-                    if ($relation instanceof Relation) {
-                        $field = $relation->getModel()->getTable() . '!' . $field;
-                    }
-                }
+					if ($relation instanceof Relation) {
+						$field = $relation->getModel()->getTable() . '!' . $field;
+					}
+				}
 
-                // 替换分隔符
-                return str_replace('!', '.', $field);
-            } else {
-                // 添加主表名
-                return $model->getTable() . '.' . $field;
-            }
-        }
-    }
+				// 替换分隔符
+				return str_replace('!', '.', $field);
+			} else {
+				// 添加主表名
+				return $model->getTable() . '.' . $field;
+			}
+		}
+	}
 }

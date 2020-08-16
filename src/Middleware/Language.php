@@ -3,9 +3,8 @@
 namespace ZhuiTech\BootLaravel\Middleware;
 
 use Closure;
-use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Lcobucci\JWT\Parser;
 
 /**
  * 语言切换
@@ -15,19 +14,19 @@ use Lcobucci\JWT\Parser;
  */
 class Language
 {
-    /**
-     * @param \Illuminate\Http\Request $request
-     * @param Closure $next
-     * @return mixed
-     */
-    public function handle($request, Closure $next)
-    {
-        $lang = $request->header('X-Language');
+	/**
+	 * @param Request $request
+	 * @param Closure $next
+	 * @return mixed
+	 */
+	public function handle($request, Closure $next)
+	{
+		$lang = $request->header('X-Language');
 
-        if (!empty($lang)) {
-            App::setLocale($lang);
-        }
+		if (!empty($lang)) {
+			App::setLocale($lang);
+		}
 
-        return $next($request);
-    }
+		return $next($request);
+	}
 }

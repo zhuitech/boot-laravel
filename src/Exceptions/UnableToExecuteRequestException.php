@@ -2,25 +2,26 @@
 
 namespace ZhuiTech\BootLaravel\Exceptions;
 
+use Exception;
 use GuzzleHttp\Psr7\Response;
 
 /**
  * Class UnableToExecuteRequestException
  * @package App\Exceptions
  */
-class UnableToExecuteRequestException extends \Exception
+class UnableToExecuteRequestException extends Exception
 {
-    /**
-     * UnableToExecuteRequestException constructor.
-     * @param Response $response
-     */
-    public function __construct(Response $response = null)
-    {
-        if ($response) {
-            parent::__construct((string)$response->getBody(), $response->getStatusCode());
-            return;
-        }
+	/**
+	 * UnableToExecuteRequestException constructor.
+	 * @param Response $response
+	 */
+	public function __construct(Response $response = null)
+	{
+		if ($response) {
+			parent::__construct((string)$response->getBody(), $response->getStatusCode());
+			return;
+		}
 
-        parent::__construct('Unable to finish the request', 502);
-    }
+		parent::__construct('Unable to finish the request', 502);
+	}
 }

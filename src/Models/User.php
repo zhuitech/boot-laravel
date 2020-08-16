@@ -14,15 +14,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class User extends Authenticatable implements UserContract
 {
-    protected $fillable = ['id'];
-    
-    function getAuthId()
-    {
-        return $this->id;
-    }
+	protected $fillable = ['id'];
 
-    function getAuthType()
-    {
-        return $this->type;
-    }
+	function getAuthId()
+	{
+		return $this->id;
+	}
+
+	function getAuthType()
+	{
+		return $this->type;
+	}
 }

@@ -12,5 +12,5 @@ use Laravel\Passport\HasApiTokens;
 
 class TokenUser extends User
 {
-    use HasApiTokens;
+	use HasApiTokens;
 }
