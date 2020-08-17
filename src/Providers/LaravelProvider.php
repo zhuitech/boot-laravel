@@ -54,11 +54,12 @@ class LaravelProvider extends AbstractServiceProvider
 		/**
 		 * 配置Eloquent
 		 * 解决 MySQL v5.7.7 以下版本会报错误：Specified key was too long error.
-		 * 2020-08-17: 不再设置默认长度，需要索引的字符串字段在定义时设定长度。
 		 */
-		// Schema::defaultStringLength(191);
+		Schema::defaultStringLength(191);
 
-		// 全局切换语言
+		/**
+		 * 全局切换语言
+		 */
 		$kernel = app(Kernel::class);
 		$kernel->pushMiddleware(Language::class);
 
@@ -71,7 +72,7 @@ class LaravelProvider extends AbstractServiceProvider
 		parent::loadMigrations();
 		parent::loadRoutes();
 
-		// HOOK接口，不限制请求
+		// hook 接口，不限制请求
 		$file = $this->basePath('routes/hook.php');
 		Route::prefix(config('boot-laravel.route.api.prefix'))->group($file);
 

@@ -14,7 +14,7 @@ class CreateSessionsTable extends Migration
     public function up()
     {
         Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id', 100)->unique();
+            $table->string('id')->unique();
             $table->unsignedBigInteger('user_id')->comment('用户ID')->nullable();
             $table->string('ip_address', 45)->comment('IP地址')->nullable();
             $table->text('user_agent')->comment('浏览器')->nullable();

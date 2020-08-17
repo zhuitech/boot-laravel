@@ -17,7 +17,7 @@ class CreateSystemSettingTable extends Migration
 
         Schema::create($table, function(Blueprint $table) {
             $table->increments('id');
-            $table->string('key', 100)->comment('键')->index();
+            $table->string('key')->comment('键')->index();
             $table->text('value')->comment('值');
             $table->timestamps();
 	        $table->comment = '系统配置表';
