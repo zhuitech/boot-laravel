@@ -20,6 +20,12 @@ use ZhuiTech\BootLaravel\Helpers\MenuRegistry;
 abstract class AbstractServiceProvider extends BaseServiceProvider
 {
 	/**
+	 * 动态加载模块
+	 * @var array
+	 */
+	protected $modules = [];
+
+	/**
 	 * 注册档案安装器
 	 * @var array
 	 */
@@ -93,6 +99,15 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	 */
 	public function register()
 	{
+		if (!empty(env('MODULES')) && !empty($this->modules)) {
+			$modules = explode(',', env('MODULES'));
+			foreach ($modules as $name) {
+				if (isset($this->modules[$name])) {
+					$this->providers[] = $this->modules[$name];
+				}
+			}
+		}
+
 		$this->registerInstallers();
 		$this->registerAliases();
 		$this->registerFacades();
