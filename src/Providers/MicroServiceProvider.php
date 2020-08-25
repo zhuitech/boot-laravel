@@ -8,6 +8,7 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -34,6 +35,7 @@ class MicroServiceProvider extends AbstractServiceProvider
 	public function register()
 	{
 		$this->configAuth();
+		config(['app.mode' => 'service']);
 
 		parent::register();
 	}
@@ -43,6 +45,7 @@ class MicroServiceProvider extends AbstractServiceProvider
 	 */
 	private function configAuth()
 	{
+		// 前台接口授权
 		Auth::extend('members', function ($app, $name, array $config) {
 			return new RequestGuard(function (Request $request) use ($config) {
 				$id = $request->header('X-User');
@@ -56,6 +59,28 @@ class MicroServiceProvider extends AbstractServiceProvider
 				}
 			}, $this->app['request']);
 		});
+
+		// 后台代理授权
+		Auth::extend('x-admin', function ($app, $name, array $config) {
+			return new RequestGuard(function (Request $request) use ($config) {
+				// 本地调试模式
+				if ($this->app->environment() == 'local' && config('app.debug')) {
+					$user = new Administrator();
+					$user->id = 1;
+					return $user;
+				}
+
+				// 微服务模式
+				if ($request->hasHeader('X-User')) {
+					$id = $request->header('X-User');
+					$user = new Administrator();
+					$user->id = $id;
+					return $user;
+				}
+				return null;
+			}, $this->app['request']);
+		});
+
 		$auth = [
 			'defaults' => [
 				'guard' => 'members'
@@ -86,7 +111,6 @@ class MicroServiceProvider extends AbstractServiceProvider
 
 			return $handler;
 		});
-
 		config(['session.driver' => 'members']);
 	}
 }
