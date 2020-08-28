@@ -24,11 +24,11 @@ composer require zhuitech/boot-laravel
 namespace App\Providers;
 
 use ZhuiTech\BootLaravel\Providers\LaravelProvider;
-use ZhuiTech\BootLaravel\Providers\ServiceProvider;
+use ZhuiTech\BootLaravel\Providers\AbstractServiceProvider;
 use ZhuiTech\BootLaravel\Providers\MicroServiceProvider;
 
 // 基类ServiceProvider中提供了很多方便的注册机制，请查看源码了解
-class AppServiceProvider extends ServiceProvider
+class AppServiceProvider extends AbstractServiceProvider
 {
     protected $providers = [
         LaravelProvider::class,

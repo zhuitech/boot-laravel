@@ -161,6 +161,7 @@ if (!function_exists('yuan')) {
 	 * 格式化以分为单位的金额
 	 *
 	 * @param $amount
+	 * @param bool $symbol
 	 * @return string
 	 */
 	function yuan($amount, $symbol = false)

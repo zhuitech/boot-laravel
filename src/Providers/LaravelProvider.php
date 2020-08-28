@@ -116,6 +116,17 @@ class LaravelProvider extends AbstractServiceProvider
 		});
 		$this->app->alias(SettingInterface::class, 'system_setting');
 
+		// 加载动态模块
+		if (!empty(config('boot-laravel.load_modules'))) {
+			$modules = config('boot-laravel.modules');
+			$load_modules = explode(',', config('boot-laravel.load_modules'));
+			foreach ($load_modules as $name) {
+				if (isset($modules[$name])) {
+					$this->providers[] = $modules[$name];
+				}
+			}
+		}
+
 		parent::register();
 	}
 

@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
 use ReflectionException;
-use ZhuiTech\BootLaravel\Helpers\MenuCollection;
-use ZhuiTech\BootLaravel\Helpers\MenuRegistry;
 
 /**
  * 基础服务提供类，封装了所有注册逻辑。
@@ -99,15 +97,6 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	 */
 	public function register()
 	{
-		if (!empty(env('MODULES')) && !empty($this->modules)) {
-			$modules = explode(',', env('MODULES'));
-			foreach ($modules as $name) {
-				if (isset($this->modules[$name])) {
-					$this->providers[] = $this->modules[$name];
-				}
-			}
-		}
-
 		$this->registerInstallers();
 		$this->registerAliases();
 		$this->registerFacades();
@@ -124,7 +113,7 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	 */
 	protected function registerInstallers()
 	{
-		$this->app->tag($this->installers, 'profile_installers');
+		$this->app->tag($this->installers, ['profile_installers']);
 	}
 
 	/**
