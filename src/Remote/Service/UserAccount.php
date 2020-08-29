@@ -2,14 +2,14 @@
 
 namespace ZhuiTech\BootLaravel\Remote\Service;
 
-use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 use ZhuiTech\BootLaravel\Remote\Model;
 use ZhuiTech\BootLaravel\Remote\Transformers\UserAccountPublicTransformer;
 
 /**
  * Class UserAccount
  * @package ZhuiTech\BootLaravel\Remote\Service
- * 
+ *
  * @property int $id
  * @property string|null $name 用户名
  * @property string|null $email 邮箱
@@ -28,12 +28,12 @@ use ZhuiTech\BootLaravel\Remote\Transformers\UserAccountPublicTransformer;
  * @property string|null $currency 货币类型
  * @property string|null $id_type 证件类型
  * @property string|null $id_number 证件号码
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * 
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ *
  */
 class UserAccount extends Model
 {
-    protected $server = 'service';
-    protected $resource = 'api/svc/user/accounts';
+	protected $server = 'service';
+	protected $resource = 'api/svc/user/accounts';
 }

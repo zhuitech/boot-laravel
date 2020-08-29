@@ -65,6 +65,7 @@ return [
         REST_FILE_STORE_FAIL        => '文件存储失败',
     ],
 
+	// 路由设置
     'route' => [
         'api' => [
             'prefix' => 'api',
@@ -75,10 +76,18 @@ return [
             'middleware' => ['web'],
         ]
     ],
-    
+
+	// 系统设置
     'setting' => [
         'table_name' => 'system_settings',
         'cache' => true,
         'minute' => 120
     ],
+
+	// 动态加载模块
+	'modules' => [
+		// ...
+	],
+
+	'load_modules' => env('LOAD_MODULES', ''),
 ];

@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
-use ZhuiTech\BootLaravel\Helpers\MenuCollection;
-use ZhuiTech\BootLaravel\Helpers\MenuRegistry;
+use ReflectionException;
 
 /**
  * 基础服务提供类，封装了所有注册逻辑。
@@ -18,212 +17,217 @@ use ZhuiTech\BootLaravel\Helpers\MenuRegistry;
  */
 abstract class AbstractServiceProvider extends BaseServiceProvider
 {
-    /**
-     * 注册档案安装器
-     * @var array
-     */
-    protected $installers = [];
+	/**
+	 * 动态加载模块
+	 * @var array
+	 */
+	protected $modules = [];
 
-    /**
-     * 注册服务提供者
-     * @var array
-     */
-    protected $providers = [];
+	/**
+	 * 注册档案安装器
+	 * @var array
+	 */
+	protected $installers = [];
 
-    /**
-     * 注册容器别名
-     * @var array
-     */
-    protected $aliases = [];
+	/**
+	 * 注册服务提供者
+	 * @var array
+	 */
+	protected $providers = [];
 
-    /**
-     * 注册门面别名
-     * @var array
-     */
-    protected $facades = [];
+	/**
+	 * 注册容器别名
+	 * @var array
+	 */
+	protected $aliases = [];
 
-    /**
-     * 注册命令
-     * @var array
-     */
-    protected $commands = [];
+	/**
+	 * 注册门面别名
+	 * @var array
+	 */
+	protected $facades = [];
 
-    /**
-     * 错误代码
-     * 用配置文件复写errors会导致索引重排，所以在provider中提供一个扩展的入口
-     *
-     * @var array
-     */
-    protected $errors = [];
+	/**
+	 * 注册命令
+	 * @var array
+	 */
+	protected $commands = [];
 
-    /**
-     * Resolve the base path of the package.
-     *
-     * @param null $path
-     * @return string
-     * @throws \ReflectionException
-     */
-    protected function basePath($path = NULL)
-    {
-        $filename = (new ReflectionClass(get_class($this)))->getFileName();
-        return dirname($filename, 3) . "/" . $path;
-    }
+	/**
+	 * 错误代码
+	 * 用配置文件复写errors会导致索引重排，所以在provider中提供一个扩展的入口
+	 *
+	 * @var array
+	 */
+	protected $errors = [];
 
-    /* -----------------------------------------------------------------
-     |  Main
-     | -----------------------------------------------------------------
-     */
+	/**
+	 * Resolve the base path of the package.
+	 *
+	 * @param null $path
+	 * @return string
+	 * @throws ReflectionException
+	 */
+	protected function basePath($path = NULL)
+	{
+		$filename = (new ReflectionClass(get_class($this)))->getFileName();
+		return dirname($filename, 3) . "/" . $path;
+	}
 
-    /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $this->commands($this->commands);
-        $this->registerErrors();
-    }
+	/* -----------------------------------------------------------------
+	 |  Main
+	 | -----------------------------------------------------------------
+	 */
 
-    /**
-     * Register the application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->registerInstallers();
-        $this->registerAliases();
-        $this->registerFacades();
-        $this->registerProviders();
-    }
+	/**
+	 * Bootstrap the application services.
+	 *
+	 * @return void
+	 */
+	public function boot()
+	{
+		$this->commands($this->commands);
+		$this->registerErrors();
+	}
 
-    /* -----------------------------------------------------------------
-     |  自动注册
-     | -----------------------------------------------------------------
-     */
+	/**
+	 * Register the application services.
+	 *
+	 * @return void
+	 */
+	public function register()
+	{
+		$this->registerInstallers();
+		$this->registerAliases();
+		$this->registerFacades();
+		$this->registerProviders();
+	}
 
-    /**
-     * 注册档案安装器
-     */
-    protected function registerInstallers()
-    {
-        $this->app->tag($this->installers, 'profile_installers');
-    }
+	/* -----------------------------------------------------------------
+	 |  自动注册
+	 | -----------------------------------------------------------------
+	 */
 
-    /**
-     * 注册服务提供者
-     */
-    protected function registerProviders()
-    {
-        foreach ($this->providers as $key => $provider) {
-            if (class_exists(is_string($key) ? $key : $provider)) {
-                $this->app->register($provider);
-            }
-        }
-    }
+	/**
+	 * 注册档案安装器
+	 */
+	protected function registerInstallers()
+	{
+		$this->app->tag($this->installers, ['profile_installers']);
+	}
 
-    /**
-     * 注册别名
-     */
-    protected function registerAliases()
-    {
-        foreach ($this->aliases as $name => $class){
-            $this->app->alias($class, $name);
-        }
-    }
+	/**
+	 * 注册服务提供者
+	 */
+	protected function registerProviders()
+	{
+		foreach ($this->providers as $key => $provider) {
+			if (class_exists(is_string($key) ? $key : $provider)) {
+				$this->app->register($provider);
+			}
+		}
+	}
 
-    /**
-     * 注册门面别名
-     */
-    protected function registerFacades()
-    {
-        if (!empty($this->facades)) {
-            AliasLoader::getInstance($this->facades)->register();
-        }
-    }
+	/**
+	 * 注册别名
+	 */
+	protected function registerAliases()
+	{
+		foreach ($this->aliases as $name => $class) {
+			$this->app->alias($class, $name);
+		}
+	}
 
-    /**
-     * 注册错误代码
-     */
-    protected function registerErrors()
-    {
-        if (!empty($this->errors)) {
-            $config = config('boot-laravel');
-            $config['errors'] += $this->errors;
-            config(['boot-laravel' => $config]);
-        }
-    }
+	/**
+	 * 注册门面别名
+	 */
+	protected function registerFacades()
+	{
+		if (!empty($this->facades)) {
+			AliasLoader::getInstance($this->facades)->register();
+		}
+	}
 
-    /* -----------------------------------------------------------------
-     |  手动注册
-     | -----------------------------------------------------------------
-     */
+	/**
+	 * 注册错误代码
+	 */
+	protected function registerErrors()
+	{
+		if (!empty($this->errors)) {
+			$config = config('boot-laravel');
+			$config['errors'] += $this->errors;
+			config(['boot-laravel' => $config]);
+		}
+	}
 
-    /**
-     * 注册数据库
-     */
-    protected function loadMigrations()
-    {
-        $path = $this->basePath('migrations');
+	/* -----------------------------------------------------------------
+	 |  手动注册
+	 | -----------------------------------------------------------------
+	 */
 
-        if (file_exists($path) && is_dir($path)) {
-            $this->loadMigrationsFrom($path);
-        }
-    }
+	/**
+	 * 注册数据库
+	 */
+	protected function loadMigrations()
+	{
+		$path = $this->basePath('migrations');
 
-    /**
-     * 注册配置文件
-     */
-    protected function mergeConfig()
-    {
-        $path = $this->basePath('config');
+		if (file_exists($path) && is_dir($path)) {
+			$this->loadMigrationsFrom($path);
+		}
+	}
 
-        if (file_exists($path) && is_dir($path)) {
-            $files = File::files($path);
+	/**
+	 * 注册配置文件
+	 */
+	protected function mergeConfig()
+	{
+		$path = $this->basePath('config');
 
-            foreach ($files as $file) {
-                $this->mergeConfigFrom($file, File::name($file));
-            }
-        }
-    }
+		if (file_exists($path) && is_dir($path)) {
+			$files = File::files($path);
 
-    /**
-     * 注册路由
-     */
-    protected function loadRoutes()
-    {
-        if ($this->app->routesAreCached()) {
-            $this->app->booted(function () {
-                require $this->app->getCachedRoutesPath();
-            });
-        }
-        else {
-            $file = $this->basePath('routes/api.php');
-            if (file_exists($file)) {
-                Route::prefix(config('boot-laravel.route.api.prefix'))
-                    ->middleware(config('boot-laravel.route.api.middleware'))
-                    ->group($file);
-            }
+			foreach ($files as $file) {
+				$this->mergeConfigFrom($file, File::name($file));
+			}
+		}
+	}
 
-            $file = $this->basePath('routes/web.php');
-            if (file_exists($file)) {
-                Route::prefix(config('boot-laravel.route.web.prefix'))
-                    ->middleware(config('boot-laravel.route.web.middleware'))
-                    ->group($file);
-            }
+	/**
+	 * 注册路由
+	 */
+	protected function loadRoutes()
+	{
+		if ($this->app->routesAreCached()) {
+			$this->app->booted(function () {
+				require $this->app->getCachedRoutesPath();
+			});
+		} else {
+			$file = $this->basePath('routes/api.php');
+			if (file_exists($file)) {
+				Route::prefix(config('boot-laravel.route.api.prefix'))
+					->middleware(config('boot-laravel.route.api.middleware'))
+					->group($file);
+			}
 
-            $file = $this->basePath('routes/admin.php');
-            if (file_exists($file)) {
-                Route::prefix(config('admin.route.prefix'))
-                    ->middleware(config('admin.route.middleware'))
-                    ->group($file);
-            }
+			$file = $this->basePath('routes/web.php');
+			if (file_exists($file)) {
+				Route::prefix(config('boot-laravel.route.web.prefix'))
+					->middleware(config('boot-laravel.route.web.middleware'))
+					->group($file);
+			}
 
-            $this->app->booted(function () {
-                $this->app['router']->getRoutes()->refreshNameLookups();
-                $this->app['router']->getRoutes()->refreshActionLookups();
-            });
-        }
-    }
+			$file = $this->basePath('routes/admin.php');
+			if (file_exists($file)) {
+				Route::prefix(config('admin.route.prefix'))
+					->middleware(config('admin.route.middleware'))
+					->group($file);
+			}
+
+			$this->app->booted(function () {
+				$this->app['router']->getRoutes()->refreshNameLookups();
+				$this->app['router']->getRoutes()->refreshActionLookups();
+			});
+		}
+	}
 }

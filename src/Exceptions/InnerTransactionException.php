@@ -3,6 +3,7 @@
 
 namespace ZhuiTech\BootLaravel\Exceptions;
 
+use Exception;
 use Throwable;
 
 /**
@@ -11,30 +12,30 @@ use Throwable;
  * Class NestedTransactionException
  * @package ZhuiTech\BootLaravel\Exceptions
  */
-class InnerTransactionException extends \Exception
+class InnerTransactionException extends Exception
 {
-    /**
-     * @var callable
-     */
-    private $commit;
+	/**
+	 * @var callable
+	 */
+	private $commit;
 
-    /**
-     * NestedTransactionException constructor.
-     *
-     * @param Throwable $previous
-     * @param callable|null $commit
-     */
-    public function __construct(Throwable $previous, callable $commit = null)
-    {
-        parent::__construct($previous->getMessage(), $previous->getCode(), $previous);
+	/**
+	 * NestedTransactionException constructor.
+	 *
+	 * @param Throwable $previous
+	 * @param callable|null $commit
+	 */
+	public function __construct(Throwable $previous, callable $commit = null)
+	{
+		parent::__construct($previous->getMessage(), $previous->getCode(), $previous);
 
-        $this->commit = $commit;
-    }
+		$this->commit = $commit;
+	}
 
-    public function doCommit($params = [])
-    {
-        if (!empty($this->commit)) {
-            call_user_func($this->commit, $params);
-        }
-    }
+	public function doCommit($params = [])
+	{
+		if (!empty($this->commit)) {
+			call_user_func($this->commit, $params);
+		}
+	}
 }

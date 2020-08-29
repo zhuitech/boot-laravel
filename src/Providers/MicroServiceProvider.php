@@ -8,13 +8,14 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
-use Illuminate\Support\Facades\Auth;
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Session;
 use ZhuiTech\BootLaravel\Auth\MemberSessionHandler;
 use ZhuiTech\BootLaravel\Models\User;
-use Illuminate\Support\Arr;
 
 /**
  * 微服务
@@ -24,69 +25,92 @@ use Illuminate\Support\Arr;
  */
 class MicroServiceProvider extends AbstractServiceProvider
 {
-    public function boot()
-    {
-        //$this->configSession();
+	public function boot()
+	{
+		//$this->configSession();
 
-        parent::boot();
-    }
+		parent::boot();
+	}
 
-    public function register()
-    {
-        $this->configAuth();
+	public function register()
+	{
+		$this->configAuth();
+		config(['app.mode' => 'service']);
 
-        parent::register();
-    }
+		parent::register();
+	}
 
-    /**
-     * 微服务授权机制
-     */
-    private function configAuth()
-    {
-        Auth::extend('members', function ($app, $name, array $config) {
-            return new RequestGuard(function (Request $request) use ($config) {
-                $id = $request->header('X-User');
-                $type = $request->header('X-User-Type', 'members');
+	/**
+	 * 微服务授权机制
+	 */
+	private function configAuth()
+	{
+		// 前台接口授权
+		Auth::extend('members', function ($app, $name, array $config) {
+			return new RequestGuard(function (Request $request) use ($config) {
+				$id = $request->header('X-User');
+				$type = $request->header('X-User-Type', 'members');
 
-                if ($id) {
-                    $user = new User();
-                    $user->id = $id;
-                    $user->type = $type;
-                    return $user;
-                }
-            }, $this->app['request']);
-        });
-        $auth = [
-            'defaults' => [
-                'guard' => 'members'
-            ],
-            'guards' => [
-                'members' => [
-                    'driver' => 'members',
-                ],
-            ],
-        ];
-        config(Arr::dot($auth, 'auth.'));
-    }
+				if ($id) {
+					$user = new User();
+					$user->id = $id;
+					$user->type = $type;
+					return $user;
+				}
+			}, $this->app['request']);
+		});
 
-    /**
-     * 微服务会话机制
-     */
-    private function configSession()
-    {
-        Session::extend('members', function ($app) {
-            $handler = new MemberSessionHandler(
-                clone $this->app['cache']->store('redis'),
-                $this->app['config']['session.lifetime']
-            );
+		// 后台代理授权
+		Auth::extend('x-admin', function ($app, $name, array $config) {
+			return new RequestGuard(function (Request $request) use ($config) {
+				// 本地调试模式
+				if ($this->app->environment() == 'local' && config('app.debug')) {
+					$user = new Administrator();
+					$user->id = 1;
+					return $user;
+				}
 
-            $handler->getCache()->getStore()->setConnection(
-                $this->app['config']['session.connection']
-            );
+				// 微服务模式
+				if ($request->hasHeader('X-User')) {
+					$id = $request->header('X-User');
+					$user = new Administrator();
+					$user->id = $id;
+					return $user;
+				}
+				return null;
+			}, $this->app['request']);
+		});
 
-            return $handler;
-        });
+		$auth = [
+			'defaults' => [
+				'guard' => 'members'
+			],
+			'guards' => [
+				'members' => [
+					'driver' => 'members',
+				],
+			],
+		];
+		config(Arr::dot($auth, 'auth.'));
+	}
 
-        config(['session.driver' => 'members']);
-    }
+	/**
+	 * 微服务会话机制
+	 */
+	private function configSession()
+	{
+		Session::extend('members', function ($app) {
+			$handler = new MemberSessionHandler(
+				clone $this->app['cache']->store('redis'),
+				$this->app['config']['session.lifetime']
+			);
+
+			$handler->getCache()->getStore()->setConnection(
+				$this->app['config']['session.connection']
+			);
+
+			return $handler;
+		});
+		config(['session.driver' => 'members']);
+	}
 }

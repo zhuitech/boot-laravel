@@ -26,55 +26,55 @@ use ZhuiTech\BootLaravel\Models\TokenUser;
  */
 class MicroServiceProxyProvider extends AbstractServiceProvider
 {
-    public function register()
-    {
-        $this->configAuth();
+	public function register()
+	{
+		$this->configAuth();
 
-        parent::register();
-    }
+		parent::register();
+	}
 
-    /**
-     * 调用方授权机制
-     */
-    private function configAuth()
-    {
-        Auth::provider('members', function ($app, array $config) {
-            return new MemberUserProvider();
-        });
+	/**
+	 * 调用方授权机制
+	 */
+	private function configAuth()
+	{
+		Auth::provider('members', function ($app, array $config) {
+			return new MemberUserProvider();
+		});
 
-        Auth::extend('passport', function ($app, $name, array $config) {
-            $guard = new RequestGuard(function ($request) use ($config) {
-                return (new TokenGuard(
-                    $this->app->make(ResourceServer::class),
-                    $config['provider'],
-                    $this->app->make(TokenRepository::class),
-                    $this->app->make(ClientRepository::class),
-                    $this->app->make('encrypter')
-                ))->user($request);
-            }, $this->app['request']);
+		Auth::extend('passport', function ($app, $name, array $config) {
+			$guard = new RequestGuard(function ($request) use ($config) {
+				return (new TokenGuard(
+					$this->app->make(ResourceServer::class),
+					$config['provider'],
+					$this->app->make(TokenRepository::class),
+					$this->app->make(ClientRepository::class),
+					$this->app->make('encrypter')
+				))->user($request);
+			}, $this->app['request']);
 
-            return tap($guard, function ($guard) {
-                $this->app->refresh('request', $guard, 'setRequest');
-            });
-        });
+			return tap($guard, function ($guard) {
+				$this->app->refresh('request', $guard, 'setRequest');
+			});
+		});
 
-        $auth = [
-            'defaults' => [
-                'guard' => 'members'
-            ],
-            'guards' => [
-                'members' => [
-                    'driver' => 'passport',
-                    'provider' => 'members',
-                ],
-            ],
-            'providers' => [
-                'members' => [
-                    'driver' => 'members',
-                    'model' => TokenUser::class
-                ],
-            ],
-        ];
-        config(Arr::dot($auth, 'auth.'));
-    }
+		$auth = [
+			'defaults' => [
+				'guard' => 'members'
+			],
+			'guards' => [
+				'members' => [
+					'driver' => 'passport',
+					'provider' => 'members',
+				],
+			],
+			'providers' => [
+				'members' => [
+					'driver' => 'members',
+					'model' => TokenUser::class
+				],
+			],
+		];
+		config(Arr::dot($auth, 'auth.'));
+	}
 }

@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
+use Jialeo\LaravelSchemaExtend\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -16,11 +16,12 @@ class CreateFailedJobsTable extends Migration
         Schema::dropIfExists('failed_jobs');
         Schema::create('failed_jobs', function (Blueprint $table) {
             $table->increments('id');
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
+            $table->text('connection')->comment('链接');
+            $table->text('queue')->comment('队列');
+            $table->longText('payload')->comment('载荷');
+            $table->longText('exception')->comment('异常信息');
+            $table->timestamp('failed_at')->comment('失败时间')->useCurrent();
+	        $table->comment = '队列失败任务表';
         });
     }
 

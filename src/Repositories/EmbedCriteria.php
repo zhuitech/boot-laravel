@@ -8,10 +8,9 @@
 
 namespace ZhuiTech\BootLaravel\Repositories;
 
+use Bosnadev\Repositories\Contracts\RepositoryInterface;
 use Bosnadev\Repositories\Criteria\Criteria;
 use Closure;
-use Illuminate\Database\Eloquent\Model;
-use Bosnadev\Repositories\Contracts\RepositoryInterface;
 
 /**
  * Class SimpleCriteria
@@ -19,24 +18,24 @@ use Bosnadev\Repositories\Contracts\RepositoryInterface;
  */
 class EmbedCriteria extends Criteria
 {
-    /**
-     * @var Closure
-     */
-    private $callback;
+	/**
+	 * @var Closure
+	 */
+	private $callback;
 
-    public function __construct(Closure $callback)
-    {
-        $this->callback = $callback;
-    }
+	public function __construct(Closure $callback)
+	{
+		$this->callback = $callback;
+	}
 
-    /**
-     * @param $model
-     * @param RepositoryInterface $repository
-     * @return mixed
-     */
-    public function apply($model, RepositoryInterface $repository)
-    {
-        $callback = $this->callback;
-        return $callback($model);
-    }
+	/**
+	 * @param $model
+	 * @param RepositoryInterface $repository
+	 * @return mixed
+	 */
+	public function apply($model, RepositoryInterface $repository)
+	{
+		$callback = $this->callback;
+		return $callback($model);
+	}
 }

@@ -1,15 +1,13 @@
 <?php
+
 namespace ZhuiTech\BootLaravel\Repositories;
 
 use Bosnadev\Repositories\Eloquent\Repository;
 use Bosnadev\Repositories\Exceptions\RepositoryException;
-use Illuminate\Container\Container as App;
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Collection;
-use phpDocumentor\Reflection\Types\Null_;
 use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 
 /**
@@ -20,218 +18,217 @@ use ZhuiTech\BootLaravel\Exceptions\RestFailException;
  */
 class BaseRepository extends Repository
 {
-    /**
-     * @var \Eloquent
-     */
-    protected $model;
+	/**
+	 * @var Eloquent
+	 */
+	protected $model;
 
-    /**
-     * @var string
-     */
-    protected $modelClass;
+	/**
+	 * @var string
+	 */
+	protected $modelClass;
 
-    /**
-     * 允许同时使用同类型的条件
-     *
-     * @var bool
-     */
-    protected $preventCriteriaOverwriting = false;
+	/**
+	 * 允许同时使用同类型的条件
+	 *
+	 * @var bool
+	 */
+	protected $preventCriteriaOverwriting = false;
 
-    /**
-     * Specify Model class name
-     *
-     * @return mixed
-     */
-    public function model()
-    {
-        return $this->modelClass;
-    }
+	/**
+	 * Specify Model class name
+	 *
+	 * @return mixed
+	 */
+	public function model()
+	{
+		return $this->modelClass;
+	}
 
-    /**
-     * 设置新的模型
-     *
-     * @param $eloquentModel
-     * @return Model
-     * @throws RepositoryException
-     */
-    public function setModel($eloquentModel)
-    {
-        if (empty($eloquentModel)) {
-            return null;
-        }
+	/**
+	 * 设置新的模型
+	 *
+	 * @param $eloquentModel
+	 * @return Model
+	 * @throws RepositoryException
+	 */
+	public function setModel($eloquentModel)
+	{
+		if (empty($eloquentModel)) {
+			return null;
+		}
 
-        $this->modelClass = $eloquentModel;
+		$this->modelClass = $eloquentModel;
 
-        return parent::setModel($eloquentModel);
-    }
+		return parent::setModel($eloquentModel);
+	}
 
-    /**
-     * 获取空白Model
-     *
-     * @return \Eloquent
-     */
-    public function newModel()
-    {
-        return $this->newModel;
-    }
+	/**
+	 * 获取空白Model
+	 *
+	 * @return Eloquent
+	 */
+	public function newModel()
+	{
+		return $this->newModel;
+	}
 
-    /**
-     * 重新设置查询范围
-     *
-     * @return $this
-     * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
-     */
-    public function resetScope()
-    {
-        $this->makeModel();
-        parent::resetScope();
-        return $this;
-    }
+	/**
+	 * 重新设置查询范围
+	 *
+	 * @return $this
+	 * @throws RepositoryException
+	 */
+	public function resetScope()
+	{
+		$this->makeModel();
+		parent::resetScope();
+		return $this;
+	}
 
-    /**
-     * 设置范围
-     *
-     * @param $query
-     * @return $this
-     */
-    public function scope($query)
-    {
-        $query += [
-            '_order' => ['id' => 'desc']
-        ];
+	/**
+	 * 设置范围
+	 *
+	 * @param $query
+	 * @return $this
+	 */
+	public function scope($query)
+	{
+		$query += [
+			'_order' => ['id' => 'desc']
+		];
 
-        $this->pushCriteria(new QueryCriteria($query));
-        return $this;
-    }
+		$this->pushCriteria(new QueryCriteria($query));
+		return $this;
+	}
 
-    /**
-     * Only Trashed
-     *
-     * @return $this
-     */
-    public function onlyTrashed()
-    {
-        $this->model = $this->model->onlyTrashed();
-        return $this;
-    }
+	/**
+	 * Only Trashed
+	 *
+	 * @return $this
+	 */
+	public function onlyTrashed()
+	{
+		$this->model = $this->model->onlyTrashed();
+		return $this;
+	}
 
-    /**
-     * @deprecated
-     * Join parent
-     *
-     * @param Model $model
-     * @param $foreignKey
-     * @return $this
-     */
-    public function joinParent(Model $model, $foreignKey = NULL)
-    {
-        $foreignKey = $foreignKey ?? $model->getForeignKey();
+	/**
+	 * @param Model $model
+	 * @param $foreignKey
+	 * @return $this
+	 * @deprecated
+	 * Join parent
+	 *
+	 */
+	public function joinParent(Model $model, $foreignKey = NULL)
+	{
+		$foreignKey = $foreignKey ?? $model->getForeignKey();
 
-        $this->model = $this->model
-            ->join($model->getTable(), $model->getQualifiedKeyName(), '=', $this->model->getTable() . '.' . $foreignKey);
-        return $this;
-    }
+		$this->model = $this->model
+			->join($model->getTable(), $model->getQualifiedKeyName(), '=', $this->model->getTable() . '.' . $foreignKey);
+		return $this;
+	}
 
-    /**
-     * @deprecated
-     * Join parent
-     *
-     * @param Model $model
-     * @param $foreignKey
-     * @return $this
-     */
-    public function joinChildren(Model $model, $foreignKey = NULL)
-    {
-        $foreignKey = $foreignKey ?? $model->getForeignKey();
+	/**
+	 * @param Model $model
+	 * @param $foreignKey
+	 * @return $this
+	 * @deprecated
+	 * Join parent
+	 *
+	 */
+	public function joinChildren(Model $model, $foreignKey = NULL)
+	{
+		$foreignKey = $foreignKey ?? $model->getForeignKey();
 
-        $this->model = $this->model
-            ->join($model->getTable(), $this->model->getQualifiedKeyName(), '=', $model->getTable() . '.' . $foreignKey);
-        return $this;
-    }
+		$this->model = $this->model
+			->join($model->getTable(), $this->model->getQualifiedKeyName(), '=', $model->getTable() . '.' . $foreignKey);
+		return $this;
+	}
 
-    /**
-     * Join relationship table
-     *
-     * @param $relationName
-     * @return $this
-     */
-    public function join($relationName)
-    {
-        if (!method_exists($this->newModel, $relationName)) {
-            throw new RestFailException(sprintf('关系 %s 不存在', $relationName));
-        }
+	/**
+	 * Join relationship table
+	 *
+	 * @param $relationName
+	 * @return $this
+	 */
+	public function join($relationName)
+	{
+		if (!method_exists($this->newModel, $relationName)) {
+			throw new RestFailException(sprintf('关系 %s 不存在', $relationName));
+		}
 
-        $relation = $this->newModel->$relationName();
+		$relation = $this->newModel->$relationName();
 
-        if ($relation instanceof BelongsTo) {
-            $this->model = $this->model->join(
-                $relation->getModel()->getTable(),
-                $relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey());
-        }
-        elseif ($relation instanceof HasOneOrMany) {
-            $this->model = $this->model->join(
-                $relation->getModel()->getTable(),
-                $relation->getQualifiedParentKeyName(), '=', $relation->getQualifiedForeignKeyName());
-        }
+		if ($relation instanceof BelongsTo) {
+			$this->model = $this->model->join(
+				$relation->getModel()->getTable(),
+				$relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey());
+		} elseif ($relation instanceof HasOneOrMany) {
+			$this->model = $this->model->join(
+				$relation->getModel()->getTable(),
+				$relation->getQualifiedParentKeyName(), '=', $relation->getQualifiedForeignKeyName());
+		}
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * 分页查询
-     *
-     * @param int $perPage
-     * @param array $columns
-     * @return mixed
-     */
-    public function paginate($perPage = 25, $columns = array('*'))
-    {
-        $this->applyCriteria();
+	/**
+	 * 分页查询
+	 *
+	 * @param int $perPage
+	 * @param array $columns
+	 * @return mixed
+	 */
+	public function paginate($perPage = 25, $columns = array('*'))
+	{
+		$this->applyCriteria();
 
-        return $this->model->paginate($perPage, $columns, request()->has('_page') ? '_page' : 'page');
-    }
+		return $this->model->paginate($perPage, $columns, request()->has('_page') ? '_page' : 'page');
+	}
 
-    /**
-     * 统计总数
-     *
-     * @return int
-     */
-    public function count()
-    {
-        $this->applyCriteria();
-        return $this->model->count();
-    }
+	/**
+	 * 统计总数
+	 *
+	 * @return int
+	 */
+	public function count()
+	{
+		$this->applyCriteria();
+		return $this->model->count();
+	}
 
-    /**
-     * 获取结果
-     *
-     * @param $options
-     * @return mixed
-     */
-    public function get($options)
-    {
-        $size = $options['_size'] ?? 25;
-        $limit = $options['_limit'] ?? null;
+	/**
+	 * 获取结果
+	 *
+	 * @param $options
+	 * @return mixed
+	 */
+	public function get($options)
+	{
+		$size = $options['_size'] ?? 25;
+		$limit = $options['_limit'] ?? null;
 
-        $columns = isset($options['_column'])
-            ? explode(',', $options['_column'])
-            : [$this->newModel()->getTable() . '.*'];
+		$columns = isset($options['_column'])
+			? explode(',', $options['_column'])
+			: [$this->newModel()->getTable() . '.*'];
 
-        $result = $limit
-            ? $this->all($columns)
-            : $this->paginate($size, $columns);
+		$result = $limit
+			? $this->all($columns)
+			: $this->paginate($size, $columns);
 
-        return $result;
-    }
+		return $result;
+	}
 
-    /**
-     * 快捷查询，使用默认scope方法
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function query($query)
-    {
-        return $this->scope($query)->get($query);
-    }
+	/**
+	 * 快捷查询，使用默认scope方法
+	 *
+	 * @param $query
+	 * @return mixed
+	 */
+	public function query($query)
+	{
+		return $this->scope($query)->get($query);
+	}
 }

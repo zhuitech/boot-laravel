@@ -1,27 +1,30 @@
 {
-    "name": "zhuitech/boot-laravel",
-    "description": "Laravel项目基础功能增强",
-    "type": "library",
-    "authors": [
-        {
-            "name": "Andrew Zhou",
-            "email": "andrew@zhuitech.com"
-        }
-    ],
-    "require": {
-        "league/fractal": "^0.17.0",
-        "barryvdh/laravel-cors": "^0.11",
-        "bosnadev/repositories": "^0.13.0",
-        "paragonie/random_compat": "^2.0",
-        "guzzlehttp/guzzle": "^6.3",
-        "overtrue/laravel-lang": "~3.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "ZhuiTech\\BootLaravel\\": "src"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
+  "name": "zhuitech/boot-laravel",
+  "description": "Laravel项目基础功能增强",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andrew Zhou",
+      "email": "andrew@zhuitech.com"
     }
+  ],
+  "require": {
+    "bkwld/croppa": "^4.9",
+    "league/fractal": "^0.17.0",
+    "barryvdh/laravel-cors": "^0.11",
+    "bosnadev/repositories": "^0.13.0",
+    "paragonie/random_compat": "^2.0",
+    "guzzlehttp/guzzle": "^6.3",
+    "zedisdog/laravel-schema-extend": "^1.3",
+    "overtrue/laravel-lang": "~3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ZhuiTech\\BootLaravel\\": "src"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  }
 }
