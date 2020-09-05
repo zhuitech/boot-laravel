@@ -12,6 +12,7 @@ use ReflectionException;
 use Route;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
+use ZhuiTech\BootLaravel\Middleware\AdvanceThrottle;
 use ZhuiTech\BootLaravel\Middleware\Cache;
 use ZhuiTech\BootLaravel\Middleware\Intranet;
 use ZhuiTech\BootLaravel\Middleware\Language;
@@ -67,6 +68,7 @@ class LaravelProvider extends AbstractServiceProvider
 		$router->aliasMiddleware('intranet', Intranet::class);
 		$router->aliasMiddleware('sign', Signature::class);
 		$router->aliasMiddleware('cache', Cache::class);
+		$router->aliasMiddleware('advance.throttle', AdvanceThrottle::class);
 
 		parent::loadMigrations();
 		parent::loadRoutes();

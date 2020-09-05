@@ -44,11 +44,12 @@ trait RestResponse
 	 *
 	 * @param $code
 	 * @param array $data
+	 * @param null $message
 	 * @return JsonResponse
 	 */
-	protected function error($code, $data = [])
+	protected function error($code, $data = [], $message = NULL)
 	{
-		return self::api($data, false, $code);
+		return self::api($data, false, $code, $message);
 	}
 
 	/**

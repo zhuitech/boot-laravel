@@ -332,45 +332,31 @@ class RestClient
 			if ($this->plain) {
 				return $content;
 			}
-
-			// 返回JSON
-			$result = json_decode($content, true);
-			if (JSON_ERROR_NONE !== json_last_error()) {
-				// 解析失败
-				return Restful::format(
-					[
-						'error' => json_last_error_msg(),
-						'url' => $url,
-						'method' => $method,
-						'options' => $options,
-						'status' => $this->response->getStatusCode(),
-						'content' => $content
-					], false, REST_DATA_JSON_FAIL
-				);
-			} else {
-				return $result;
-			}
 		} catch (RequestException $e) {
-			$data = [
-				'error' => $e->getMessage(),
-				'url' => $url,
-				'method' => $method,
-				'options' => $options,
-			];
 			if ($e->hasResponse()) {
-				$this->response = $e->getResponse();
-
-				$data += [
-					'status' => $e->getResponse()->getStatusCode(),
-					'content' => (string)$e->getResponse()->getBody()
-				];
+				$content = (string)$e->getResponse()->getBody();
+			} else {
+				throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
 			}
-
-			return Restful::format($data, false, REST_REMOTE_FAIL, $data['error']);
 		} catch (GuzzleException $e) {
 			throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
 		} catch (Exception $e) {
 			throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
+		}
+
+		// 返回JSON
+		$result = json_decode($content, true);
+		if (JSON_ERROR_NONE !== json_last_error()) {
+			// 解析失败
+			return Restful::format([
+				'error' => json_last_error_msg(),
+				'url' => $url,
+				'method' => $method,
+				'status' => $this->response->getStatusCode(),
+				'content' => $content
+			], false, REST_DATA_JSON_FAIL);
+		} else {
+			return $result;
 		}
 	}
 

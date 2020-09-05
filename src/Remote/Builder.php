@@ -32,7 +32,7 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
 	}
 
 	/**
-	 * 查询
+	 * 查询列表
 	 *
 	 * @param array $columns
 	 * @return Collection

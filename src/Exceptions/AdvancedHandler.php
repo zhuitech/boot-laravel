@@ -91,8 +91,6 @@ class AdvancedHandler extends ExceptionHandler
 	 */
 	protected function convertExceptionToArray(Exception $e)
 	{
-		$errors = config('boot-laravel.errors');
-
 		// 全局异常处理
 		if ($e instanceof AccessDeniedHttpException) {
 			return $this->error(REST_NOT_AUTH);

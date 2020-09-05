@@ -17,29 +17,34 @@ use ZhuiTech\BootLaravel\Remote\Model;
  */
 class LogisticsRegion extends Model
 {
-	const OPTIONS_URL = '/api/svc/logistics/regions/select';
+	protected static $server = 'service';
+	protected static $resource = 'api/svc/logistics/regions';
+	protected static $cacheItemTTL = -1;
+	protected static $cacheListTTL = -1;
 
-	protected $server = 'service';
-	protected $resource = 'api/svc/logistics/regions';
-	protected $cache = true;
+	public $queries = [
+		'_limit' => -1,
+		'_order' => ['code' => 'asc']
+	];
 
 	/**
 	 * 多级下拉框选项
 	 *
-	 * @param null $parentCode
+	 * @param string $parentCode
 	 * @return array|Collection
 	 */
-	public static function selectOptions($parentCode = null)
+	public static function selectOptions($parentCode = '')
 	{
-		$result = RestClient::server('service')->get(self::OPTIONS_URL, ['q' => $parentCode]);
-		if (!empty($result) && (!isset($result['status']) || $result['status'] == false)) {
-			return collect($result)->pluck('text', 'id')->toArray();
-		}
-		return [];
+		$list = static::where('parent_code', $parentCode)->get();
+		return $list->pluck('name', 'code');
 	}
 
+	/**
+	 * 父节点
+	 * @return LogisticsRegion
+	 */
 	public function getParentAttribute()
 	{
-		return self::find($this->parent_code);
+		return static::find($this->parent_code);
 	}
 }

@@ -2,13 +2,15 @@
 
 namespace ZhuiTech\BootLaravel\Remote\Service;
 
-use ZhuiTech\BootLaravel\Helpers\RestClient;
+use ZhuiTech\BootLaravel\Remote\Model;
 
-class SMS
+class SMS extends Model
 {
+	protected static $server = 'service';
+	protected static $resource = 'api/svc/sms';
+
 	/**
 	 * 发送短信
-	 *
 	 * @param $mobile
 	 * @param $template
 	 * @param array $data
@@ -16,18 +18,17 @@ class SMS
 	 */
 	public static function send($mobile, $template, $data = [])
 	{
-		$data = [
-			'mobile' => $mobile,
-			'template' => $template,
-			'data' => $data,
-		];
-
-		return RestClient::server('service')->post('api/svc/sms/send', $data);
+		return static::requestData('send', [], ['mobile' => $mobile, 'template' => $template, 'data' => $data], 'post');
 	}
 
+	/**
+	 * 验证短信
+	 * @param $to
+	 * @param $code
+	 * @return array
+	 */
 	public static function check($to, $code)
 	{
-		$result = RestClient::server('service')->post('api/svc/sms/check', ['mobile' => $to, 'verify_code' => $code]);
-		return $result['status'] ?? false;
+		return static::requestData('check', [], ['mobile' => $to, 'verify_code' => $code], 'post');
 	}
 }

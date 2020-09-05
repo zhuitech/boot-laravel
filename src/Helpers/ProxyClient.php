@@ -64,6 +64,7 @@ class ProxyClient extends RestClient
 	 * 返回JSON
 	 * @param null $url
 	 * @param null $method
+	 * @return array|mixed
 	 */
 	public function passJson($url = null, $method = null)
 	{

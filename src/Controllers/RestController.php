@@ -71,7 +71,7 @@ abstract class RestController extends Controller
 	 */
 	public function __construct(BaseRepository $repository)
 	{
-		$this->repository = $repository;
+		$this->repository = $repository;//print_r($repository->modelClass);exit;
 
 		if (empty($repository->model())) {
 			$repository->setModel($this->model);
@@ -107,7 +107,8 @@ abstract class RestController extends Controller
 
 		// 找不到
 		if (empty($result)) {
-			throw new RestCodeException(REST_OBJ_NOT_EXIST);
+			$modelCaption = $this->modelCaption();
+			throw new RestCodeException(REST_OBJ_NOT_EXIST, null, $modelCaption ? "{$modelCaption}不存在" : null);
 		}
 
 		return $result;
@@ -128,6 +129,20 @@ abstract class RestController extends Controller
 	protected function prepare()
 	{
 
+	}
+
+	/**
+	 * 获取模型名称
+	 * @return string|null
+	 */
+	protected function modelCaption()
+	{
+		$class = $this->repository->model();
+		if (property_exists($class, 'modelCaption')) {
+			return $class::$modelCaption;
+		}
+
+		return null;
 	}
 
 	// CRUD ************************************************************************************************************
@@ -217,7 +232,8 @@ abstract class RestController extends Controller
 			// 创建失败
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_CREATE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_CREATE_FAIL, null, $modelCaption ? "{$modelCaption}创建失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -262,7 +278,8 @@ abstract class RestController extends Controller
 			// 更新失败
 			if ($result === false) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_UPDATE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_UPDATE_FAIL, null, $modelCaption ? "{$modelCaption}更新失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -309,7 +326,8 @@ abstract class RestController extends Controller
 			// 失败了
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_DELETE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_DELETE_FAIL, null, $modelCaption ? "{$modelCaption}删除失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -409,7 +427,8 @@ abstract class RestController extends Controller
 			// 失败了
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_ERASE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_ERASE_FAIL, null, $modelCaption ? "{$modelCaption}强制删除失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -448,7 +467,8 @@ abstract class RestController extends Controller
 			// 失败了
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_RESTORE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_RESTORE_FAIL, null, $modelCaption ? "{$modelCaption}恢复失败" : null);
 			} else {
 				// 成功了
 				DB::commit();

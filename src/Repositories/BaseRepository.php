@@ -19,14 +19,16 @@ use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 class BaseRepository extends Repository
 {
 	/**
+	 * 子类需要重写
+	 *
+	 * @var string
+	 */
+	public $modelClass;
+
+	/**
 	 * @var Eloquent
 	 */
 	protected $model;
-
-	/**
-	 * @var string
-	 */
-	protected $modelClass;
 
 	/**
 	 * 允许同时使用同类型的条件
@@ -95,7 +97,7 @@ class BaseRepository extends Repository
 	public function scope($query)
 	{
 		$query += [
-			'_order' => ['id' => 'desc']
+			'_order' => [$this->newModel()->getKeyName() => 'asc']
 		];
 
 		$this->pushCriteria(new QueryCriteria($query));

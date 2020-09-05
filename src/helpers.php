@@ -253,7 +253,7 @@ if (!function_exists('unique_no')) {
 	 * @param string $prefix
 	 * @return string
 	 */
-	function unique_no($prefix = '')
+	function unique_no($prefix = 'O')
 	{
 		$uniqid = substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
 		return $prefix . date('Ymd') . $uniqid . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);

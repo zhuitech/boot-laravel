@@ -18,30 +18,24 @@ use ZhuiTech\BootLaravel\Remote\Model;
  */
 class LogisticsCompany extends Model
 {
-	protected $server = 'service';
-	protected $resource = 'api/svc/logistics/companies';
-	protected $cache = true;
+	protected static $server = 'service';
+	protected static $resource = 'api/svc/logistics/companies';
+	protected static $cacheItemTTL = -1;
+	protected static $cacheListTTL = -1;
 
 	public $queries = [
 		'_limit' => -1,
 		'_order' => ['id' => 'asc']
 	];
 
-	public static function ensure($name, $code = null): LogisticsCompany
+	/**
+	 * 获取物流公司
+	 * @param $name
+	 * @param null $code
+	 * @return LogisticsCompany|null
+	 */
+	public static function ensure($name, $code = null)
 	{
-		if (!empty($code)) {
-			$company = LogisticsCompany::where('code', $code)->first();
-		} elseif (!empty($name)) {
-			$company = LogisticsCompany::where('name', $name)->first();
-		}
-
-		if (empty($company)) {
-			$company = new LogisticsCompany();
-			$company->code = $code ?? $name;
-			$company->name = $name;
-			$company->save();
-		}
-
-		return $company;
+		return static::requestItem(static::$resource . '/ensure', ['name' => $name, 'code' => $code]);
 	}
 }
