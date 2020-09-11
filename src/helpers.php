@@ -98,19 +98,20 @@ if (!function_exists('cdn')) {
 	 */
 	function cdn($path)
 	{
-		$cdn = trim(env('CDN_URL', ''), '/');
+		$cdnUrl = trim(config('boo-admin.cdn_url'), '/');
+		$replaceUrl = trim(config('boo-admin.cdn_replace_url'), '/');
 
 		// 没有配置CDN
-		if (empty($cdn)) {
+		if (!config('boot-admin.cdn_status', false) || empty($cdnUrl)) {
 			return $path;
 		}
 
 		if (URL::isValidUrl($path)) {
 			// 替换域名
-			return str_replace(env('APP_URL', ''), $cdn, $path);
+			return str_replace($replaceUrl, $cdnUrl, $path);
 		} else {
 			// 直接添加前缀
-			return $cdn . '/' . trim($path, '/');
+			return $cdnUrl . '/' . trim($path, '/');
 		}
 	}
 }

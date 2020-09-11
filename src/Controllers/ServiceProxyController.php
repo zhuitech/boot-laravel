@@ -2,12 +2,12 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
+use Auth;
 use Exception;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Log;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 use ZhuiTech\BootLaravel\Helpers\ProxyClient;
 use ZhuiTech\BootLaravel\Helpers\Restful;
 use ZhuiTech\BootLaravel\Models\TokenUser;
@@ -32,9 +32,14 @@ class ServiceProxyController extends Controller
 	{
 		$result = ProxyClient::server('service')->passJson();
 
-		if ($result['status'] != false) {
-			$user = new TokenUser($result['data']);
-			$result['data']['token'] = $user->createToken('members')->accessToken;
+		// 如果返回结果有用户字段，生成令牌
+		if ($result['status'] != false && !empty($result['data']['user'])) {
+			// 如果当前未登录，返回令牌
+			$user = Auth::user();
+			if (empty($user)) {
+				$user = new TokenUser($result['data']['user']);
+				$result['data']['token'] = $user->createToken('members')->accessToken;
+			}
 		}
 
 		return response()->json($result);

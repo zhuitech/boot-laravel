@@ -103,6 +103,12 @@ class ModelTransformer extends TransformerAbstract
 		return $result;
 	}
 
+	/**
+	 * 包含对象
+	 * @param $data
+	 * @param TransformerAbstract|NULL $transformer
+	 * @return \League\Fractal\Resource\Item
+	 */
 	protected function includeItem($data, TransformerAbstract $transformer = NULL)
 	{
 		if (!empty($data)) {
@@ -115,6 +121,12 @@ class ModelTransformer extends TransformerAbstract
 		}
 	}
 
+	/**
+	 * 包含列表
+	 * @param $data
+	 * @param TransformerAbstract|NULL $transformer
+	 * @return \League\Fractal\Resource\Collection
+	 */
 	protected function includeCollection($data, TransformerAbstract $transformer = NULL)
 	{
 		if (!empty($data)) {

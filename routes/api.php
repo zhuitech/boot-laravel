@@ -17,9 +17,9 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['get|post', 'user/my/invoices'],
 	    ['get|put|delete', 'user/my/invoices/{id}'],
 
-	    ['post', 'sms/verify', ['middleware' => ['advance.throttle:10,1']]],
+	    ['post', 'sms/verify', ['middleware' => ['throttle2:10,1']]],
 	    ['post', 'sms/check'],
-	    ['post', 'sms/send', ['middleware' => ['advance.throttle:10,1']]],
+	    ['post', 'sms/send', ['middleware' => ['throttle2:10,1']]],
 
         ['get', 'logistics/regions/select'],
 	    ['get', 'logistics/regions'],
@@ -47,7 +47,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['get', 'cms/page/types'],
 
         ['get', 'wechat/pub/auth'],
-	    ['get', 'wechat/mp/auth'],
+	    ['get', 'wechat/mp/auth', ['func' => 'token']],
 	    ['post', 'wechat/mp/qrcode'],
 	    ['get', 'wechat/pub/jssdk'],
 	    ['post', 'wechat/mp/poster'],

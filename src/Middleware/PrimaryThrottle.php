@@ -3,17 +3,28 @@
 namespace ZhuiTech\BootLaravel\Middleware;
 
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use RuntimeException;
 
 /**
- * 自定义流控
+ * 主要流控
  * Class AdvanceThrottle
  * @package ZhuiTech\BootLaravel\Middleware
  */
-class AdvanceThrottle extends ThrottleRequests
+class PrimaryThrottle extends ThrottleRequests
 {
 	protected function resolveRequestSignature($request)
 	{
-		return 'advance.' . parent::resolveRequestSignature($request);
+		$prefix = 'throttle.1.';
+
+		if ($user = $request->user('jwt')) {
+			return $prefix . sha1($user->getAuthIdentifier());
+		}
+
+		if ($route = $request->route()) {
+			return $prefix . sha1($route->getDomain() . '|' . $request->ip());
+		}
+
+		throw new RuntimeException('Unable to generate the request signature. Route unavailable.');
 	}
 
 	protected function getHeaders($maxAttempts, $remainingAttempts, $retryAfter = null)

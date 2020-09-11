@@ -166,7 +166,7 @@ class BaseRepository extends Repository
 		if ($relation instanceof BelongsTo) {
 			$this->model = $this->model->join(
 				$relation->getModel()->getTable(),
-				$relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey());
+				$relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKeyName());
 		} elseif ($relation instanceof HasOneOrMany) {
 			$this->model = $this->model->join(
 				$relation->getModel()->getTable(),

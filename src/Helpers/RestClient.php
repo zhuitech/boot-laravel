@@ -327,13 +327,9 @@ class RestClient
 		try {
 			$this->response = $this->getClient()->request($method, $url, $options);
 			$content = (string)$this->response->getBody();
-
-			// 返回原始
-			if ($this->plain) {
-				return $content;
-			}
 		} catch (RequestException $e) {
 			if ($e->hasResponse()) {
+				$this->response = $e->getResponse();
 				$content = (string)$e->getResponse()->getBody();
 			} else {
 				throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
@@ -342,6 +338,11 @@ class RestClient
 			throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
 		} catch (Exception $e) {
 			throw new RestCodeException(REST_REMOTE_FAIL, $e->getMessage());
+		}
+
+		// 返回原始
+		if ($this->plain) {
+			return $content;
 		}
 
 		// 返回JSON

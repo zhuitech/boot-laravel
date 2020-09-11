@@ -3,8 +3,8 @@
 namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
+use File;
+use Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
 use ReflectionException;
@@ -87,7 +87,7 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	public function boot()
 	{
 		$this->commands($this->commands);
-		$this->registerErrors();
+		$this->mergeErrors();
 	}
 
 	/**
@@ -151,7 +151,7 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	/**
 	 * 注册错误代码
 	 */
-	protected function registerErrors()
+	protected function mergeErrors()
 	{
 		if (!empty($this->errors)) {
 			$config = config('boot-laravel');
@@ -221,6 +221,13 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 			if (file_exists($file)) {
 				Route::prefix(config('admin.route.prefix'))
 					->middleware(config('admin.route.middleware'))
+					->group($file);
+			}
+
+			$file = $this->basePath('routes/hook.php');
+			if (file_exists($file)) {
+				// 无须添加中间件
+				Route::prefix(config('boot-laravel.route.api.prefix'))
 					->group($file);
 			}
 
