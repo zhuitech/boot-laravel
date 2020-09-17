@@ -8,6 +8,7 @@ use Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
 use ReflectionException;
+use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 
 /**
  * 基础服务提供类，封装了所有注册逻辑。
@@ -62,6 +63,18 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	protected $errors = [];
 
 	/**
+	 * 注册定时任务
+	 * @var array
+	 */
+	protected $schedules = [];
+
+	/**
+	 * 注册事件订阅
+	 * @var array
+	 */
+	protected $subscribers = [];
+
+	/**
 	 * Resolve the base path of the package.
 	 *
 	 * @param null $path
@@ -88,6 +101,8 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	{
 		$this->commands($this->commands);
 		$this->mergeErrors();
+		$this->registerSchedules();
+		$this->registerSubscribers();
 	}
 
 	/**
@@ -157,6 +172,27 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 			$config = config('boot-laravel');
 			$config['errors'] += $this->errors;
 			config(['boot-laravel' => $config]);
+		}
+	}
+
+	/**
+	 * 注册定时器
+	 */
+	protected function registerSchedules()
+	{
+		$registry = resolve(ScheduleRegistry::class);
+		foreach ($this->schedules as $schedule) {
+			$registry->push($schedule);
+		}
+	}
+
+	/**
+	 * 注册定时器
+	 */
+	protected function registerSubscribers()
+	{
+		foreach ($this->subscribers as $subscriber) {
+			\Event::subscribe($subscriber);
 		}
 	}
 

@@ -2,7 +2,9 @@
 
 namespace ZhuiTech\BootLaravel\Transformers;
 
+use Closure;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use League\Fractal\TransformerAbstract;
@@ -83,10 +85,10 @@ class ModelTransformer extends TransformerAbstract
 
 		// 筛选字段
 		if (!empty($this->only)) {
-			$result = array_only($result, $this->only);
+			$result = Arr::only($result, $this->only);
 		} else {
 			$excepts = array_merge($this->excepts, $this->defaultExcepts());
-			$result = array_except($result, $excepts);
+			$result = Arr::except($result, $excepts);
 		}
 
 		foreach ($this->appends as $field) {
@@ -133,7 +135,7 @@ class ModelTransformer extends TransformerAbstract
 			if (empty($transformer)) {
 				$item = [];
 				if (is_array($data)) {
-					$item = array_first($data);
+					$item = Arr::first($data);
 				} elseif ($data instanceof Collection) {
 					$item = $data->first();
 				}
@@ -163,8 +165,14 @@ class ModelTransformer extends TransformerAbstract
 				return $class::$defaultTransformer;
 			}
 
-			// 根据命名规则找到默认转化器
+			// 指定类型
 			$transformerClass = Str::replaceFirst('Models', 'Transformers', $class) . ucwords($type) . 'Transformer';
+			if (class_exists($transformerClass)) {
+				return $transformerClass;
+			}
+
+			// 不指定类型
+			$transformerClass = Str::replaceFirst('Models', 'Transformers', $class) . 'Transformer';
 			if (class_exists($transformerClass)) {
 				return $transformerClass;
 			}
@@ -172,5 +180,62 @@ class ModelTransformer extends TransformerAbstract
 
 		// 通用转化器
 		return self::class;
+	}
+
+	/*
+	 * 外部扩展includes
+	 *
+	 * ************************************************************************************************
+	 */
+
+	/**
+	 * 扩展include定义
+	 *
+	 * @var array
+	 */
+	protected static $extendIncludes = [];
+
+	/**
+	 * 定义一个扩展的include
+	 *
+	 * @param  string  $name
+	 * @param  \Closure  $callback
+	 * @return void
+	 */
+	public static function extendInclude($name, Closure $callback)
+	{
+		static::$extendIncludes = array_replace_recursive(
+			static::$extendIncludes,
+			[static::class => [$name => $callback]]
+		);
+	}
+
+	/**
+	 * 获取可用includes
+	 * @return array
+	 */
+	public function getAvailableIncludes()
+	{
+		$includes = parent::getAvailableIncludes();
+
+		// 添加扩展includes
+		$extends = static::$extendIncludes[static::class] ?? null;
+		if ($extends) {
+			$includes = array_merge($includes, array_keys($extends));
+		}
+		return $includes;
+	}
+
+	public function __call($name, $arguments)
+	{
+		if (Str::startsWith($name, 'include')){
+			$include = Str::snake(Str::replaceFirst('include', '', $name));
+			/* @var $resolver Closure */
+			if ($resolver = static::$extendIncludes[static::class][$include] ?? null) {
+				return $resolver->call($this, ... $arguments);
+			}
+		}
+
+		return null;
 	}
 }

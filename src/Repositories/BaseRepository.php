@@ -157,11 +157,10 @@ class BaseRepository extends Repository
 	 */
 	public function join($relationName)
 	{
-		if (!method_exists($this->newModel, $relationName)) {
+		$relation = $this->newModel->$relationName();
+		if (!$relation) {
 			throw new RestFailException(sprintf('关系 %s 不存在', $relationName));
 		}
-
-		$relation = $this->newModel->$relationName();
 
 		if ($relation instanceof BelongsTo) {
 			$this->model = $this->model->join(

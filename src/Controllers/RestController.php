@@ -59,6 +59,12 @@ abstract class RestController extends Controller
 	protected $transformer;
 
 	/**
+	 * 列表转化器
+	 * @var string
+	 */
+	protected $listTransformer;
+
+	/**
 	 * 模型类
 	 * @var
 	 */
@@ -83,6 +89,10 @@ abstract class RestController extends Controller
 
 		if (empty($this->transformer)) {
 			$this->transformer = ModelTransformer::defaultTransformer($repository->newModel());
+		}
+
+		if (empty($this->listTransformer)) {
+			$this->listTransformer = ModelTransformer::defaultTransformer($repository->newModel(), 'list');
 		}
 	}
 

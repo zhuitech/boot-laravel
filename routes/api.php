@@ -10,6 +10,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['get', 'user/me'],
 	    ['post', 'user/update/password'],
 	    ['post', 'user/update/mobile'],
+	    ['post', 'user/update/profile'],
 	    ['get', 'user/my/connects'],
 	    ['delete', 'user/my/connects/{id}'],
 	    ['get|post', 'user/my/addresses'],

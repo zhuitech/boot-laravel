@@ -87,12 +87,12 @@ trait ModelCache
 
 	/**
 	 * 删除时
-	 */
+
 	protected function performDeleteOnModel()
 	{
 		$this->cacheRemove();
 		parent::performDeleteOnModel();
-	}
+	}*/
 
 	/**
 	 * 更新时

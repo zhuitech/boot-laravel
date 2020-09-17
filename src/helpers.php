@@ -82,7 +82,9 @@ if (!function_exists('magic_replace')) {
 		if (!empty($url)) {
 			$replacements = [];
 			foreach ($data as $key => $value) {
-				$replacements["{{$key}}"] = $value;
+				if (is_string($value)) {
+					$replacements["{{$key}}"] = $value;
+				}
 			}
 			return strtr($url, $replacements);
 		}
