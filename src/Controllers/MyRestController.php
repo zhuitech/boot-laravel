@@ -1,18 +1,9 @@
 <?php
 
-/*
- * This file is part of the current project.
- * 
- * (c) ForeverGlory <http://foreverglory.me/>
- * 
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ZhuiTech\BootLaravel\Controllers;
 
 use Bosnadev\Repositories\Exceptions\RepositoryException;
-use Illuminate\Support\Facades\Auth;
+use Auth;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Models\User;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
@@ -23,7 +14,7 @@ use ZhuiTech\BootLaravel\Repositories\SimpleCriteria;
  *
  * @author ForeverGlory
  */
-class MyRestController extends RestController
+abstract class MyRestController extends RestController
 {
 	/**
 	 * 当前用户

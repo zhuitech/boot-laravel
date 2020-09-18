@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2016-08-19
- * Time: 12:31
- */
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
@@ -18,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use DB;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;

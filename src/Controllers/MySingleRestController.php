@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: breeze
- * Date: 2019-05-02
- * Time: 16:47
- */
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
@@ -15,7 +9,7 @@ use Illuminate\Http\JsonResponse;
  * Class MySingleRestController
  * @package ZhuiTech\BootLaravel\Controllers
  */
-class MySingleRestController extends MyRestController
+abstract class MySingleRestController extends MyRestController
 {
 	/**
 	 * Retrive a list of objects

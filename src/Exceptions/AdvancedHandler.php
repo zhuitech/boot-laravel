@@ -54,8 +54,6 @@ class AdvancedHandler extends ExceptionHandler
 	 */
 	protected function unauthenticated($request, AuthenticationException $exception)
 	{
-		$errors = config('boot-laravel.errors');
-
 		return $request->expectsJson()
 			? response()->json($this->error(REST_NOT_LOGIN), 401)
 			: redirect()->guest(route('login'));
@@ -95,7 +93,7 @@ class AdvancedHandler extends ExceptionHandler
 		if ($e instanceof AccessDeniedHttpException) {
 			return $this->error(REST_NOT_AUTH);
 		} elseif ($e instanceof NotFoundHttpException) {
-			return $this->error(REST_NOT_FOUND);
+			return $this->error(REST_NOT_FOUND, $e->getMessage());
 		} elseif ($e instanceof RestCodeException) {
 			return array_merge($this->error(), [
 				'code' => $e->getCode(),
