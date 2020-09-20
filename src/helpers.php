@@ -100,8 +100,8 @@ if (!function_exists('cdn')) {
 	 */
 	function cdn($path)
 	{
-		$cdnUrl = trim(config('boo-admin.cdn_url'), '/');
-		$replaceUrl = trim(config('boo-admin.cdn_replace_url'), '/');
+		$cdnUrl = trim(config('boot-admin.cdn_url'), '/');
+		$replaceUrl = trim(config('boot-admin.cdn_replace_url'), '/');
 
 		// 没有配置CDN
 		if (!config('boot-admin.cdn_status', false) || empty($cdnUrl)) {
