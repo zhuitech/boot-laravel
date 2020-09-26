@@ -2,6 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Middleware;
 
+use Closure;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use RuntimeException;
 
@@ -40,5 +41,14 @@ class SecondaryThrottle extends ThrottleRequests
 		}
 
 		return $headers;
+	}
+
+	public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1)
+	{
+		if (config('boot-laravel.pressure_test')) {
+			return $next($request);
+		} else {
+			return parent::handle($request, $next, $maxAttempts, $decayMinutes);
+		}
 	}
 }
