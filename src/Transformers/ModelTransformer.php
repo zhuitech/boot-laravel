@@ -53,35 +53,7 @@ class ModelTransformer extends TransformerAbstract
 		}
 
 		// 转换字段
-		foreach ($this->casts as $field => $caster_setting) {
-			// 支持管道
-			$casters = explode('|', $caster_setting);
-
-			if (isset($result[$field])) {
-				// 获取原始值
-				$value = $result[$field];
-
-				// 遍历管道
-				foreach ($casters as $caster) {
-					$caster_items = explode(':', $caster);
-
-					// 简单转换函数
-					if (count($caster_items) == 1) {
-						$func = $caster_items[0];
-						$value = $func($value);
-					}
-
-					// 嵌套转换函数
-					if (count($caster_items) == 2) {
-						$func = $caster_items[0];
-						$value = $func($caster_items[1], $value);
-					}
-				}
-
-				// 设置处理后的结果
-				$result[$field] = $value;
-			}
-		}
+		$result = array_format($result, $this->casts);
 
 		// 筛选字段
 		if (!empty($this->only)) {
@@ -198,8 +170,8 @@ class ModelTransformer extends TransformerAbstract
 	/**
 	 * 定义一个扩展的include
 	 *
-	 * @param  string  $name
-	 * @param  \Closure  $callback
+	 * @param string $name
+	 * @param \Closure $callback
 	 * @return void
 	 */
 	public static function extendInclude($name, Closure $callback)
@@ -228,7 +200,7 @@ class ModelTransformer extends TransformerAbstract
 
 	public function __call($name, $arguments)
 	{
-		if (Str::startsWith($name, 'include')){
+		if (Str::startsWith($name, 'include')) {
 			$include = Str::snake(Str::replaceFirst('include', '', $name));
 			/* @var $resolver Closure */
 			if ($resolver = static::$extendIncludes[static::class][$include] ?? null) {

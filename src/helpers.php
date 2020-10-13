@@ -223,6 +223,100 @@ if (!function_exists('transform_list')) {
 	}
 }
 
+if (!function_exists('array_format')) {
+	/**
+	 * 格式化数组
+	 * @param $data
+	 * @param $casts
+	 * @return mixed
+	 */
+	function array_format($data, $casters)
+	{
+		foreach ($casters as $field => $caster) {
+			// 支持管道
+			$pipes = explode('|', $caster);
+
+			if (isset($data[$field])) {
+				// 获取原始值
+				$value = $data[$field];
+
+				// 遍历管道
+				foreach ($pipes as $pipe) {
+					$items = explode(':', $pipe);
+
+					// 函数 
+					$func = $items[0];
+					// 参数
+					$para = count($items) > 1 ? explode(',', $items[1]) : [];
+
+					// 全局转换函数
+					$value = $func($value, ... $para);
+				}
+
+				// 设置处理后的结果
+				$data[$field] = $value;
+			}
+		}
+
+		return $data;
+	}
+}
+
+if (!function_exists('excel_datetime')) {
+	/**
+	 * 转换excel日期到php日期
+	 * @param $excelDate
+	 * @return \Illuminate\Support\Carbon
+	 */
+	function excel_datetime($dateFromExcel)
+	{
+		return \Illuminate\Support\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateFromExcel));
+	}
+}
+
+if (!function_exists('expand_number')) {
+	/**
+	 * 展开数字，可以展开 W,K
+	 * @param $number
+	 */
+	function expand_number($number)
+	{
+		$number = Str::upper($number);
+
+		if (Str::endsWith($number, 'K')) {
+			$number = str_replace('K', '', $number) * 1000;
+		}
+
+		if (Str::endsWith($number, 'W')) {
+			$number = str_replace('W', '', $number) * 10000;
+		}
+
+		return $number;
+	}
+}
+
+if (!function_exists('short_number')) {
+	/**
+	 * 格式化为短格式数字
+	 * @param $number
+	 * @return string
+	 */
+	function short_number($number, $decimals = 1)
+	{
+		if ($number >= 10000) {
+			$number = round($number / 10000, $decimals);
+			return number_format($number, $number != (int)$number ? $decimals : 0) . 'W';
+		} else if ($number >= 1000) {
+			$number = round($number / 1000, $decimals);
+			return number_format($number, $number != (int)$number ? $decimals : 0) . 'K';
+		} else {
+			return $number;
+		}
+	}
+}
+
+/***************************************************************************************************************************************************************/
+
 if (!function_exists('morph_alias')) {
 	/**
 	 * 获取别名
@@ -420,7 +514,6 @@ if (!function_exists('collect_to_array')) {
 		return $array;
 	}
 }
-
 
 if (!function_exists('str2hex')) {
 	/**

@@ -37,7 +37,6 @@ use ZhuiTech\BootLaravel\Transformers\ArraySerializer;
 class LaravelProvider extends AbstractServiceProvider
 {
 	protected $providers = [
-		'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
 		'Overtrue\LaravelUploader\UploadServiceProvider',
 		'Overtrue\LaravelLang\TranslationServiceProvider',
 	];

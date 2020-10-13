@@ -100,7 +100,8 @@ class BaseRepository extends Repository
 			'_order' => [$this->newModel()->getKeyName() => 'asc']
 		];
 
-		$this->pushCriteria(new QueryCriteria($query));
+		$criteria = new QueryCriteria($query);
+		$this->pushCriteria($criteria);
 		return $this;
 	}
 

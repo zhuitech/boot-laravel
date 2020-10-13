@@ -36,6 +36,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
 	}
 
 	/**
+	 * 是否存在关系
+	 * @param $object
+	 * @param $method
+	 * @return bool
+	 */
+	public static function relationExists($object, $key)
+	{
+		$class = get_class($object);
+		return method_exists($object, $key)|| ($object instanceof Model && isset($object::$relationResolvers[$class][$key]));
+	}
+
+	/**
 	 * Get a relationship.
 	 *
 	 * @param  string  $key
@@ -53,7 +65,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 		// If the "attribute" exists as a method on the model, we will just assume
 		// it is a relationship and will load and return results from the query
 		// and hydrate the relationship's value on the "relationships" array.
-		if (method_exists($this, $key) || (static::$relationResolvers[static::class][$key] ?? null)) {
+		if (static::relationExists($this, $key)) {
 			return $this->getRelationshipFromMethod($key);
 		}
 	}
