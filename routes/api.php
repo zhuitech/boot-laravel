@@ -17,18 +17,26 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['get|put|delete', 'user/my/addresses/{id}'],
 	    ['get|post', 'user/my/invoices'],
 	    ['get|put|delete', 'user/my/invoices/{id}'],
+	    ['get|post', 'user/my/bank-accounts'],
+	    ['get|put|delete', 'user/my/bank-accounts/{id}'],
 
 	    ['post', 'sms/verify', ['middleware' => ['throttle2:10,1']]],
 	    ['post', 'sms/check'],
 	    ['post', 'sms/send', ['middleware' => ['throttle2:10,1']]],
 
-        ['get', 'logistics/regions/select'],
+	    ['get', 'message/my/notifications/unread'],
+	    ['post', 'message/my/notifications/mark'],
+	    ['post', 'message/my/notifications/delete'],
+	    ['get', 'message/my/notifications'],
+
+	    ['get', 'logistics/regions/select'],
 	    ['get', 'logistics/regions'],
 	    ['get', 'logistics/companies'],
 	    ['get', 'logistics/query'],
         ['get', 'system/shipping/query'],
 	    ['get', 'system/shipping/company'],
 
+	    ['get', 'pay/banks'],
         ['post', 'pay/notify/{channel}'],
 	    ['post', 'pay/return/{channel}/{method}'],
 	    ['post', 'pay/notify/{channel}/{method}'],
@@ -42,6 +50,7 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['post', 'file/upload/form/token'],
 
         ['get', 'cms/ads/slug/{slug}'],
+	    ['get', 'cms/ads'],
         ['get', 'cms/page/categories/tree'],
 	    ['get', 'cms/page/articles'],
 	    ['get', 'cms/page/articles/{id}'],

@@ -4,6 +4,7 @@ namespace ZhuiTech\BootLaravel\Controllers;
 
 
 use Illuminate\Http\JsonResponse;
+use League\Fractal\TransformerAbstract;
 
 /**
  * Class MySingleRestController
@@ -11,25 +12,9 @@ use Illuminate\Http\JsonResponse;
  */
 abstract class MySingleRestController extends MyRestController
 {
-	/**
-	 * Retrive a list of objects
-	 * GET        /photos
-	 *
-	 * @return JsonResponse
-	 */
-	public function index()
+	protected function transformList($list, TransformerAbstract $transformer = NULL)
 	{
-		$this->prepare();
-
-		$data = request()->all();
-		$result = $this->execIndex($data);
-
-		// v2 使用 transformer
-		if ($this->version >= 2) {
-			$result = $this->transformItem($result);
-		}
-
-		return $this->success($result);
+		return $this->transformItem($list, $transformer);
 	}
 
 	/**
@@ -37,9 +22,10 @@ abstract class MySingleRestController extends MyRestController
 	 * @param $data
 	 * @return mixed
 	 */
-	public function execIndex($data)
+	protected function execIndex($data)
 	{
-		return $this->repository->all()->first();
+		// 接受外部参数
+		return $this->findSingle($data);
 	}
 
 	/**
@@ -47,15 +33,30 @@ abstract class MySingleRestController extends MyRestController
 	 * @param $data
 	 * @return mixed
 	 */
-	public function execStore($data)
+	protected function execStore($data)
 	{
-		$model = $this->repository->all()->first();
+		$model = $this->findSingle();
 
 		if (empty($model)) {
 			return $this->storeSingle($data);
 		} else {
 			return $this->updateSingle($model, $data);
 		}
+	}
+
+	/**
+	 * 查询
+	 * @param array $data
+	 * @return mixed
+	 */
+	protected function findSingle($data = [])
+	{
+		$data += [
+			'_limit' => 1
+		];
+
+		// 底层自带user_id条件
+		return parent::execIndex($data)->first();
 	}
 
 	/**
@@ -78,6 +79,8 @@ abstract class MySingleRestController extends MyRestController
 	{
 		return parent::execUpdate($model, $data);
 	}
+
+	/**********************************************************/
 
 	public function update($id)
 	{

@@ -100,4 +100,16 @@ return [
 
 	// 压测模式
 	'pressure_test' => false,
+
+	// CDN开启
+	'cdn_status' => false,
+
+	// CDN链接
+	'cdn_url' => env('CDN_URL', ''),
+
+	// 被替换域名
+	'cdn_replace_url' => env('APP_URL', ''),
+
+	// 并发请求用户数限制
+	'concurrent_request_limit' => 0,
 ];

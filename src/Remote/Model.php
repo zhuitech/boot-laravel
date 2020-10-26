@@ -28,6 +28,8 @@ use ZhuiTech\BootLaravel\Helpers\RestClient;
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
+	protected $guarded = [];
+
 	/**
 	 * 微服务名称
 	 * @var
@@ -85,6 +87,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
 	public static function with($relations)
 	{
 		return (new static)->newQuery();
+	}
+
+	public function newInstance($attributes = [], $exists = false)
+	{
+		// This method just provides a convenient way for us to generate fresh model
+		// instances of this current model. It is particularly useful during the
+		// hydration of new objects via the Eloquent query builder instances.
+		$model = new static((array) $attributes);
+
+		$model->exists = $exists;
+
+		return $model;
 	}
 
 	# 实例方法 #######################################################################################

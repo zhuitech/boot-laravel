@@ -82,9 +82,10 @@ if (!function_exists('magic_replace')) {
 		if (!empty($url)) {
 			$replacements = [];
 			foreach ($data as $key => $value) {
-				if (is_string($value)) {
-					$replacements["{{$key}}"] = $value;
+				if (!is_string($value)) {
+					$value = (string)$value;
 				}
+				$replacements["{{$key}}"] = $value;
 			}
 			return strtr($url, $replacements);
 		}
@@ -100,11 +101,11 @@ if (!function_exists('cdn')) {
 	 */
 	function cdn($path)
 	{
-		$cdnUrl = trim(config('boot-admin.cdn_url'), '/');
-		$replaceUrl = trim(config('boot-admin.cdn_replace_url'), '/');
+		$cdnUrl = trim(config('boot-laravel.cdn_url'), '/');
+		$replaceUrl = trim(config('boot-laravel.cdn_replace_url'), '/');
 
 		// 没有配置CDN
-		if (!config('boot-admin.cdn_status', false) || empty($cdnUrl)) {
+		if (!config('boot-laravel.cdn_status', false) || empty($cdnUrl)) {
 			return $path;
 		}
 
@@ -184,10 +185,11 @@ if (!function_exists('transform_item')) {
 	 * 转换对象
 	 *
 	 * @param $item
-	 * @param TransformerAbstract $transformer
+	 * @param TransformerAbstract|null $transformer
+	 * @param string $include
 	 * @return array
 	 */
-	function transform_item($item, TransformerAbstract $transformer = null)
+	function transform_item($item, TransformerAbstract $transformer = null, $include = '')
 	{
 		if (empty($transformer)) {
 			$class = ModelTransformer::defaultTransformer($item);
@@ -197,6 +199,7 @@ if (!function_exists('transform_item')) {
 		$data = new Item($item, $transformer);
 
 		$fractal = resolve(Manager::class);
+		$fractal->parseIncludes($include);
 		return $fractal->createData($data)->toArray();
 	}
 }
@@ -206,10 +209,11 @@ if (!function_exists('transform_list')) {
 	 * 转换集合
 	 *
 	 * @param \Illuminate\Support\Collection $list
-	 * @param TransformerAbstract $transformer
+	 * @param TransformerAbstract|null $transformer
+	 * @param string $include
 	 * @return array
 	 */
-	function transform_list($list, TransformerAbstract $transformer = null)
+	function transform_list($list, TransformerAbstract $transformer = null, $include = '')
 	{
 		if (empty($transformer)) {
 			$class = ModelTransformer::defaultTransformer($list->first());
@@ -219,42 +223,71 @@ if (!function_exists('transform_list')) {
 		$data = new Collection($list, $transformer);
 
 		$fractal = resolve(Manager::class);
+		$fractal->parseIncludes($include);
 		return $fractal->createData($data)->toArray();
+	}
+}
+
+if (!function_exists('pipe_format')) {
+	/**
+	 * 管道格式化
+	 * @param $value
+	 * @param $pipes
+	 * @return
+	 */
+	function pipe_format($value, $pipes)
+	{
+		if (!is_array($pipes)) {
+			$pipes = [$pipes];
+		}
+
+		// 递归处理子对象
+		if (is_array($value) && $pipes !== array_values($pipes)) {
+			return array_format($value, $pipes);
+		}
+
+		// 处理
+		foreach ($pipes as $pipe) {
+			$items = explode(':', $pipe);
+
+			// 函数
+			$func = $items[0];
+			array_shift($items);
+
+			// 填补空白项为原值
+			$flag = false;
+			foreach ($items as $i => $item) {
+				if (empty($item)) {
+					$items[$i] = $value;
+					$flag = true;
+				}
+			}
+			if (!$flag) {
+				$items[] = $value;
+			}
+
+			// 全局转换函数
+			$value = $func(... $items);
+		}
+
+		return $value;
 	}
 }
 
 if (!function_exists('array_format')) {
 	/**
-	 * 格式化数组
+	 * 数组格式化
 	 * @param $data
-	 * @param $casts
+	 * @param $casters
 	 * @return mixed
 	 */
 	function array_format($data, $casters)
 	{
-		foreach ($casters as $field => $caster) {
-			// 支持管道
-			$pipes = explode('|', $caster);
-
+		// 遍历管道
+		foreach ($casters as $field => $pipes) {
 			if (isset($data[$field])) {
-				// 获取原始值
-				$value = $data[$field];
-
-				// 遍历管道
-				foreach ($pipes as $pipe) {
-					$items = explode(':', $pipe);
-
-					// 函数 
-					$func = $items[0];
-					// 参数
-					$para = count($items) > 1 ? explode(',', $items[1]) : [];
-
-					// 全局转换函数
-					$value = $func($value, ... $para);
-				}
-
-				// 设置处理后的结果
-				$data[$field] = $value;
+				// 管道格式化处理
+				$data[$field] = pipe_format($data[$field], $pipes);
 			}
 		}
 

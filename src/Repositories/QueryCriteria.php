@@ -93,7 +93,7 @@ class QueryCriteria extends Criteria
 				$not = $search == '1' ? false : true;
 				$query = $query->whereNull($field, $boolean, $not);
 			} elseif ($op == 'in') { // in
-				$values = explode(',', $search);
+				$values = is_array($search) ? $search : explode(',', $search);
 				$query = $query->whereIn($field, $values, $boolean);
 			} else { // 其他操作符
 				$query = $query->where($field, $op, $search, $boolean);

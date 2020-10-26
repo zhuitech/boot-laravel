@@ -194,4 +194,9 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
 		$this->model->queries['_transformer'] = $value;
 		return $this;
 	}
+
+	public function newModelInstance($attributes = [])
+	{
+		return $this->model->newInstance($attributes);
+	}
 }
