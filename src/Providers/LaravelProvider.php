@@ -8,19 +8,17 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use ReflectionException;
-use Route;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
 use ZhuiTech\BootLaravel\Guards\JwtTokenGuard;
-use ZhuiTech\BootLaravel\Middleware\PrimaryThrottle;
-use ZhuiTech\BootLaravel\Middleware\SecondaryThrottle;
-use ZhuiTech\BootLaravel\Middleware\PageCache;
 use ZhuiTech\BootLaravel\Middleware\Intranet;
 use ZhuiTech\BootLaravel\Middleware\Language;
+use ZhuiTech\BootLaravel\Middleware\PageCache;
+use ZhuiTech\BootLaravel\Middleware\PrimaryThrottle;
+use ZhuiTech\BootLaravel\Middleware\SecondaryThrottle;
 use ZhuiTech\BootLaravel\Middleware\Signature;
 use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 use ZhuiTech\BootLaravel\Setting\CacheDecorator;
@@ -118,14 +116,11 @@ class LaravelProvider extends AbstractServiceProvider
 		$this->app->alias(SettingInterface::class, 'system_setting');
 
 		// 加载动态模块
-		if (!empty(config('boot-laravel.load_modules'))) {
-			$modules = config('boot-laravel.modules');
-			$load_modules = explode(',', config('boot-laravel.load_modules'));
-
-			foreach ($modules as $name => $module) {
-				if (in_array($name, $load_modules) || empty($load_modules)) {
-					$this->providers[] = $module;
-				}
+		$modules = config('boot-laravel.modules');
+		$load_modules = explode(',', config('boot-laravel.load_modules'));
+		foreach ($modules as $name => $module) {
+			if (in_array($name, $load_modules) || empty($load_modules)) {
+				$this->providers[] = $module;
 			}
 		}
 
