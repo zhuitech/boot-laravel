@@ -121,9 +121,10 @@ class LaravelProvider extends AbstractServiceProvider
 		if (!empty(config('boot-laravel.load_modules'))) {
 			$modules = config('boot-laravel.modules');
 			$load_modules = explode(',', config('boot-laravel.load_modules'));
-			foreach ($load_modules as $name) {
-				if (isset($modules[$name])) {
-					$this->providers[] = $modules[$name];
+
+			foreach ($modules as $name => $module) {
+				if (in_array($name, $load_modules) || empty($load_modules)) {
+					$this->providers[] = $module;
 				}
 			}
 		}
