@@ -2,7 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use Auth;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Models\User;

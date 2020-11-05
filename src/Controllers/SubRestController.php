@@ -8,7 +8,7 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;

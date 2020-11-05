@@ -2,7 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use DB;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;

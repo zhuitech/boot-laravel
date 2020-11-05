@@ -2,8 +2,8 @@
 
 namespace ZhuiTech\BootLaravel\Repositories;
 
-use Bosnadev\Repositories\Contracts\RepositoryInterface;
-use Bosnadev\Repositories\Criteria\Criteria;
+use ZhuiTech\BootLaravel\Repositories\Contracts\RepositoryInterface;
+use ZhuiTech\BootLaravel\Repositories\Criteria\Criteria;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;

@@ -2,8 +2,8 @@
 
 namespace ZhuiTech\BootLaravel\Repositories;
 
-use Bosnadev\Repositories\Eloquent\Repository;
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Eloquent\Repository;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
