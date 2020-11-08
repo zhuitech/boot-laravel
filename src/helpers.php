@@ -394,9 +394,9 @@ if (!function_exists('unique_no')) {
 }
 
 if (!function_exists('random_string')) {
-	function random_string($length = 10)
+	function random_string($length = 10, $numeric = false)
 	{
-		$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+		$permitted_chars = $numeric ? '0123456789' : '0123456789abcdefghijklmnopqrstuvwxyz';
 		return strtoupper(substr(str_shuffle($permitted_chars), 0, $length));
 	}
 }

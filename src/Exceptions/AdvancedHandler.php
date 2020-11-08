@@ -2,7 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Exceptions;
 
-use Exception;
+use Throwable;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
@@ -31,10 +31,10 @@ class AdvancedHandler extends ExceptionHandler
 	/**
 	 * Prepare exception for rendering.
 	 *
-	 * @param Exception $e
-	 * @return Exception
+	 * @param Throwable $e
+	 * @return Throwable
 	 */
-	protected function prepareException(Exception $e)
+	protected function prepareException(Throwable $e)
 	{
 		$e = parent::prepareException($e);
 
@@ -84,10 +84,10 @@ class AdvancedHandler extends ExceptionHandler
 	/**
 	 * Convert the given exception to an array.
 	 *
-	 * @param Exception $e
+	 * @param Throwable $e
 	 * @return array
 	 */
-	protected function convertExceptionToArray(Exception $e)
+	protected function convertExceptionToArray(Throwable $e)
 	{
 		// 全局异常处理
 		if ($e instanceof AccessDeniedHttpException) {
@@ -136,10 +136,10 @@ class AdvancedHandler extends ExceptionHandler
 	 * Prepare a response for the given exception.
 	 *
 	 * @param Request $request
-	 * @param Exception $e
+	 * @param Throwable $e
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	protected function prepareResponse($request, Exception $e)
+	protected function prepareResponse($request, Throwable $e)
 	{
 		// 调试模式
 		if (!$this->isHttpException($e) && config('app.debug')) {
