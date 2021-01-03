@@ -3,6 +3,7 @@
 namespace ZhuiTech\BootLaravel\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * Class User
@@ -14,6 +15,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class User extends Authenticatable implements UserContract
 {
+	use Notifiable;
+
 	protected $fillable = ['id'];
 
 	function getAuthId()

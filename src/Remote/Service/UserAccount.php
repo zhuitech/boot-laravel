@@ -4,7 +4,6 @@ namespace ZhuiTech\BootLaravel\Remote\Service;
 
 use Illuminate\Support\Carbon;
 use ZhuiTech\BootLaravel\Remote\Model;
-use ZhuiTech\BootLaravel\Remote\Transformers\UserAccountPublicTransformer;
 
 /**
  * Class UserAccount
@@ -34,6 +33,15 @@ use ZhuiTech\BootLaravel\Remote\Transformers\UserAccountPublicTransformer;
  */
 class UserAccount extends Model
 {
-	protected $server = 'service';
-	protected $resource = 'api/svc/user/accounts';
+	protected static $server = 'service';
+	protected static $resource = 'api/svc/user/accounts';
+
+	/**
+	 * 获取当前用户
+	 * @return UserAccount
+	 */
+	public static function current()
+	{
+		return static::find(\Auth::user()->getAuthIdentifier());
+	}
 }

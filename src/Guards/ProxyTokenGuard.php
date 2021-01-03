@@ -1,11 +1,10 @@
 <?php
 
-namespace ZhuiTech\BootLaravel\Auth;
+namespace ZhuiTech\BootLaravel\Guards;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Encryption\Encrypter;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\TokenRepository;
@@ -13,7 +12,7 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 
-class TokenGuard extends \Laravel\Passport\Guards\TokenGuard
+class ProxyTokenGuard extends \Laravel\Passport\Guards\TokenGuard
 {
 
 	/**
@@ -26,11 +25,11 @@ class TokenGuard extends \Laravel\Passport\Guards\TokenGuard
 	/**
 	 * Create a new token guard instance.
 	 *
-	 * @param ResourceServer $server
+	 * @param \League\OAuth2\Server\ResourceServer $server
 	 * @param  $provider
-	 * @param TokenRepository $tokens
-	 * @param ClientRepository $clients
-	 * @param Encrypter $encrypter
+	 * @param \Laravel\Passport\TokenRepository $tokens
+	 * @param \Laravel\Passport\ClientRepository $clients
+	 * @param \Illuminate\Contracts\Encryption\Encrypter $encrypter
 	 * @return void
 	 */
 	public function __construct(ResourceServer $server,
@@ -49,8 +48,9 @@ class TokenGuard extends \Laravel\Passport\Guards\TokenGuard
 	/**
 	 * Authenticate the incoming request via the Bearer token.
 	 *
-	 * @param Request $request
+	 * @param \Illuminate\Http\Request $request
 	 * @return mixed
+	 * @throws \Illuminate\Contracts\Container\BindingResolutionException
 	 */
 	protected function authenticateViaBearerToken($request)
 	{
@@ -66,11 +66,6 @@ class TokenGuard extends \Laravel\Passport\Guards\TokenGuard
 			$token = $this->tokens->find(
 				$psr->getAttribute('oauth_access_token_id')
 			);
-
-			// 令牌期望Provider与Guard的不一样 TODO 此处的name是多余的?
-			if ($this->provider != $token->name) {
-				return;
-			}
 
 			// If the access token is valid we will retrieve the user according to the user ID
 			// associated with the token. We will use the provider implementation which may

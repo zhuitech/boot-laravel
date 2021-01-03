@@ -12,9 +12,7 @@ use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Auth\RequestGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Session;
-use ZhuiTech\BootLaravel\Auth\MemberSessionHandler;
+use Auth;
 use ZhuiTech\BootLaravel\Models\User;
 
 /**
@@ -27,8 +25,6 @@ class MicroServiceProvider extends AbstractServiceProvider
 {
 	public function boot()
 	{
-		//$this->configSession();
-
 		parent::boot();
 	}
 
@@ -92,25 +88,5 @@ class MicroServiceProvider extends AbstractServiceProvider
 			],
 		];
 		config(Arr::dot($auth, 'auth.'));
-	}
-
-	/**
-	 * 微服务会话机制
-	 */
-	private function configSession()
-	{
-		Session::extend('members', function ($app) {
-			$handler = new MemberSessionHandler(
-				clone $this->app['cache']->store('redis'),
-				$this->app['config']['session.lifetime']
-			);
-
-			$handler->getCache()->getStore()->setConnection(
-				$this->app['config']['session.connection']
-			);
-
-			return $handler;
-		});
-		config(['session.driver' => 'members']);
 	}
 }

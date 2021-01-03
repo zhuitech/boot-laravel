@@ -1,18 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 2018/3/6
- * Time: 13:44
- */
 
 namespace ZhuiTech\BootLaravel\Repositories;
 
-use Bosnadev\Repositories\Contracts\RepositoryInterface;
-use Bosnadev\Repositories\Criteria\Criteria;
+use ZhuiTech\BootLaravel\Repositories\Contracts\RepositoryInterface;
+use ZhuiTech\BootLaravel\Repositories\Criteria\Criteria;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
+use ZhuiTech\BootLaravel\Models\Model as ZhuiModel;
 
 /**
  * Class QueryCriteria
@@ -31,13 +27,14 @@ class QueryCriteria extends Criteria
 	}
 
 	/**
-	 * @param Model $model
+	 * @param Model $query
 	 * @param RepositoryInterface $repository
 	 * @return mixed
 	 */
-	public function apply($model, RepositoryInterface $repository)
+	public function apply($query, RepositoryInterface $repository)
 	{
 		// 获取查询条件
+		$model = $repository->newModel();
 		$orders = $this->query['_order'] ?? [];
 		$or = $this->query['_or'] ?? false;
 		$boolean = $or ? 'or' : 'and';
@@ -46,21 +43,16 @@ class QueryCriteria extends Criteria
 
 		// Where
 		foreach ($wheres as $field => $value) {
-			$field = $this->qualified($field, $repository);
-			if (is_array($value)) {
-				foreach ($value as $operator => $search) {
-					if ($operator == 'null') {
-						$not = $search == '1' ? false : true;
-						$model = $model->whereNull($field, $boolean, $not);
-					} elseif ($operator == 'in') {
-						$values = explode(',', $search);
-						$model = $model->whereIn($field, $values, $boolean);
-					} else {
-						$model = $model->where($field, $operator, $search, $boolean);
+			if (ZhuiModel::relationExists($model, $field)) {
+				// 子查询
+				$query = $query->whereHas($field, function ($query) use ($value) {
+					foreach ($value as $field => $condition) {
+						$query = $this->addWhere($query, $field, $condition);
 					}
-				}
+				});
 			} else {
-				$model = $model->where($field, '=', $value, $boolean);
+				// 普通条件
+				$query = $this->addWhere($query, $field, $value, $boolean);
 			}
 		}
 
@@ -68,16 +60,47 @@ class QueryCriteria extends Criteria
 		if (!empty($orders)) {
 			foreach ($orders as $field => $order) {
 				$field = $this->qualified($field, $repository);
-				$model = $model->orderBy($field, $order);
+				$query = $query->orderBy($field, $order);
 			}
 		}
 
 		// Limit
 		if (!empty($limit)) {
-			$model = $model->take($limit);
+			$query = $query->take($limit);
 		}
 
-		return $model;
+		return $query;
+	}
+
+	/**
+	 * 添加单个字段的查询条件
+	 *
+	 * @param Builder $query
+	 * @param $field
+	 * @param $condition
+	 * @param string $boolean
+	 * @return Builder
+	 */
+	private function addWhere($query, $field, $condition, $boolean = 'and')
+	{
+		// 默认操作符
+		if (!is_array($condition)) {
+			$condition = ['=' => $condition];
+		}
+
+		foreach ($condition as $op => $search) {
+			if ($op == 'null') { // null
+				$not = $search == '1' ? false : true;
+				$query = $query->whereNull($field, $boolean, $not);
+			} elseif ($op == 'in') { // in
+				$values = is_array($search) ? $search : explode(',', $search);
+				$query = $query->whereIn($field, $values, $boolean);
+			} else { // 其他操作符
+				$query = $query->where($field, $op, $search, $boolean);
+			}
+		}
+
+		return $query;
 	}
 
 	private function qualified($field, RepositoryInterface $repository)

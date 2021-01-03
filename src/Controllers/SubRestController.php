@@ -8,7 +8,7 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
@@ -78,16 +78,6 @@ abstract class SubRestController extends RestController
 	}
 
 	/**
-	 * 获取主键
-	 *
-	 * @return mixed
-	 */
-	protected function key()
-	{
-		return Arr::last(request()->route()->parameters());
-	}
-
-	/**
 	 * 初始化
 	 */
 	protected function prepare()
@@ -115,24 +105,6 @@ abstract class SubRestController extends RestController
 		}
 
 		parent::prepare();
-	}
-
-	public function show($id)
-	{
-		$id = $this->key();
-		return parent::show($id);
-	}
-
-	public function update($id)
-	{
-		$id = $this->key();
-		return parent::update($id);
-	}
-
-	public function destroy($id)
-	{
-		$id = $this->key();
-		return parent::destroy($id);
 	}
 
 	/**

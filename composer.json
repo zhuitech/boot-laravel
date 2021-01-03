@@ -10,13 +10,9 @@
     }
   ],
   "require": {
+    "laravel/framework": "^8.0",
     "bkwld/croppa": "^4.9",
     "league/fractal": "^0.17.0",
-    "barryvdh/laravel-cors": "^0.11",
-    "bosnadev/repositories": "^0.13.0",
-    "paragonie/random_compat": "^2.0",
-    "guzzlehttp/guzzle": "^6.3",
-    "zedisdog/laravel-schema-extend": "^1.3",
     "overtrue/laravel-lang": "~3.0"
   },
   "autoload": {

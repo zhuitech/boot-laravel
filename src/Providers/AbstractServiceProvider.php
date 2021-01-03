@@ -3,11 +3,12 @@
 namespace ZhuiTech\BootLaravel\Providers;
 
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
+use File;
+use Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use ReflectionClass;
 use ReflectionException;
+use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 
 /**
  * 基础服务提供类，封装了所有注册逻辑。
@@ -62,6 +63,18 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	protected $errors = [];
 
 	/**
+	 * 注册定时任务
+	 * @var array
+	 */
+	protected $schedules = [];
+
+	/**
+	 * 注册事件订阅
+	 * @var array
+	 */
+	protected $subscribers = [];
+
+	/**
 	 * Resolve the base path of the package.
 	 *
 	 * @param null $path
@@ -87,7 +100,9 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	public function boot()
 	{
 		$this->commands($this->commands);
-		$this->registerErrors();
+		$this->mergeErrors();
+		$this->registerSchedules();
+		$this->registerSubscribers();
 	}
 
 	/**
@@ -151,12 +166,33 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	/**
 	 * 注册错误代码
 	 */
-	protected function registerErrors()
+	protected function mergeErrors()
 	{
 		if (!empty($this->errors)) {
 			$config = config('boot-laravel');
 			$config['errors'] += $this->errors;
 			config(['boot-laravel' => $config]);
+		}
+	}
+
+	/**
+	 * 注册定时器
+	 */
+	protected function registerSchedules()
+	{
+		$registry = resolve(ScheduleRegistry::class);
+		foreach ($this->schedules as $schedule) {
+			$registry->push($schedule);
+		}
+	}
+
+	/**
+	 * 注册定时器
+	 */
+	protected function registerSubscribers()
+	{
+		foreach ($this->subscribers as $subscriber) {
+			\Event::subscribe($subscriber);
 		}
 	}
 
@@ -221,6 +257,13 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 			if (file_exists($file)) {
 				Route::prefix(config('admin.route.prefix'))
 					->middleware(config('admin.route.middleware'))
+					->group($file);
+			}
+
+			$file = $this->basePath('routes/hook.php');
+			if (file_exists($file)) {
+				// 无须添加中间件
+				Route::prefix(config('boot-laravel.route.api.prefix'))
 					->group($file);
 			}
 

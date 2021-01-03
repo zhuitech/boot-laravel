@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhuiTech\BootLaravel\Contracts;
+namespace ZhuiTech\BootLaravel\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

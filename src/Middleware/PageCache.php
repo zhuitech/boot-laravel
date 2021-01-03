@@ -13,7 +13,7 @@ use Psr\SimpleCache\InvalidArgumentException;
  * Class ParseToken
  * @package TrackHub\Wechat\Middleware
  */
-class Cache
+class PageCache
 {
 	/**
 	 * @param Request $request
@@ -30,28 +30,25 @@ class Cache
 		// 设置缓存
 		if ($response->status() == 200) {
 			// Key
-			$key = 'page:' . md5($request->getRequestUri());
+			$key = 'page.' . md5($request->getRequestUri());
 
 			// TTL
 			preg_match('/((?<h>[\d]+)h)?((?<m>[\d]+)m)?((?<s>[\d]+)s)?/', $ttl, $m);
 			$m = array_filter($m);
 			$time = (($m['h'] ?? 0) * 60 + ($m['m'] ?? 0)) * 60 + ($m['s'] ?? 0);
 
-			if (is_version('5.5')) { // 5.5 use minutes
-				$time = $time / 60;
-			}
-
-			// Group
-			$parameters = is_version('5.5') ? $request->route()->parameters() : $request->route()->originalParameters();
+			// 参数
+			$parameters = $request->route()->originalParameters();
 			$parameters += $request->all();
 
+			// 组
 			$groups = explode('|', $groups);
 			foreach ($groups as $group) {
 				$group = magic_replace($group, $parameters);
-				$key_group = \Cache::get("page.group:$group", []);
+				$key_group = \Cache::get("group.$group", []);
 				$key_group[] = $key;
 				$key_group = array_unique($key_group);
-				\Cache::forever("page.group:$group", $key_group);//dd($key_group);
+				\Cache::forever("group.$group", $key_group);//dd($key_group);
 			}
 
 			$content = $response->content();
@@ -76,7 +73,7 @@ class Cache
 	public static function forget($groups = [])
 	{
 		foreach ($groups as $group) {
-			$key_group = \Cache::get("page.group:$group", []);
+			$key_group = \Cache::get("group.$group", []);
 			\Cache::deleteMultiple($key_group);
 		}
 	}

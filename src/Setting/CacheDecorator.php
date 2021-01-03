@@ -25,6 +25,7 @@ class CacheDecorator implements SettingInterface
 	/**
 	 * CacheDecorator constructor.
 	 * @param SettingInterface $repo
+	 * @throws \Exception
 	 */
 	public function __construct(SettingInterface $repo)
 	{

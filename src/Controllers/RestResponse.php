@@ -44,11 +44,12 @@ trait RestResponse
 	 *
 	 * @param $code
 	 * @param array $data
+	 * @param null $message
 	 * @return JsonResponse
 	 */
-	protected function error($code, $data = [])
+	protected function error($code, $data = [], $message = NULL)
 	{
-		return self::api($data, false, $code);
+		return self::api($data, false, $code, $message);
 	}
 
 	/**
@@ -84,7 +85,7 @@ trait RestResponse
 	protected function transformList($list, TransformerAbstract $transformer = NULL)
 	{
 		if (empty($transformer)) {
-			$transformer = new $this->transformer;
+			$transformer = new $this->listTransformer;
 		}
 
 		if ($list instanceof LengthAwarePaginator) {

@@ -2,8 +2,8 @@
 
 namespace ZhuiTech\BootLaravel\Repositories;
 
-use Bosnadev\Repositories\Eloquent\Repository;
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Eloquent\Repository;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,14 +19,16 @@ use ZhuiTech\BootLaravel\Exceptions\RestFailException;
 class BaseRepository extends Repository
 {
 	/**
+	 * 子类需要重写
+	 *
+	 * @var string
+	 */
+	public $modelClass;
+
+	/**
 	 * @var Eloquent
 	 */
 	protected $model;
-
-	/**
-	 * @var string
-	 */
-	protected $modelClass;
 
 	/**
 	 * 允许同时使用同类型的条件
@@ -95,10 +97,11 @@ class BaseRepository extends Repository
 	public function scope($query)
 	{
 		$query += [
-			'_order' => ['id' => 'desc']
+			'_order' => [$this->newModel()->getKeyName() => 'asc']
 		];
 
-		$this->pushCriteria(new QueryCriteria($query));
+		$criteria = new QueryCriteria($query);
+		$this->pushCriteria($criteria);
 		return $this;
 	}
 
@@ -155,16 +158,15 @@ class BaseRepository extends Repository
 	 */
 	public function join($relationName)
 	{
-		if (!method_exists($this->newModel, $relationName)) {
+		$relation = $this->newModel->$relationName();
+		if (!$relation) {
 			throw new RestFailException(sprintf('关系 %s 不存在', $relationName));
 		}
-
-		$relation = $this->newModel->$relationName();
 
 		if ($relation instanceof BelongsTo) {
 			$this->model = $this->model->join(
 				$relation->getModel()->getTable(),
-				$relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey());
+				$relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKeyName());
 		} elseif ($relation instanceof HasOneOrMany) {
 			$this->model = $this->model->join(
 				$relation->getModel()->getTable(),

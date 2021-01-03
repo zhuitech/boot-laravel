@@ -1,14 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2016-08-19
- * Time: 12:31
- */
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
-use Bosnadev\Repositories\Exceptions\RepositoryException;
+use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
+use DB;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -17,8 +12,9 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
@@ -33,6 +29,30 @@ use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 abstract class RestController extends Controller
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests, RestResponse;
+
+	/**
+	 * 模型类
+	 * @var
+	 */
+	protected $model;
+
+	/**
+	 * 转化器类
+	 * @var string
+	 */
+	protected $transformer;
+
+	/**
+	 * 列表转化器
+	 * @var string
+	 */
+	protected $listTransformer;
+
+	/**
+	 * 是否合并路由参数
+	 * @var bool
+	 */
+	protected bool $mergeRouteParas = false;
 
 	/**
 	 * 版本
@@ -53,25 +73,13 @@ abstract class RestController extends Controller
 	protected $formClass = Request::class;
 
 	/**
-	 * 转化器类
-	 * @var string
-	 */
-	protected $transformer;
-
-	/**
-	 * 模型类
-	 * @var
-	 */
-	protected $model;
-
-	/**
 	 * RestController constructor.
 	 * @param BaseRepository $repository
 	 * @throws RepositoryException
 	 */
 	public function __construct(BaseRepository $repository)
 	{
-		$this->repository = $repository;
+		$this->repository = $repository;//print_r($repository->modelClass);exit;
 
 		if (empty($repository->model())) {
 			$repository->setModel($this->model);
@@ -83,6 +91,10 @@ abstract class RestController extends Controller
 
 		if (empty($this->transformer)) {
 			$this->transformer = ModelTransformer::defaultTransformer($repository->newModel());
+		}
+
+		if (empty($this->listTransformer)) {
+			$this->listTransformer = ModelTransformer::defaultTransformer($repository->newModel(), 'list');
 		}
 	}
 
@@ -107,7 +119,8 @@ abstract class RestController extends Controller
 
 		// 找不到
 		if (empty($result)) {
-			throw new RestCodeException(REST_OBJ_NOT_EXIST);
+			$modelCaption = $this->modelCaption();
+			throw new RestCodeException(REST_OBJ_NOT_EXIST, null, $modelCaption ? "{$modelCaption}不存在" : null);
 		}
 
 		return $result;
@@ -127,7 +140,42 @@ abstract class RestController extends Controller
 	 */
 	protected function prepare()
 	{
+		// 合并路由参数
+		if ($this->mergeRouteParas) {
+			$paras = [];
+			foreach (request()->route()->parameters() as $key => $value) {
+				// 排除主键
+				if (!Str::endsWith(request()->route()->uri(), "{{$key}}")) {
+					$paras["{$key}_id"] = $value;
+				}
+			}
+			// 将路由参数合并到请求数据中
+			request()->merge($paras);
+		}
+	}
 
+	/**
+	 * 获取模型名称
+	 * @return string|null
+	 */
+	protected function modelCaption()
+	{
+		$class = $this->repository->model();
+		if (property_exists($class, 'modelCaption')) {
+			return $class::$modelCaption;
+		}
+
+		return null;
+	}
+
+	/**
+	 * 获取主键
+	 *
+	 * @return mixed
+	 */
+	protected function key()
+	{
+		return Arr::last(request()->route()->parameters());
 	}
 
 	// CRUD ************************************************************************************************************
@@ -181,6 +229,7 @@ abstract class RestController extends Controller
 		$this->prepare();
 
 		// 找一下
+		$id = $this->key();
 		$result = $this->execShow($id);
 
 		// v2 使用 transformer
@@ -217,11 +266,13 @@ abstract class RestController extends Controller
 			// 创建失败
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_CREATE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_CREATE_FAIL, null, $modelCaption ? "{$modelCaption}创建失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
 
+				$result = $this->transformItem($result);
 				return self::success($result);
 			}
 		} catch (Exception $ex) {
@@ -254,6 +305,7 @@ abstract class RestController extends Controller
 			$data = $this->form()->all();
 
 			// 找一下
+			$id = $this->key();
 			$model = $this->findOrThrow($id);
 
 			// 更新
@@ -262,7 +314,8 @@ abstract class RestController extends Controller
 			// 更新失败
 			if ($result === false) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_UPDATE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_UPDATE_FAIL, null, $modelCaption ? "{$modelCaption}更新失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -301,6 +354,7 @@ abstract class RestController extends Controller
 			DB::beginTransaction();
 
 			// 找一下
+			$id = $this->key();
 			$model = $this->findOrThrow($id);
 
 			// 删除
@@ -309,7 +363,8 @@ abstract class RestController extends Controller
 			// 失败了
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_DELETE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_DELETE_FAIL, null, $modelCaption ? "{$modelCaption}删除失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -409,7 +464,8 @@ abstract class RestController extends Controller
 			// 失败了
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_ERASE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_ERASE_FAIL, null, $modelCaption ? "{$modelCaption}强制删除失败" : null);
 			} else {
 				// 成功了
 				DB::commit();
@@ -448,7 +504,8 @@ abstract class RestController extends Controller
 			// 失败了
 			if (empty($result)) {
 				DB::rollBack();
-				return $this->error(REST_OBJ_RESTORE_FAIL);
+				$modelCaption = $this->modelCaption();
+				return $this->error(REST_OBJ_RESTORE_FAIL, null, $modelCaption ? "{$modelCaption}恢复失败" : null);
 			} else {
 				// 成功了
 				DB::commit();

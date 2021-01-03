@@ -2,19 +2,23 @@
 
 namespace ZhuiTech\BootLaravel\Providers;
 
+use Auth;
+use Illuminate\Auth\RequestGuard;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use ReflectionException;
-use Route;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
-use ZhuiTech\BootLaravel\Middleware\Cache;
+use ZhuiTech\BootLaravel\Guards\JwtTokenGuard;
 use ZhuiTech\BootLaravel\Middleware\Intranet;
 use ZhuiTech\BootLaravel\Middleware\Language;
+use ZhuiTech\BootLaravel\Middleware\PageCache;
+use ZhuiTech\BootLaravel\Middleware\PrimaryThrottle;
+use ZhuiTech\BootLaravel\Middleware\SecondaryThrottle;
 use ZhuiTech\BootLaravel\Middleware\Signature;
 use ZhuiTech\BootLaravel\Scheduling\ScheduleRegistry;
 use ZhuiTech\BootLaravel\Setting\CacheDecorator;
@@ -31,7 +35,6 @@ use ZhuiTech\BootLaravel\Transformers\ArraySerializer;
 class LaravelProvider extends AbstractServiceProvider
 {
 	protected $providers = [
-		'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
 		'Overtrue\LaravelUploader\UploadServiceProvider',
 		'Overtrue\LaravelLang\TranslationServiceProvider',
 	];
@@ -51,29 +54,25 @@ class LaravelProvider extends AbstractServiceProvider
 		// 加载设置
 		$this->loadSettings();
 
-		/**
-		 * 配置Eloquent
-		 * 解决 MySQL v5.7.7 以下版本会报错误：Specified key was too long error.
-		 * 2020-08-17: 不再设置默认长度，需要索引的字符串字段在定义时设定长度。
-		 */
-		// Schema::defaultStringLength(191);
+		// 加载数据库
+		parent::loadMigrations();
 
-		// 全局切换语言
-		$kernel = app(Kernel::class);
-		$kernel->pushMiddleware(Language::class);
-
+		// 配置中间件
 		/* @var Router $router */
 		$router = $this->app['router'];
+		$kernel = app(Kernel::class);
+		$kernel->pushMiddleware(Language::class);
 		$router->aliasMiddleware('intranet', Intranet::class);
 		$router->aliasMiddleware('sign', Signature::class);
-		$router->aliasMiddleware('cache', Cache::class);
+		$router->aliasMiddleware('cache', PageCache::class);
+		$router->aliasMiddleware('throttle1', PrimaryThrottle::class);
+		$router->aliasMiddleware('throttle2', SecondaryThrottle::class);
 
-		parent::loadMigrations();
+		// 加载路由
 		parent::loadRoutes();
 
-		// HOOK接口，不限制请求
-		$file = $this->basePath('routes/hook.php');
-		Route::prefix(config('boot-laravel.route.api.prefix'))->group($file);
+		// 配置授权
+		$this->configAuth();
 
 		parent::boot();
 	}
@@ -91,7 +90,7 @@ class LaravelProvider extends AbstractServiceProvider
 		// 异常处理
 		$this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
 
-		// Transformer
+		// 转化器
 		$this->app->bind(Manager::class, function () {
 			$manager = new Manager();
 			$manager->setSerializer(new ArraySerializer());
@@ -106,7 +105,7 @@ class LaravelProvider extends AbstractServiceProvider
 		array_unshift($paths, $this->basePath('views'));
 		config(['view.paths' => $paths]);
 
-		// Setting
+		// 系统设置
 		$this->app->singleton(SettingInterface::class, function ($app) {
 			$repository = new EloquentSetting(new SystemSetting());
 			if (!config('boot-laravel.setting.cache')) {
@@ -117,13 +116,12 @@ class LaravelProvider extends AbstractServiceProvider
 		$this->app->alias(SettingInterface::class, 'system_setting');
 
 		// 加载动态模块
-		if (!empty(config('boot-laravel.load_modules'))) {
-			$modules = config('boot-laravel.modules');
-			$load_modules = explode(',', config('boot-laravel.load_modules'));
-			foreach ($load_modules as $name) {
-				if (isset($modules[$name])) {
-					$this->providers[] = $modules[$name];
-				}
+		$modules = config('boot-laravel.modules');
+		$load_modules = array_filter(explode(',', config('boot-laravel.load_modules')));
+
+		foreach ($modules as $name => $module) {
+			if (in_array($name, $load_modules) || empty($load_modules)) {
+				$this->providers[] = $module;
 			}
 		}
 
@@ -141,5 +139,28 @@ class LaravelProvider extends AbstractServiceProvider
 				config([$key => $value]);
 			}
 		}
+	}
+
+	/**
+	 * 配置授权机制
+	 */
+	private function configAuth()
+	{
+		/*
+		 * 弱授权，对于一些安全性要求不高的接口，可以直接信任JWT令牌，不做数据库查询，
+		 * 在 config/auth.php 配置后方可使用
+		 */
+		Auth::extend('jwt', function ($app, $name, array $config) {
+			return new RequestGuard(function ($request) use ($config) {
+				$user = (new JwtTokenGuard())->user($request);
+				return $user;
+			}, $this->app['request']);
+		});
+
+		$auth = config('auth');
+		$auth['guards']['jwt'] = [
+			'driver' => 'jwt'
+		];
+		config(Arr::dot($auth, 'auth.'));
 	}
 }

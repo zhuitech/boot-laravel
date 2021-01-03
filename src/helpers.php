@@ -44,6 +44,22 @@ if (!function_exists('local_path')) {
 	}
 }
 
+if (!function_exists('large_path')) {
+	/**
+	 * 生成大文件上传的地址
+	 * @param $uri
+	 * @return string
+	 * @throws Exception
+	 */
+	function large_path($uri)
+	{
+		$params = SavedPathResolver::decode($uri);
+		ConfigMapper::instance()->applyGroupConfig($params->group);
+		$resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
+		return $resource->getPath();
+	}
+}
+
 if (!function_exists('storage_url')) {
 	/**
 	 * 获取存储文件URL
@@ -65,6 +81,13 @@ if (!function_exists('storage_url')) {
 			$url = Storage::disk($disk)->url($path);
 		}
 
+		// If the path contains "storage/public", it probably means the developer is using
+		// the default disk to generate the path instead of the "public" disk like they
+		// are really supposed to use. We will remove the public from this path here.
+		if (Str::contains($url, '/storage/public/')) {
+			$url = Str::replaceFirst('/storage/public/', '/storage/', $url);
+		}
+
 		// 返回CDN地址
 		return cdn($url);
 	}
@@ -82,7 +105,13 @@ if (!function_exists('magic_replace')) {
 		if (!empty($url)) {
 			$replacements = [];
 			foreach ($data as $key => $value) {
-				$replacements["{{$key}}"] = $value;
+				if (is_numeric($value)) {
+					$value = (string)$value;
+				}
+
+				if (is_string($value)) {
+					$replacements["{{$key}}"] = $value;
+				}
 			}
 			return strtr($url, $replacements);
 		}
@@ -98,19 +127,20 @@ if (!function_exists('cdn')) {
 	 */
 	function cdn($path)
 	{
-		$cdn = trim(env('CDN_URL', ''), '/');
+		$cdnUrl = trim(config('boot-laravel.cdn_url'), '/');
+		$replaceUrl = trim(config('boot-laravel.cdn_replace_url'), '/');
 
 		// 没有配置CDN
-		if (empty($cdn)) {
+		if (!config('boot-laravel.cdn_status', false) || empty($cdnUrl)) {
 			return $path;
 		}
 
 		if (URL::isValidUrl($path)) {
 			// 替换域名
-			return str_replace(env('APP_URL', ''), $cdn, $path);
+			return str_replace($replaceUrl, $cdnUrl, $path);
 		} else {
 			// 直接添加前缀
-			return $cdn . '/' . trim($path, '/');
+			return $cdnUrl . '/' . trim($path, '/');
 		}
 	}
 }
@@ -135,22 +165,6 @@ if (!function_exists('resize')) {
 		}
 
 		return Croppa::url($url, $width, $height, $options);
-	}
-}
-
-if (!function_exists('large_url')) {
-	/**
-	 * 生成大文件上传的地址
-	 * @param $uri
-	 * @return string
-	 * @throws Exception
-	 */
-	function large_url($uri)
-	{
-		$params = SavedPathResolver::decode($uri);
-		ConfigMapper::instance()->applyGroupConfig($params->group);
-		$resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
-		return $resource->getPath();
 	}
 }
 
@@ -181,10 +195,11 @@ if (!function_exists('transform_item')) {
 	 * 转换对象
 	 *
 	 * @param $item
-	 * @param TransformerAbstract $transformer
+	 * @param TransformerAbstract|null $transformer
+	 * @param string $include
 	 * @return array
 	 */
-	function transform_item($item, TransformerAbstract $transformer = null)
+	function transform_item($item, TransformerAbstract $transformer = null, $include = '')
 	{
 		if (empty($transformer)) {
 			$class = ModelTransformer::defaultTransformer($item);
@@ -194,6 +209,7 @@ if (!function_exists('transform_item')) {
 		$data = new Item($item, $transformer);
 
 		$fractal = resolve(Manager::class);
+		$fractal->parseIncludes($include);
 		return $fractal->createData($data)->toArray();
 	}
 }
@@ -203,10 +219,11 @@ if (!function_exists('transform_list')) {
 	 * 转换集合
 	 *
 	 * @param \Illuminate\Support\Collection $list
-	 * @param TransformerAbstract $transformer
+	 * @param TransformerAbstract|null $transformer
+	 * @param string $include
 	 * @return array
 	 */
-	function transform_list($list, TransformerAbstract $transformer = null)
+	function transform_list($list, TransformerAbstract $transformer = null, $include = '')
 	{
 		if (empty($transformer)) {
 			$class = ModelTransformer::defaultTransformer($list->first());
@@ -216,9 +233,132 @@ if (!function_exists('transform_list')) {
 		$data = new Collection($list, $transformer);
 
 		$fractal = resolve(Manager::class);
+		$fractal->parseIncludes($include);
 		return $fractal->createData($data)->toArray();
 	}
 }
+
+if (!function_exists('pipe_format')) {
+	/**
+	 * 管道格式化
+	 * @param $value
+	 * @param $pipes
+	 * @return
+	 */
+	function pipe_format($value, $pipes)
+	{
+		if (!is_array($pipes)) {
+			$pipes = [$pipes];
+		}
+
+		// 递归处理子对象
+		if (is_array($value) && $pipes !== array_values($pipes)) {
+			return array_format($value, $pipes);
+		}
+
+		// 处理
+		foreach ($pipes as $pipe) {
+			$items = explode(':', $pipe);
+
+			// 函数
+			$func = $items[0];
+			array_shift($items);
+
+			// 填补空白项为原值
+			$flag = false;
+			foreach ($items as $i => $item) {
+				if (empty($item)) {
+					$items[$i] = $value;
+					$flag = true;
+				}
+			}
+			if (!$flag) {
+				$items[] = $value;
+			}
+
+			// 全局转换函数
+			$value = $func(... $items);
+		}
+
+		return $value;
+	}
+}
+
+if (!function_exists('array_format')) {
+	/**
+	 * 数组格式化
+	 * @param $data
+	 * @param $casters
+	 * @return mixed
+	 */
+	function array_format($data, $casters)
+	{
+		// 遍历管道
+		foreach ($casters as $field => $pipes) {
+			if (isset($data[$field])) {
+				// 管道格式化处理
+				$data[$field] = pipe_format($data[$field], $pipes);
+			}
+		}
+
+		return $data;
+	}
+}
+
+if (!function_exists('excel_datetime')) {
+	/**
+	 * 转换excel日期到php日期
+	 * @param $excelDate
+	 * @return \Illuminate\Support\Carbon
+	 */
+	function excel_datetime($dateFromExcel)
+	{
+		return \Illuminate\Support\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateFromExcel));
+	}
+}
+
+if (!function_exists('expand_number')) {
+	/**
+	 * 展开数字，可以展开 W,K
+	 * @param $number
+	 */
+	function expand_number($number)
+	{
+		$number = Str::upper($number);
+
+		if (Str::endsWith($number, 'K')) {
+			$number = str_replace('K', '', $number) * 1000;
+		}
+
+		if (Str::endsWith($number, 'W')) {
+			$number = str_replace('W', '', $number) * 10000;
+		}
+
+		return $number;
+	}
+}
+
+if (!function_exists('short_number')) {
+	/**
+	 * 格式化为短格式数字
+	 * @param $number
+	 * @return string
+	 */
+	function short_number($number, $decimals = 1)
+	{
+		if ($number >= 10000) {
+			$number = round($number / 10000, $decimals);
+			return number_format($number, $number != (int)$number ? $decimals : 0) . 'W';
+		} else if ($number >= 1000) {
+			$number = round($number / 1000, $decimals);
+			return number_format($number, $number != (int)$number ? $decimals : 0) . 'K';
+		} else {
+			return $number;
+		}
+	}
+}
+
+/***************************************************************************************************************************************************************/
 
 if (!function_exists('morph_alias')) {
 	/**
@@ -253,7 +393,7 @@ if (!function_exists('unique_no')) {
 	 * @param string $prefix
 	 * @return string
 	 */
-	function unique_no($prefix = '')
+	function unique_no($prefix = 'O')
 	{
 		$uniqid = substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
 		return $prefix . date('Ymd') . $uniqid . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
@@ -261,9 +401,9 @@ if (!function_exists('unique_no')) {
 }
 
 if (!function_exists('random_string')) {
-	function random_string($length = 10)
+	function random_string($length = 10, $numeric = false)
 	{
-		$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+		$permitted_chars = $numeric ? '0123456789' : '0123456789abcdefghijklmnopqrstuvwxyz';
 		return strtoupper(substr(str_shuffle($permitted_chars), 0, $length));
 	}
 }
@@ -417,7 +557,6 @@ if (!function_exists('collect_to_array')) {
 		return $array;
 	}
 }
-
 
 if (!function_exists('str2hex')) {
 	/**

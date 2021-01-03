@@ -44,26 +44,49 @@ class PayOrder extends Model
 		self::STATUS_REFUND => '已退款',
 	];
 
-	protected $server = 'service';
-	protected $resource = 'api/svc/pay/orders';
+	protected static $server = 'service';
+	protected static $resource = 'api/svc/pay/orders';
 
-	public function charge($channel, $method, $options = null)
+	/**
+	 * 获取支付单
+	 * @param $order_type
+	 * @param $order_no
+	 * @param $order_amount
+	 * @param null $total_amount
+	 * @return PayOrder|null
+	 */
+	public static function ensure($order_type, $order_no, $order_amount, $total_amount = null)
 	{
-		$result = RestClient::server($this->server)->post("api/svc/pay/orders/{$this->id}/charge", compact('channel', 'method', 'options'));
-		if ($result['status'] === true) {
-			return $result['data'];
-		} else {
-			throw new RestFailException($result['message'], $result);
-		}
+		return static::requestItem('ensure', compact('order_type', 'order_no', 'order_amount', 'total_amount'));
 	}
 
-	public function refund($amount)
+	/**
+	 * 发起支付请求
+	 * @param $channel
+	 * @param $method
+	 * @param null $options
+	 * @return mixed
+	 */
+	public function charge($channel, $method, $options = null)
 	{
-		$result = RestClient::server($this->server)->post("api/svc/pay/orders/{$this->id}/refund", compact('amount'));
-		if ($result['status'] === true) {
-			return $result['data'];
-		} else {
-			throw new RestFailException($result['message'], $result);
+		return static::requestData("{$this->id}/charge", [], compact('channel', 'method', 'options'), 'POST');
+	}
+
+	/**
+	 * 发起退款请求
+	 * @param $amount
+	 * @return PayRefund[]
+	 */
+	public function refund(&$amount)
+	{
+		$result = static::requestData("{$this->id}/refund", [], compact('amount'), 'POST');
+		$amount = $result['remain'];
+
+		$refunds = [];
+		foreach ($result['refunds'] as $refund) {
+			$refunds[] = (new PayRefund())->setRawAttributes($refund);
 		}
+
+		return $refunds;
 	}
 }

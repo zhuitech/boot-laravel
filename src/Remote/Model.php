@@ -6,39 +6,61 @@ use Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use phpseclib\Crypt\Hash;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Helpers\RestClient;
 
 /**
  * 远程模型
  *
+ * @method static static find($id)
+ * @method static Collection get($columns = ['*'])
+ * @method static LengthAwarePaginator paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
+ * @method static boolean chunk($count, callable $callback)
+ * @method static static where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static static orderBy($column, $direction = 'asc')
+ * @method static static forPage($page, $perPage = 15)
+ * @method static static limit($value)
+ * @method static static take($value)
+ * @method static static first($columns = ['*'])
+ * @method static static transformer($value)
  * @mixin Builder
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
+	protected $guarded = [];
+
 	/**
 	 * 微服务名称
 	 * @var
 	 */
-	protected $server;
+	protected static $server;
 
 	/**
 	 * resource 接口
 	 * @var
 	 */
-	protected $resource;
+	protected static $resource;
 
 	/**
-	 * 是否启用缓存
-	 * @var bool
+	 * 是否缓存单项结果
+	 * 0:不缓存，-1:永久缓存，>0:缓存?秒
+	 * @var int|null
 	 */
-	protected $cache = false;
+	protected static $cacheItemTTL = 0;
+
+	/**
+	 * 是否缓存列表结果，慎重启用，无法判断何时失效
+	 * 0:不缓存，-1:永久缓存，>0:缓存?秒
+	 * @var int|null
+	 */
+	protected static $cacheListTTL = 0;
 
 	/**
 	 * 缓存前缀
 	 * @var string
 	 */
-	protected $cache_prefix = 'Remote';
+	protected static $cachePrefix = 'remote';
 
 	/**
 	 * 查询参数
@@ -47,26 +69,93 @@ class Model extends \Illuminate\Database\Eloquent\Model
 	 */
 	public $queries = [
 		'_limit' => -1,
-		'_order' => ['id' => 'desc']
+		'_order' => ['id' => 'asc']
 	];
 
-	# Model 复写 ########################################################################################################
+	/**
+	 * @return \Illuminate\Database\Eloquent\Builder|Builder
+	 */
+	public function newQuery()
+	{
+		return new Builder($this);
+	}
+
+	/**
+	 * @param array|string $relations
+	 * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|Builder
+	 */
+	public static function with($relations)
+	{
+		return (new static)->newQuery();
+	}
+
+	public function newInstance($attributes = [], $exists = false)
+	{
+		// This method just provides a convenient way for us to generate fresh model
+		// instances of this current model. It is particularly useful during the
+		// hydration of new objects via the Eloquent query builder instances.
+		$model = new static((array) $attributes);
+
+		$model->exists = $exists;
+
+		return $model;
+	}
+
+	# 实例方法 #######################################################################################
+
+	/**
+	 * 查询单个数据
+	 * @param $id
+	 * @param array $columns
+	 * @return static|null
+	 */
+	public function performFind($id, $columns = ['*'])
+	{
+		return static::cacheResult($id, function() use ($id){
+			// 请求后端服务
+			$resource = static::$resource;
+			$result = RestClient::server(static::$server)->get("{$resource}/{$id}");
+
+			// 处理返回结果
+			return static::processItemResult($result);
+		}, static::$cacheItemTTL);
+	}
+
+	/**
+	 * 查询列表数据
+	 * @param array $columns
+	 * @return static[]|LengthAwarePaginator|Collection
+	 */
+	public function performQuery($columns = ['*'])
+	{
+		$query = md5(json_encode($this->queries));
+		return static::cacheResult($query, function () {
+			// 请求后端服务
+			$resource = static::$resource;
+			$result = RestClient::server(static::$server)->get($resource, $this->queries);
+
+			// 处理返回结果
+			return static::processListResult($result);
+		}, static::$cacheListTTL);
+	}
 
 	/**
 	 * 删除
 	 *
 	 * @return void
+	 * @throws \Psr\SimpleCache\InvalidArgumentException
 	 */
 	protected function performDeleteOnModel()
 	{
-		$result = RestClient::server($this->server)->delete("{$this->resource}/{$this->getKey()}");
+		$resource = static::$resource;
+		$result = RestClient::server(static::$server)->delete("{$resource}/{$this->getKey()}");
 
 		// 处理返回结果
 		if ($result['status'] === true) {
 			$this->exists = false;
 
 			// 更新缓存
-			Cache::delete($this->itemCacheKey($this->getKey()));
+			Cache::delete($this->cacheKey($this->getKey()));
 		} else {
 			throw new RestCodeException($result['code'], $result['data'], $result['message']);
 		}
@@ -77,6 +166,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $query
 	 * @return bool
+	 * @throws \Psr\SimpleCache\InvalidArgumentException
 	 */
 	protected function performUpdate(\Illuminate\Database\Eloquent\Builder $query)
 	{
@@ -94,7 +184,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
 		if (count($dirty) > 0) {
 			// 更新
-			$result = RestClient::server($this->server)->put("{$this->resource}/{$this->getKey()}", $dirty);
+			$resource = static::$resource;
+			$result = RestClient::server(static::$server)->put("{$resource}/{$this->getKey()}", $dirty);
 
 			// 处理返回结果
 			if ($result['status'] === true) {
@@ -102,7 +193,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 				$this->syncChanges();
 
 				// 更新缓存
-				Cache::delete($this->itemCacheKey($this->getKey()));
+				Cache::delete($this->cacheKey($this->getKey()));
 			} else {
 				throw new RestCodeException($result['code'], $result['data'], $result['message']);
 			}
@@ -129,7 +220,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 		$attributes = $this->getAttributes();
 
 		// 远程调用
-		$result = RestClient::server($this->server)->post("{$this->resource}", $attributes);
+		$resource = static::$resource;
+		$result = RestClient::server(static::$server)->post("{$resource}", $attributes);
 
 		// 处理返回结果
 		if ($result['status'] === true) {
@@ -147,92 +239,105 @@ class Model extends \Illuminate\Database\Eloquent\Model
 	}
 
 	/**
-	 * @return \Illuminate\Database\Eloquent\Builder|Builder
+	 * 刷新数据
+	 * @return static|null
 	 */
-	public function newQuery()
+	public function reload()
 	{
-		return new Builder($this);
+		// 更新缓存
+		Cache::delete($this->cacheKey($this->getKey()));
+		return $this->performFind($this->getKey());
+	}
+
+	# 静态方法 #######################################################################################
+
+	/**
+	 * 对象缓存键
+	 * @param $name
+	 * @return string
+	 */
+	protected static function cacheKey($name)
+	{
+		return implode('.', [static::$cachePrefix, class_basename(static::class), $name]);
 	}
 
 	/**
-	 * @param array|string $relations
-	 * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|Builder
+	 * 缓存结果
+	 * @param $name
+	 * @param $callback
+	 * @param null|int $ttl 0:不缓存，-1:永久缓存，>0:缓存?秒
+	 * @return mixed
 	 */
-	public static function with($relations)
+	protected static function cacheResult($name, $callback, $ttl = -1)
 	{
-		return static::newQuery();
-	}
-
-	# 辅助方法 ##########################################################################################################
-
-	public function itemCacheKey($id)
-	{
-		return implode('.', [$this->cache_prefix, class_basename($this), $id]);
-	}
-
-	public function performFind($id, $columns = ['*'])
-	{
-		$key = $this->itemCacheKey($id);
+		// 不缓存，直接请求
+		if ($ttl === 0) {
+			return $callback();
+		}
 
 		// 查询缓存
-		if ($this->cache and $data = Cache::get($key)) {
+		$key = static::cacheKey($name);
+		if ($data = Cache::get($key)) {
 			return $data;
 		}
 
-		// 请求后端服务
-		$result = RestClient::server($this->server)->get("{$this->resource}/{$id}");
-
-		// 处理返回结果
-		if ($result['status'] === true) {
-			$data = static::newFromBuilder($result['data']);
-
-			// 设置缓存
-			if ($this->cache) {
-				Cache::put($key, $data);
-			}
-		}
-
-		return $data ?? null;
+		// 获取数据
+		$data = $callback();
+		Cache::put($key, $data, $ttl < 0 ? null : $ttl);
+		return $data;
 	}
 
-	public function performQuery($columns = ['*'])
+	/**
+	 * 处理单个返回结果
+	 * @param $result
+	 * @return static|null
+	 */
+	protected static function processItemResult($result)
 	{
-		// 请求后端服务
-		$result = RestClient::server($this->server)->get($this->resource, $this->queries);
+		// 处理返回结果
+		if ($result['status'] === true) {
+			return (new static)->newFromBuilder($result['data']);
+		} else {
+			throw new RestCodeException($result['code'], $result['data'], $result['message']);
+		}
+	}
 
+	/**
+	 * 处理列表数据
+	 * @param $result
+	 * @return static[]|LengthAwarePaginator|Collection
+	 */
+	protected static function processListResult($result)
+	{
 		// 处理返回结果
 		$list = collect();
 		if ($result['status'] === true) {
 			foreach ($result['data'] as $item) {
-				$list[] = static::newFromBuilder($item);
+				$list[] = (new static)->newFromBuilder($item);
 			}
 
 			if (!empty($result['meta']['pagination'])) {
-				$paginator = new LengthAwarePaginator($list, $result['meta']['pagination']['total'], $perPage);
+				$pagination = $result['meta']['pagination'];
+				$paginator = new LengthAwarePaginator($list, $pagination['total'], $pagination['per_page'], $pagination['current_page']);
 				$paginator->setPath(url()->current());
 				return $paginator;
 			} else {
 				return $list;
 			}
+		} else {
+			throw new RestCodeException($result['code'], $result['data'], $result['message']);
 		}
-
-		return $list;
-	}
-
-	public function reload()
-	{
-		// 更新缓存
-		Cache::delete($this->itemCacheKey($this->getKey()));
-		return $this->performFind($this->getKey());
 	}
 
 	/**
 	 * 批量加载
 	 *
-	 * @param Collection $items
+	 * @param Collection $list
+	 * @param $foreignKey
+	 * @param string $transformer
 	 * @return Collection
 	 */
-	public static function batchInclude(Collection $list, $foreignKey, $transformer = 'public')
+	public static function batchLoading(Collection $list, $foreignKey, $transformer = 'public')
 	{
 		$ids = array_unique($list->pluck($foreignKey)->toArray());
 		$models = static::where('id', 'in', $ids)->limit(-1)->transformer($transformer)->get();
@@ -243,5 +348,81 @@ class Model extends \Illuminate\Database\Eloquent\Model
 		});
 
 		return $list;
+	}
+
+	/**
+	 * 请求单个对象
+	 * @param $path
+	 * @param array $queries
+	 * @param array $data
+	 * @param string $method
+	 * @param int $ttl 0:不缓存，-1:永久缓存，>0:缓存?秒
+	 * @return static|null
+	 */
+	public static function requestItem($path, $queries = [], $data = [], $method = 'GET', $ttl = 0)
+	{
+		$query = md5(json_encode($queries));
+		return static::cacheResult("$path.$query", function () use ($path, $queries, $data, $method) {
+			// 请求后端服务
+			$result = RestClient::server(static::$server)->request(static::$resource . "/$path", $method, [
+				'query' => $queries,
+				'body' => json_encode($data, JSON_UNESCAPED_UNICODE)
+			]);
+
+			// 处理返回结果
+			return static::processItemResult($result);
+		}, $ttl);
+	}
+
+	/**
+	 * 请求对象列表
+	 * @param $path
+	 * @param array $queries
+	 * @param array $data
+	 * @param string $method
+	 * @param int $ttl 0:不缓存，-1:永久缓存，>0:缓存?秒
+	 * @return static[]|LengthAwarePaginator|Collection
+	 */
+	public static function requestList($path, $queries = [], $data = [], $method = 'GET', $ttl = 0)
+	{
+		$query = md5(json_encode($queries));
+		return static::cacheResult("$path.$query", function () use ($path, $queries, $data, $method) {
+			// 请求后端服务
+			$result = RestClient::server(static::$server)->request(static::$resource . "/$path", $method, [
+				'query' => $queries,
+				'body' => json_encode($data, JSON_UNESCAPED_UNICODE)
+			]);
+
+			// 处理返回结果
+			return static::processListResult($result);
+		}, $ttl);
+	}
+
+	/**
+	 * 请求其他格式数据
+	 * @param $path
+	 * @param array $queries
+	 * @param array $data
+	 * @param string $method
+	 * @param int $ttl 0:不缓存，-1:永久缓存，>0:缓存?秒
+	 * @return array
+	 */
+	public static function requestData($path, $queries = [], $data = [], $method = 'GET', $ttl = 0)
+	{
+		$query = md5(json_encode($queries));
+		return static::cacheResult("$path.$query", function () use ($path, $queries, $data, $method) {
+			// 请求后端服务
+			$result = RestClient::server(static::$server)->request(static::$resource . "/$path", $method, [
+				'query' => $queries,
+				'body' => json_encode($data, JSON_UNESCAPED_UNICODE)
+			]);
+
+			// 处理返回结果
+			if ($result['status'] === true) {
+				return $result['data'];
+			} else {
+				throw new RestCodeException($result['code'], $result['data'], $result['message']);
+			}
+		}, $ttl);
 	}
 }

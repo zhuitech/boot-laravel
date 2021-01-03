@@ -10,13 +10,11 @@ use ZhuiTech\BootLaravel\Remote\Service\PayOrder;
  */
 trait PayOrderRelation
 {
-	public static $order_type = 'order';
-
 	/**
 	 * @return PayOrder|null
 	 */
-	public function getRemoteOrder()
+	public function getPayOrder()
 	{
-		return PayOrder::where('order_type', static::$order_type)->where('order_no', $this->order_no)->first();
+		return PayOrder::where('order_no', $this->order_no)->first();
 	}
 }
