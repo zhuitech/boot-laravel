@@ -44,6 +44,22 @@ if (!function_exists('local_path')) {
 	}
 }
 
+if (!function_exists('large_path')) {
+	/**
+	 * 生成大文件上传的地址
+	 * @param $uri
+	 * @return string
+	 * @throws Exception
+	 */
+	function large_path($uri)
+	{
+		$params = SavedPathResolver::decode($uri);
+		ConfigMapper::instance()->applyGroupConfig($params->group);
+		$resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
+		return $resource->getPath();
+	}
+}
+
 if (!function_exists('storage_url')) {
 	/**
 	 * 获取存储文件URL
@@ -63,6 +79,13 @@ if (!function_exists('storage_url')) {
 			$url = $path;
 		} else {
 			$url = Storage::disk($disk)->url($path);
+		}
+
+		// If the path contains "storage/public", it probably means the developer is using
+		// the default disk to generate the path instead of the "public" disk like they
+		// are really supposed to use. We will remove the public from this path here.
+		if (Str::contains($url, '/storage/public/')) {
+			$url = Str::replaceFirst('/storage/public/', '/storage/', $url);
 		}
 
 		// 返回CDN地址
@@ -142,22 +165,6 @@ if (!function_exists('resize')) {
 		}
 
 		return Croppa::url($url, $width, $height, $options);
-	}
-}
-
-if (!function_exists('large_url')) {
-	/**
-	 * 生成大文件上传的地址
-	 * @param $uri
-	 * @return string
-	 * @throws Exception
-	 */
-	function large_url($uri)
-	{
-		$params = SavedPathResolver::decode($uri);
-		ConfigMapper::instance()->applyGroupConfig($params->group);
-		$resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
-		return $resource->getPath();
 	}
 }
 

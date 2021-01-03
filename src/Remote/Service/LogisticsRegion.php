@@ -45,6 +45,6 @@ class LogisticsRegion extends Model
 	 */
 	public function getParentAttribute()
 	{
-		return static::find($this->parent_code);
+		return !empty($this->parent_code) ? static::find($this->parent_code) : null;
 	}
 }
