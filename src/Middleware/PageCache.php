@@ -5,6 +5,7 @@ namespace ZhuiTech\BootLaravel\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
@@ -22,13 +23,13 @@ class PageCache
 	 * @param string $ttl
 	 * @return mixed
 	 */
-	public function handle($request, Closure $next, $groups = '', $ttl = '20m')
+	public function handle($request, Closure $next, $groups = '', $ttl = '10m')
 	{
 		/* @var Response $response */
 		$response = $next($request);
 
 		// 设置缓存
-		if ($response->status() == 200) {
+		if ($response->getStatusCode() == 200) {
 			// Key
 			$key = 'page.' . md5($request->getRequestUri());
 
@@ -51,9 +52,9 @@ class PageCache
 				\Cache::forever("group.$group", $key_group);//dd($key_group);
 			}
 
-			$content = $response->content();
-			$headers = $response->headers->all();
-			$value = compact('content', 'headers');
+			$content = $response->getContent();
+			$headers = Arr::only($response->headers->all(), ['content-type']);
+			$value = compact('content', 'headers');//dd($value);
 
 			if ($time > 0) {
 				\Cache::put($key, $value, $time);

@@ -49,8 +49,8 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['post', 'file/upload/{disk}'],
 	    ['post', 'file/upload/form/token'],
 
-        ['get', 'cms/ads/slug/{slug}'],
-	    ['get', 'cms/ads'],
+        ['get', 'cms/ads/slug/{slug}', ['middleware' => ['cache:ads.{slug},0']]],
+	    ['get', 'cms/ads', ['middleware' => ['cache:ads,0']]],
         ['get', 'cms/page/categories/tree'],
 	    ['get', 'cms/page/articles'],
 	    ['get', 'cms/page/articles/{id}'],
