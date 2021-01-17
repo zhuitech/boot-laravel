@@ -9,7 +9,8 @@ use Laravel\Passport\Passport;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use ZhuiTech\BootLaravel\Models\User;
 
 class JwtTokenGuard
@@ -78,7 +79,12 @@ class JwtTokenGuard
 		// First, we will convert the Symfony request to a PSR-7 implementation which will
 		// be compatible with the base OAuth2 library. The Symfony bridge can perform a
 		// conversion for us to a Zend Diactoros implementation of the PSR-7 request.
-		$psr = (new DiactorosFactory)->createRequest($request);
+		$psr = (new PsrHttpFactory(
+			new Psr17Factory,
+			new Psr17Factory,
+			new Psr17Factory,
+			new Psr17Factory
+		))->createRequest($request);
 
 		try {
 			return $this->server->validateAuthenticatedRequest($psr);

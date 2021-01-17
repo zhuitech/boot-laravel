@@ -4,6 +4,7 @@ namespace ZhuiTech\BootLaravel\Transformers;
 
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -44,6 +45,15 @@ class ModelTransformer extends TransformerAbstract
 		$result = [];
 		if (method_exists($this, 'execTransform')) {
 			$result = call_user_func(array($this, 'execTransform'), $data);
+		} elseif ($data instanceof Model) {
+			$result = $data->attributesToArray();
+
+			// 日期
+			if ($dates = $data->getDates()) {
+				foreach ($dates as $date) {
+					$result[$date] = (string) $data->$date;
+				}
+			}
 		} elseif ($data instanceof Arrayable) {
 			$result = $data->toArray();
 		} elseif (is_array($data)) {
