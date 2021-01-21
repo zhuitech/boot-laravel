@@ -10,6 +10,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
+use Log;
 use ReflectionException;
 use ZhuiTech\BootLaravel\Console\Commands\PassportInstall;
 use ZhuiTech\BootLaravel\Exceptions\AdvancedHandler;
@@ -86,6 +87,11 @@ class LaravelProvider extends AbstractServiceProvider
 	public function register()
 	{
 		$this->mergeConfig();
+
+		// 命令行日志
+		if (app()->runningInConsole()){
+			Log::setDefaultDriver('console');
+		}
 
 		// 异常处理
 		$this->app->singleton(ExceptionHandler::class, AdvancedHandler::class);
