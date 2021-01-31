@@ -11,6 +11,7 @@ use AetherUpload\Resource;
 use AetherUpload\SavedPathResolver;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
@@ -56,7 +57,11 @@ if (!function_exists('large_path')) {
 		$params = SavedPathResolver::decode($uri);
 		ConfigMapper::instance()->applyGroupConfig($params->group);
 		$resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
-		return $resource->getPath();
+		$path = $resource->getPath();
+
+		// AetherUpload 强制使用local存储，故此处需转换为public路径
+		$path = str_replace('public/large', 'large', $path);
+		return $path;
 	}
 }
 

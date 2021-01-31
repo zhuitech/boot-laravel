@@ -8,6 +8,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use League\Fractal\Manager;
 use Log;
@@ -86,6 +87,17 @@ class LaravelProvider extends AbstractServiceProvider
 	 */
 	public function register()
 	{
+		// 强制HTTPS
+		if (env('ADMIN_HTTPS')) {
+			\URL::forceScheme('https');
+		}
+
+		// 中文
+		Carbon::setLocale('zh');
+
+		// 强制URL
+		\URL::forceRootUrl(config('app.url'));
+
 		$this->mergeConfig();
 
 		// 命令行日志

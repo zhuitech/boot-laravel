@@ -44,17 +44,10 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
         ['get|post', 'system/qrcode'],
         ['get|post', 'system/cache/{key}'],
 
-        ['post', 'file/upload/{strategy}'],
-	    ['post', 'file/upload/callback/{disk}'],
-	    ['post', 'file/upload/{disk}'],
-	    ['post', 'file/upload/form/token'],
-
-        ['get', 'cms/ads/slug/{slug}', ['middleware' => ['cache:ads.{slug},0']]],
-	    ['get', 'cms/ads', ['middleware' => ['cache:ads,0']]],
-        ['get', 'cms/page/categories/tree'],
-	    ['get', 'cms/page/articles'],
-	    ['get', 'cms/page/articles/{id}'],
-	    ['get', 'cms/page/types'],
+        ['post', 'media/upload/{strategy}'],
+	    ['post', 'media/upload/callback/{disk}'],
+	    ['post', 'media/upload/{disk}'],
+	    ['post', 'media/upload/form/token'],
 
         ['get', 'wechat/pub/auth'],
 	    ['get', 'wechat/mp/auth', ['func' => 'token']],
@@ -63,12 +56,6 @@ Route::group(['prefix' => 'svc', 'namespace' => 'ZhuiTech\BootLaravel\Controller
 	    ['post', 'wechat/mp/poster'],
 
         ['post', 'ar/targets/search'],
-	    ['get', 'vr/tours/{id}'],
-	    ['get', 'vr/tours/{id}/xml'],
-	    ['get', 'vr/tours'],
-	    ['get', 'vr/tours/{id}/preview'],
-	    
-	    ['get', 'device/devices/code/{code}'],
     ];
 
     foreach ($registry as $item) {

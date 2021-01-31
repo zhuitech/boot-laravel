@@ -2,6 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Controllers;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use ZhuiTech\BootLaravel\Repositories\Exceptions\RepositoryException;
 use DB;
 use Exception;
@@ -17,6 +18,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
+use ZhuiTech\BootLaravel\Repositories\GroupCriteria;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
 use ZhuiTech\BootLaravel\Transformers\ModelTransformer;
 
@@ -71,6 +73,12 @@ abstract class RestController extends Controller
 	 * @var string
 	 */
 	protected $formClass = Request::class;
+
+	/**
+	 * 关键词搜索字段
+	 * @var array
+	 */
+	protected $keywords = [];
 
 	/**
 	 * RestController constructor.
@@ -213,6 +221,22 @@ abstract class RestController extends Controller
 	 */
 	protected function execIndex($data)
 	{
+		// 关键词搜索
+		if (!empty($data['_keyword']) && !empty($this->keywords)) {
+			$keyword = "%{$data['_keyword']}%";
+			$criteria = new GroupCriteria(function ($query) use ($keyword) {
+				foreach ($this->keywords as $i => $field) {
+					if ($i == 0) {
+						$query->where($field, 'like', $keyword);
+					} else {
+						$query->orWhere($field, 'like', $keyword);
+					}
+				}
+			});
+			$this->repository->pushCriteria($criteria);
+			unset($data['_keyword']);
+		}
+
 		$result = $this->repository->query($data);
 		return $result;
 	}

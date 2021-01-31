@@ -75,6 +75,12 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	protected $subscribers = [];
 
 	/**
+	 * 配置
+	 * @var array
+	 */
+	protected $configs = [];
+
+	/**
 	 * Resolve the base path of the package.
 	 *
 	 * @param null $path
@@ -99,10 +105,11 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	 */
 	public function boot()
 	{
-		$this->commands($this->commands);
-		$this->mergeErrors();
+		$this->injectConfig();
+		$this->registerErrors();
 		$this->registerSchedules();
 		$this->registerSubscribers();
+		$this->registerCommands();
 	}
 
 	/**
@@ -122,6 +129,11 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	 |  自动注册
 	 | -----------------------------------------------------------------
 	 */
+
+	protected function registerCommands()
+	{
+		$this->commands($this->commands);
+	}
 
 	/**
 	 * 注册档案安装器
@@ -166,7 +178,7 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	/**
 	 * 注册错误代码
 	 */
-	protected function mergeErrors()
+	protected function registerErrors()
 	{
 		if (!empty($this->errors)) {
 			$config = config('boot-laravel');
@@ -193,6 +205,16 @@ abstract class AbstractServiceProvider extends BaseServiceProvider
 	{
 		foreach ($this->subscribers as $subscriber) {
 			\Event::subscribe($subscriber);
+		}
+	}
+
+	/**
+	 * 注入配置
+	 */
+	protected function injectConfig()
+	{
+		foreach ($this->configs as $key => $config) {
+			config([$key => array_merge(config($key, []), $config)]);
 		}
 	}
 
