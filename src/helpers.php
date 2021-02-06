@@ -40,6 +40,17 @@ if (!function_exists('local_path')) {
 	 */
 	function local_path($path, $disk = null)
 	{
+		// 如果是外网地址
+		if (URL::isValidUrl($path)) {
+			// 转换本机外网地址为本地路径
+			if (Str::startsWith($path, config('app.url'))){
+				$path = Str::replaceFirst(config('app.url'), '', $path);
+				return public_path($path);
+			} else { // 其他外网地址不处理
+				return $path;
+			}
+		}
+
 		return Storage::disk($disk)->path($path);
 	}
 }
