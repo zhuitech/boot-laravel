@@ -202,7 +202,7 @@ abstract class RestController extends Controller
 
 		// 指定转化器
 		if (isset($data['_transformer'])) {
-			$this->transformer = ModelTransformer::defaultTransformer($this->repository->newModel(), $data['_transformer']);
+			$this->listTransformer = ModelTransformer::defaultTransformer($this->repository->newModel(), $data['_transformer']);
 		}
 
 		$result = $this->execIndex($data);
