@@ -376,26 +376,6 @@ if (!function_exists('short_number')) {
 
 /***************************************************************************************************************************************************************/
 
-if (!function_exists('morph_alias')) {
-	/**
-	 * 获取别名
-	 *
-	 * @param $class
-	 * @return string
-	 */
-	function morph_alias($class)
-	{
-		$map = Relation::$morphMap;
-
-		foreach ($map as $alias => $fullname) {
-			if ($class == $fullname) {
-				return $alias;
-			}
-		}
-		return $class;
-	}
-}
-
 if (!function_exists('unique_no')) {
 	/**
 	 * 创建唯一编号
