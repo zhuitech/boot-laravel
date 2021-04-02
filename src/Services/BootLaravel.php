@@ -63,4 +63,20 @@ class BootLaravel
 		$options = self::morphOptions();
 		return $options[$alias] ?? '';
 	}
+
+	/**
+	 * 模块是否加载
+	 * @param $name
+	 * @return false
+	 */
+	public static function isLoaded($name)
+	{
+		$modules = config('boot-laravel.modules');
+
+		if (isset($modules[$name])) {
+			return app()->getProvider($modules[$name]) != null;
+		}
+
+		return false;
+	}
 }
