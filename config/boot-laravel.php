@@ -65,6 +65,9 @@ return [
         REST_FILE_STORE_FAIL        => '文件存储失败',
     ],
 
+	// 角色：admin|service
+	'role' => 'admin',
+
 	// 路由设置
     'route' => [
         'api' => [
