@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use League\Fractal\Resource\ResourceAbstract;
 use ZhuiTech\BootLaravel\Exceptions\RestCodeException;
 use ZhuiTech\BootLaravel\Repositories\BaseRepository;
 use ZhuiTech\BootLaravel\Repositories\QueryCriteria;
@@ -152,7 +153,7 @@ abstract class RestController extends Controller
 		$result = $this->execIndex($data);
 
 		// v2 使用 transformer
-		if ($this->version >= 2) {
+		if ($this->version >= 2 && !($result instanceof ResourceAbstract)) {
 			$result = $this->transformList($result);
 		}
 

@@ -200,6 +200,17 @@ class BaseRepository extends Repository
 	}
 
 	/**
+	 * 汇总
+	 *
+	 * @return int
+	 */
+	public function sum($field)
+	{
+		$this->applyCriteria();
+		return $this->model->sum($field);
+	}
+
+	/**
 	 * 获取结果
 	 *
 	 * @param $options
