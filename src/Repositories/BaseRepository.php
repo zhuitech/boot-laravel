@@ -233,4 +233,15 @@ class BaseRepository extends Repository
 	{
 		return $this->scope($query)->get($query);
 	}
+
+	/**
+	 * 汇总
+	 *
+	 * @return int
+	 */
+	public function sum($field)
+	{
+		$this->applyCriteria();
+		return $this->model->sum($field);
+	}
 }
