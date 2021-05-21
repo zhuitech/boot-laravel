@@ -2,7 +2,7 @@
 
 namespace ZhuiTech\BootLaravel\Models;
 
-use Closure;
+use Carbon\Carbon;
 
 /**
  * Class Model
@@ -11,6 +11,15 @@ use Closure;
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
+	protected function serializeDate(\DateTimeInterface $date)
+	{
+		if (version_compare(app()->version(), '7.0.0') < 0) {
+			return parent::serializeDate($date);
+		}
+
+		return $date->format(Carbon::DEFAULT_TO_STRING_FORMAT);
+	}
+
 	/**
 	 * 是否存在关系
 	 * @param $object
