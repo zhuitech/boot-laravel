@@ -210,6 +210,7 @@ abstract class RestController extends Controller
 		// v2 使用 transformer
 		if ($this->version >= 2) {
 			$result = $this->transformList($result);
+			RestResponse::takeMeta($result, \Auth::id());
 		}
 
 		return $this->success($result);
@@ -259,6 +260,7 @@ abstract class RestController extends Controller
 		// v2 使用 transformer
 		if ($this->version >= 2) {
 			$result = $this->transformItem($result);
+			RestResponse::takeMeta($result, \Auth::id());
 		}
 
 		// 找到了
@@ -297,6 +299,8 @@ abstract class RestController extends Controller
 				DB::commit();
 
 				$result = $this->transformItem($result);
+				RestResponse::takeMeta($result, \Auth::id());
+
 				return self::success($result);
 			}
 		} catch (Exception $ex) {
@@ -432,6 +436,7 @@ abstract class RestController extends Controller
 		// v2 使用 transformer
 		if ($this->version >= 2) {
 			$result = $this->transformItem($result);
+			RestResponse::takeMeta($result, \Auth::id());
 		}
 
 		// 找到了

@@ -13,6 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
+use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\TransformerAbstract;
 use ZhuiTech\BootLaravel\Helpers\Restful;
 
@@ -115,5 +116,29 @@ trait RestResponse
 		}
 
 		return null;
+	}
+
+	public static function saveMeta($user_id, $key, $value)
+	{
+		$cacheKey = "meta.$user_id";
+		$meta = \Cache::get($cacheKey, []);
+		$meta[$key] = $value;
+		\Cache::forever($cacheKey, $meta);
+	}
+
+	public static function takeMeta(ResourceAbstract $resource, $user_id, $keys = [])
+	{
+		$cacheKey = "meta.$user_id";
+		$meta = \Cache::get($cacheKey, []);
+
+		$meta1 = $meta;
+		foreach ($meta1 as $key => $value) {
+			if (empty($keys) || in_array($key, $keys)) {
+				$resource->setMetaValue($key, $value);
+				unset($meta[$key]);
+			}
+		}
+
+		\Cache::forever($cacheKey, $meta);
 	}
 }
